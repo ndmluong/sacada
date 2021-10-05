@@ -1,2 +1,3 @@
 # SACADA
-Projet ANR SACADA, updated Oct 4th 2021
+Projet ANR SACADA, update Oct 4th 2021
+Test using RStudio
