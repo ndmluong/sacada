@@ -19,6 +19,8 @@ source("parameters_workers.R") ## check this script for more details / change pa
 
 ## Initialize the workers 
 MyWorkers <- f_initWorkers(prm = Parms_Workers)
+MyWorkers
+
 
 ## Examples: move all or some workers to different locations inside the plant
 MyWorkers <- f_moveWorkers(Plant = MyPlant,
@@ -29,18 +31,15 @@ g_Plant <- f_plotPlant(P = MyPlant$P,
                        W = MyWorkers)
 g_Plant
 
+## Example: move workers
 MyWorkers <- f_moveWorkers(Plant = MyPlant,
                            W = MyWorkers,
                            selectW = c("W015"),
                            to = "W.C.")
-MyWorkers <- f_moveWorkers(Plant = MyPlant,
-                           W = MyWorkers,
-                           selectW = c("W007","W012","W003"),
-                           to = "Cooling area")
-MyWorkers <- f_moveWorkers(Plant = MyPlant,
-                           W = MyWorkers,
-                           selectW = c("W015","W011","W005"),
-                           to = "Waste area")
+
+
+##### WORKSPACES #####
+
 
 
 
@@ -61,6 +60,7 @@ g_Plant <- f_plotPlant(P = MyPlant$P,
                        FP = MyFood)
 g_Plant
 
+## Example: move food portions
 MyFood <- f_moveFood(Plant = MyPlant,
                      FP= MyFood,
                      selectFP = c("F0090", "F0100"),
@@ -69,9 +69,6 @@ MyFood <- f_moveFood(Plant = MyPlant,
                      FP= MyFood,
                      selectFP = c("F0007", "F00850"),
                      to = "Waste area")
-
-
-
 
 
 

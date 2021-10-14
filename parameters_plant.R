@@ -1,8 +1,8 @@
 ##### USER DEFINED PARAMETERS FOR THE PLANT #####
 Parms_Plant <- list(
   #### Plant
-  dim.X = 50, ## (numeric) length of the processing plants (meter)
-  dim.Y = 32, ## (numeric) width of the processing plants (meter)
+  dim.X = 52, ## (numeric) length of the processing plants (meter)
+  dim.Y = 30, ## (numeric) width of the processing plants (meter)
   
   ######### SPACES (begin)
   Spaces = list(
@@ -84,66 +84,21 @@ Parms_Plant <- list(
   ######### OBJECTS (begin)
   Objects = list(
     ## conveyor treadmill
-    trm = list(
-      label = "Conveyor treadmill",
+    cvy = list(
+      label = "Conveyor",
       dim.X = 20, # dimensions including the border 
       dim.Y = 3, # dimensions including the border 
       pos.X = 0.2, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0.4 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
     )
     ,
-    ## Table 1a
-    t1a = list(
-      label = "Table 1a",
+    ## 'Eplucheuse'
+    epm1 = list(
+      label = "Equipment 1",
       dim.X = 2, # dimensions including the border 
       dim.Y = 2, # dimensions including the border 
-      pos.X = 0.3, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.X = 0.8, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
-    )
-    ,
-    ## Table 1b
-    t1b = list(
-      label = "Table 1b",
-      dim.X = 2, # dimensions including the border 
-      dim.Y = 2, # dimensions including the border 
-      pos.X = 0.3, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.3 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
-    )
-    ,
-    ## Table 2a
-    t2a = list(
-      label = "Table 2a",
-      dim.X = 2, # dimensions including the border 
-      dim.Y = 2, # dimensions including the border 
-      pos.X = 0.4, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
-    )
-    ,
-    ## Table 2b
-    t2b = list(
-      label = "Table 2b",
-      dim.X = 2, # dimensions including the border 
-      dim.Y = 2, # dimensions including the border 
-      pos.X = 0.4, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.3 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
-    )
-    ,
-    ## Table 3a
-    t3a = list(
-      label = "Table 3a",
-      dim.X = 2, # dimensions including the border 
-      dim.Y = 2, # dimensions including the border 
-      pos.X = 0.5, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
-    )
-    ,
-    ## Table 3a
-    t3b = list(
-      label = "Table 3b",
-      dim.X = 2, # dimensions including the border 
-      dim.Y = 2, # dimensions including the border 
-      pos.X = 0.5, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.3 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
     )
     
     ####### NOTE /!\ 

@@ -50,6 +50,7 @@ f_createPlant <- function(
   nbObjects <- length(prm$Objects)
   for (i in 1:nbObjects) {
     P <- f_addObject(P,
+                     label = prm$Objects[[i]]$label,
                      obj.dim.X = prm$Objects[[i]]$dim.X,
                      obj.dim.Y = prm$Objects[[i]]$dim.Y,
                      obj.pos.X = prm$Objects[[i]]$pos.X,
@@ -153,6 +154,7 @@ f_addSpace <- function(
 f_addObject <- function(
   ## INPUT
   P, ## (numeric matrix) The pre-created plant
+  label, ## (character)
   obj.dim.X, ## (numeric) Dimension of the object
   obj.dim.Y, ## (numeric) Dimension of the object
   obj.pos.X, ## (numeric) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
@@ -182,7 +184,7 @@ f_addObject <- function(
   ## Add the object in the pre-created plant
   for (i in obj.X0:obj.X1) {
     for (j in obj.Y0:obj.Y1) {
-      P[i,j] <- "equipment"
+      P[i,j] <- label
     }
   }
   
@@ -224,17 +226,31 @@ f_initWorkers <- function(
                              size = prm$NWorkers, replace = T,
                              prob = c(prm$MaskWearingProb, 1-prm$MaskWearingProb)))
   
-  ## Initiate coordinates and location of the workers (NA)
+  ## Workers with a fixed or mobile work space
+  W_fixed <- as.factor(sample(c("fixed", "mobile"),
+                              size = prm$NWorkers, replace = T,
+                              prob = c(prm$FixedWorkspaceProb, 1-prm$FixedWorkspaceProb)))
+  
+  ## Initialize coordinates and location of the workers (NA)
   W_coordX <- rep(NA, prm$NWorkers)
   W_coordY <- rep(NA, prm$NWorkers)
   W_location <- rep(NA, prm$NWorkers)
   
+  ## Initialize the working (or not-working phase) of the workers (NA)
+  W_active <- rep(NA, prm$NWorkers)
+  
+  t <- rep(0, prm$NWorkers)
+  
+  ## Output data frame
   W <- data.frame(W_ID = W_ID,
                   W_state = W_state,
                   W_mask = W_mask,
+                  W_fixed = W_fixed,
+                  W_active = W_active,
                   W_coordX = W_coordX,
                   W_coordY = W_coordY,
-                  W_location = W_location)
+                  W_location = W_location,
+                  t = t)
   
   return(W)
   #### END OF FUNCTION
@@ -263,24 +279,33 @@ f_initFood <- function(
   FP_ID = paste("F", stringr::str_pad(seq(1:prm$NPortions), 
                                       width=4, pad="0"), sep="")
   
-  ## The types of each food portion
-  FP_type <- as.factor(sample(c("Possible contact / not contaminated", 
-                                "Possible contact / contaminated",
-                                "No possible contact",
-                                "Loss portion"),
-                              size = prm$NPortions, replace = T,
-                              prob = prm$PortionsTypeProv))
+  ## Portions with possible contact with other surfaces: initialized with the probabilities given as model parameters
+  FP_contact <- as.factor(sample(c(T,F),
+                                 size = prm$NPortions, replace=T,
+                                 prob = c(prm$ContactProb, 1-prm$ContactProb)))
   
-  ## Initiate coordinates and location of the food portions (initialized as NA)
+  # FP_type <- as.factor(sample(c("Possible contact / not contaminated", 
+  #                               "Possible contact / contaminated",
+  #                               "No possible contact",
+  #                               "Loss portion"),
+  #                             size = prm$NPortions, replace = T,
+  #                             prob = prm$PortionsTypeProv))
+  
+  ## Initial coordinates and location of the food portions (initialized as NA)
   FP_coordX <- rep(NA, prm$NPortions)
   FP_coordY <- rep(NA, prm$NPortions)
   FP_location <- rep(NA, prm$NPortions)
   
+  ## time index initialized at 0
+  t <- rep(0, prm$NPortions)
+  
   FP <- data.frame(FP_ID = FP_ID,
-                   FP_type = FP_type,
+                   FP_contact = FP_contact,
                    FP_coordX = FP_coordX,
                    FP_coordY = FP_coordY,
-                   FP_location = FP_location)
+                   FP_location = FP_location,
+                   t = t)
+  
   return(FP)
   #### END OF FUNCTION
 }
@@ -452,3 +477,88 @@ f_moveFood <- function(
   return(FP)
   #### END OF FUNCTION
 }
+
+
+##### f_generateWorkspace() FUNCTION TO GENERATE AUTOMATICALLY WORKSPACE FOR EACH WORKER  #####
+## implementation en cours !
+f_generateWorkspace <- function(
+  ## Function for generating automatically the different workspaces (tables of 1x1m.) 
+  ## around the conveyor depending on the total number of active workers
+  ## INPUT
+  Plant, # 'Plant object': list of two elements
+  # L (data.frame): different locations of the plant ('entry hall', 'wc'...) and their coordinates X and Y
+  # P (numeric matrix) : food processing plant 
+  
+  W, # (dataframe) The agents (workers/food portions) set: with at least these columns $
+  # - W_ID / S_ID / FP_ID / AIR_ID : (character) ID of the agents
+  # - W_coordX / S_coordX / FP_coordX: (numeric) coordinates (X) in the plant
+  # - W_coordY / S_coordY / FP_coordY: (numeric) coordinates (Y) in the plant
+  # - W_location / S_location / FP_location: (optional) (character) current location of the agents
+  
+  byXAxis = T, # (logical): direction of the conveyor (default: by the X axis)
+  ...
+  ## OUTPUT
+  
+) {
+  #### BEGIN OF FUNCTION
+  P <- Plant$P ## the plant
+  
+  ## total number of workspaces : total number of "active" workers ?
+  subset(W, W_active == T) %>% nrow -> N
+  
+  ## Coordinates of conveyor
+  cvy <- which(P == "Conveyor", arr.ind = T)
+  colnames(cvy) <- c("coordX", "coordY")
+  
+  ## Generate the table around the conveyor
+  switch(byXAxis,
+         ## if the workspaces are placed "by row" (horizontally along the conveyor on the X axis)
+         T = { 
+           XAB <- min(cvy[,"coordX"]) # seeking for the coordinates X for the first table
+           
+           ## the tables with be placed alternatively on the one and the other side (side A and B) of the conveyor
+           YA <- min(cvy[,"coordY"]) - 1 # coordinates Y of the tables on the side A (1m between the conveyor and the tables)
+           YB <- max(cvy[,"coordY"]) + 1 # coordinates Y of the tables on the side B (1m between the conveyor and the tables)
+           
+           ## Generate the tables
+           i <- 1
+           while (i <= N) { ## for the table i from 1 to N
+             if ((i %% 2) != 0) {
+               P[XAB, YA] <- "Workspace"
+             } else {
+               P[XAB, YB] <- "Workspace"
+               XAB <- XAB + 2
+             }
+             i <- i + 1 ## next workspace
+           }
+         },
+         ## if the workspaces are placed "by column" (vertically along the conveyor on the Y axis)
+         F = { 
+           YAB <- min(cvy[,"coordY"]) # seeking for the coordinates Y for the first table
+           
+           ## the tables with be placed alternatively on the one and the other side (side A and B) of the conveyor
+           XA <- min(cvy[,"coordX"]) - 2 # coordinates X of the tables on the side A (1m between the conveyor and the tables)
+           XB <- max(cvy[,"coordX"]) + 2 # coordinates X of the tables on the side B (1m between the conveyor and the tables)
+           
+           ## Generate the tables
+           j <- 1
+           while (j <= N) { ## for the table i from 1 to N
+             if ((j %% 2) != 0) {
+               P[XA, YAB] <- "Table"
+             } else {
+               P[XB, YAB] <- "Table"
+               YAB <- YAB + 3
+             }
+             j <- j + 1 ## next table
+           }
+         })
+  
+  return(cvy)
+  #### END OF FUNCTION
+}
+
+
+
+
+
+
