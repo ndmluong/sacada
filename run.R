@@ -1,5 +1,6 @@
 ##### FUNCTIONS #####
 source("functions.R")
+source("functions_plot.R")
 
 ##### PROCESSING PLANT #####
 ## Import all plant parameters
@@ -8,7 +9,7 @@ source("parameters_plant.R") ## check this script for more details / change para
 ## Create the plant
 MyPlant <- f_createPlant(prm = Parms_Plant)
 ## Plot
-g_Plant <- f_plotPlant(P = MyPlant$P)
+g_Plant <- f_plotPlant(Plant = MyPlant)
 g_Plant
 
 
@@ -27,9 +28,10 @@ MyWorkers <- f_moveWorkers(Plant = MyPlant,
                            W = MyWorkers,
                            to = "Entry hall")
 ## Plot
-g_Plant <- f_plotPlant(P = MyPlant$P,
+g_Plant <- f_plotPlant(Plant = MyPlant,
                        W = MyWorkers)
 g_Plant
+
 
 ## Example: move workers
 MyWorkers <- f_moveWorkers(Plant = MyPlant,
@@ -44,7 +46,6 @@ MyWorkers <- f_moveWorkers(Plant = MyPlant,
 
 
 
-
 ##### FOOD (MEAT PORTIONS) #####
 ## Import parameters associated with all food portions
 source("parameters_food.R") ## check this script for more details / change parameter values if needed
@@ -52,7 +53,7 @@ MyFood <- f_initFood(prm = Parms_Food)
 
 ## Move all or some food portions to different locations inside the plant
 MyFood <- f_moveFood(Plant = MyPlant,
-                     FP= MyFood,
+                     FP = MyFood,
                      to = "Arrival gate")
 ## Plotting the processing plant with food and workers
 g_Plant <- f_plotPlant(P = MyPlant$P,

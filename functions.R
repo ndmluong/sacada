@@ -16,12 +16,6 @@ f_createPlant <- function(
   #### BEGIN OF FUNCTION
   # Initialize an empty space dim.X * dim.Y
   P <- matrix("empty", nrow = prm$dim.X, ncol = prm$dim.Y) 
-  
-  ## CREATE BORDER WALLS
-  P[1,] <- "border" 
-  P[,1] <- "border"  
-  P[prm$dim.X, ] <- "border"
-  P[, prm$dim.Y] <- "border"
 
   ## ADD ALL SPACES AND THE CORRESPONDING LOCATIONS
   ## Save all coordinates of all locations with the data frame L
@@ -37,15 +31,13 @@ f_createPlant <- function(
                       space.dim.X = prm$Spaces[[i]]$dim.X,
                       space.dim.Y = prm$Spaces[[i]]$dim.Y,
                       space.pos.X = prm$Spaces[[i]]$pos.X,
-                      space.pos.Y = prm$Spaces[[i]]$pos.Y,
-                      space.intdoor.side = prm$Spaces[[i]]$intdoor.side,
-                      space.extdoor.side = prm$Spaces[[i]]$extdoor.side)
+                      space.pos.Y = prm$Spaces[[i]]$pos.Y)
     P <- tmp$P
     L <- rbind(L, tmp$L) ## save the coordinates of the added location
   }
   colnames(L) <- c("Location", "coordX", "coordY")
   L$Location <- as.factor(L$Location)
-
+  
   ## ADD ALL OBJECTS
   nbObjects <- length(prm$Objects)
   for (i in 1:nbObjects) {
@@ -57,9 +49,12 @@ f_createPlant <- function(
                      obj.pos.Y = prm$Objects[[i]]$pos.Y)
 
   }
-
-  OUTPUT <- list(L = L, P = P)
-  return(OUTPUT)
+  
+  ## Coordinates of the doors
+  D <- f_coordDoor(L = L, prm = prm)
+  
+  Plant <- list(L = L, P = P, D = D)
+  return(Plant)
   #### END OF FUNCTION
 }
 
@@ -72,11 +67,11 @@ f_addSpace <- function(
   space.dim.Y, ## (numeric) Dimension of the space
   space.pos.X, ## (numeric) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
   space.pos.Y, ## (numeric) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
-  space.intdoor.side, ## (character) 
-  space.extdoor.side, ## (character) 
   ...
   ## OUTPUT
-  ## P (character matrix) The updated plant with the added space
+  ## Plant (list): list of two elements
+  ## - $L (data frame): the coordinates (in X and Y axes) of all locations inside the plant ("Entry hall", "W.C.",...)
+  ## - $P (character matrix): The updated plant with the added space
 ) {
   #### BEGIN OF FUNCTION
   ## Dimensions of the plant
@@ -96,14 +91,9 @@ f_addSpace <- function(
   space.Y0 <- space.Y1 - space.dim.Y + 1 
   ######################################################
   
-  
-  ## Add a border around the space
-  for (i in space.X0:space.X1) {P[i, c(space.Y0,space.Y1)] <- "border"}
-  for (j in space.Y0:space.Y1) {P[c(space.X0,space.X1),j] <- "border"}
-  
   ## Store all surface coordinates associated with this space as a location L
-  x_vec <- (space.X0+1):(space.X1-1)
-  y_vec <- (space.Y0+1):(space.Y1-1)
+  x_vec <- space.X0:space.X1
+  y_vec <- space.Y0:space.Y1
   xy_tab <- expand.grid(x_vec, y_vec)
   L <- data.frame(
     Location = rep(space.label, nrow(xy_tab)),
@@ -111,41 +101,9 @@ f_addSpace <- function(
     coordY = xy_tab$Var2
   )
   
-  ## CREATE DOORS
-  switch(space.intdoor.side,
-         "left" = {
-           intdoor.pos.X <- space.X0
-           intdoor.pos.Y <- ceiling(space.Y0+space.dim.Y/2)},
-         "right" = {
-           intdoor.pos.X <- space.X1
-           intdoor.pos.Y <- ceiling(space.Y0+space.dim.Y/2)},
-         "top" = {
-           intdoor.pos.X <- ceiling(space.X0+space.dim.X/2)
-           intdoor.pos.Y <- space.Y1},
-         "bottom" = {
-           intdoor.pos.X <- ceiling(space.X0+space.dim.X/2)
-           intdoor.pos.Y <- space.Y0})
-  switch(space.extdoor.side,
-         "left" = {
-           extdoor.pos.X <- space.X0
-           extdoor.pos.Y <- ceiling(space.Y0+space.dim.Y/2)},
-         "right" = {
-           extdoor.pos.X <- space.X1
-           extdoor.pos.Y <- ceiling(space.Y0+space.dim.Y/2)},
-         "top" = {
-           extdoor.pos.X <- ceiling(space.X0+space.dim.X/2)
-           extdoor.pos.Y <- space.Y1},
-         "bottom" = {
-           extdoor.pos.X <- ceiling(space.X0+space.dim.X/2)
-           extdoor.pos.Y <- space.Y0})
+  Plant <- list(L = L, P = P)
   
-  ## Add the doors in the pre-created plant
-  P[intdoor.pos.X, intdoor.pos.Y] <- "door" ## value 4 for doors
-  P[extdoor.pos.X, extdoor.pos.Y] <- "door" ## value 4 for doors
-  
-  OUTPUT <- list(L = L, P = P)
-  
-  return(OUTPUT)
+  return(Plant)
   #### END OF FUNCTION
 }
 
@@ -312,79 +270,7 @@ f_initFood <- function(
 
 
 
-##### f_plotPlant() FUNCTION TO PLOT THE PROCESSING PLANT #####
-f_plotPlant <- function(
-  #### INPUT PARAMETERS
-  P, ## (numeric matrix): food processing plant
-  W = NULL, ## (optional arguments) (data.frame): information of the workers with at least these attributes
-  ##  - W_ID (character): worker ID
-  ##  - W_coordX (numeric): coordinates in the X axis of the worker
-  ##  - W_coordY (numeric): coordinates in the X axis of the worker
-  ##  - W_state (character/factor): infected/not infected worker 
-  ##  - W_mask (character/factor): mask/no mask
-  FP = NULL, ## (optional arguments) (data.frame): information of the food portions with at least these attributes
-  ##  - F_ID (character): worker ID
-  ##  - F_coordX (numeric): coordinates in the X axis of the worker
-  ##  - F_coordY (numeric): coordinates in the X axis of the worker
-  ##  - F_state (character/factor): infected/not infected worker 
-  ##  - F_mask (character/factor): mask/no mask
-  ...
-) {
-  #### BEGIN OF FUNCTION
-  ## data transformation
-  Pdf <- reshape2::melt(P, c("coordX","coordY"), value.name = "tile") ## converting matrix into dataframe for plotting
-  Pdf$tile <- as.factor(Pdf$tile) ## converting the values into factors with different levels
-  
-  ## plotting using ggplot2 package
-  g_Plant <- ggplot()+
-    geom_raster(data = Pdf, mapping = aes(x=coordX ,y=coordY, fill=tile)) +
-    theme(axis.ticks=element_blank(),
-          legend.position = "none",
-          panel.background=element_rect(fill="white"),
-          plot.title = element_text(hjust = 0.5, face="bold", size=20),
-          axis.title = element_blank(),
-          axis.text = element_blank(),
-          panel.grid = element_blank()) +
-    scale_fill_manual(values = c("border" = "black", ## border
-                                 "equipment" = "darkgrey", ## furnitures/equipment
-                                 "empty"= "white", ## empty space
-                                 "workplace" = "navyblue", ## working position
-                                 "door" = "lightgrey" ## doors
-                                 )) +
-    scale_colour_manual(values = c("not infected" = "darkgreen", ## sick 
-                                   "infected" = "darkred", ## not sick
-                                   "Possible contact / not contaminated" = "orange", ## possible contact / not contaminated
-                                   "Possible contact / contaminated" = "red", ## possible contact / contaminated
-                                   "No possible contact" = "blue", ## no possible contact
-                                   "Loss portion" = "black") ## wasted pieces
-                        ) + 
-    scale_shape_manual(values = c("no mask" = 1,
-                                  "mask" = 16)) +
-    coord_fixed(ratio = 1) +
-    labs(title = "Meat processing plant")
-  
-  ## If the workers set are supplied using the input parameter W
-  if (!is.null(W)) {
-    g_Plant <- g_Plant +
-      geom_point(data = W,
-                 mapping = aes(x=W_coordX, y=W_coordY, colour=W_state, shape=W_mask, W_ID=W_ID),
-                 size = 3,
-                 position = position_jitter(width = 0.3, height = 0.3, seed=408))
-  }
 
-  ## If the food matrices set are supplied using the input parameter FP
-  if (!is.null(FP)) {
-    g_Plant <- g_Plant +
-      geom_point(data = FP,
-                 mapping = aes(x = FP_coordX, y = FP_coordY,
-                                colour = FP_type, FP_ID = FP_ID),
-                 shape = 15,
-                 position = position_jitterdodge(jitter.height = 0.3, dodge.width=0.3, seed=408))
-  }
-  
-  return(g_Plant)
-  #### END OF FUNCTION
-}
 
 
 ##### f_moveWorkers() FUNCTION TO MOVE THE WORKERS INSIDE THE PLANT #####
@@ -480,7 +366,7 @@ f_moveFood <- function(
 
 
 ##### f_generateWorkspace() FUNCTION TO GENERATE AUTOMATICALLY WORKSPACE FOR EACH WORKER  #####
-## implementation en cours !
+## IMPLEMENTATION EN COURS !
 f_generateWorkspace <- function(
   ## Function for generating automatically the different workspaces (tables of 1x1m.) 
   ## around the conveyor depending on the total number of active workers
@@ -556,9 +442,5 @@ f_generateWorkspace <- function(
   return(cvy)
   #### END OF FUNCTION
 }
-
-
-
-
 
 
