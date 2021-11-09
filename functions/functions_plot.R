@@ -225,43 +225,7 @@ f_tile_colour <- function(
   return(tile_colour)
 }
 
-##### f_plotWorkers() FUNCTION TO PLOT THE AGENTS INSIDE A PRE-PLOTTED PLANT #####
-f_plotWorkers <- function(
-  g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
-  W, ## (data.frame): information of the workers with at least these attributes
-  ##  - W_ID (character): worker ID
-  ##  - W_coordX (numeric): coordinates in the X axis of the worker
-  ##  - W_coordY (numeric): coordinates in the X axis of the worker
-  ##  - W_state (character/factor): infected/not infected worker 
-  ##  - W_mask (character/factor): mask/no mask
-  ## time index
-  ...
-) {
-  #### BEGIN OF FUNCTION
-  ##
-  W$W_coordX <- as.numeric(W$W_coordX)
-  W$W_coordY <- as.numeric(W$W_coordY)
-  
-  W <- data.frame(W,
-                  time_minutes = W$t_ind * 5)
-  
-  g_Plant <- g_emptyPlant +
-    geom_point(data = W,
-               mapping = aes(x=W_coordX, y=W_coordY, colour=W_status, shape=W_mask,
-                             W_ID=W_ID, W_type=W_type, frame=time_minutes),
-               size = 3, alpha = 0.5,
-               position = position_jitter(width = 0.1, height = 0.1, seed=408))
-  
-  g_Plant <- g_Plant +
-    geom_text(data = W,
-              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID, frame=time_minutes),
-              size = 2,
-              position = position_jitter(width = 0.1, height = 0.1, seed=408))
-  
-  return(g_Plant)
-  #### END OF FUNCTION
-}
-
+##### f_plotAgents() FUNCTION TO PLOT THE AGENTS INSIDE A PRE-PLOTTED PLANT #####
 f_plotAgents <- function(
   g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
   W, ## (data.frame): information of the workers with at least these attributes
