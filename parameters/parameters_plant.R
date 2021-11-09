@@ -99,7 +99,7 @@ Parms_Plant <- list(
       label = "Conveyor",
       dim.X = 15, # dimensions
       dim.Y = 2, # dimensions
-      pos.X = 0.3, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.X = 0.2, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
     )
     ,

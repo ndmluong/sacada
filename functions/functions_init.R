@@ -22,7 +22,8 @@ f_createPlant <- function(
   L <- data.frame(
     Location = character(),
     coordX = numeric(),
-    coordY = numeric()
+    coordY = numeric(),
+    border = logical()
   )
   nbSpaces <- length(prm$Spaces) ## total number of the spaces
   for (i in 1:nbSpaces) { ## for each space i, add i inside the plant P
@@ -35,27 +36,44 @@ f_createPlant <- function(
     P <- tmp$P
     L <- rbind(L, tmp$L) ## save the coordinates of the added location
   }
-  colnames(L) <- c("Location", "coordX", "coordY")
-  L$Location <- as.factor(L$Location)
   
   ## ADD ALL OBJECTS
   nbObjects <- length(prm$Objects)
   for (i in 1:nbObjects) {
-    P <- f_addObject(P,
-                     label = prm$Objects[[i]]$label,
-                     obj.dim.X = prm$Objects[[i]]$dim.X,
-                     obj.dim.Y = prm$Objects[[i]]$dim.Y,
-                     obj.pos.X = prm$Objects[[i]]$pos.X,
-                     obj.pos.Y = prm$Objects[[i]]$pos.Y)
-
+    tmp <- f_addObject(P,
+                       label = prm$Objects[[i]]$label,
+                       obj.dim.X = prm$Objects[[i]]$dim.X,
+                       obj.dim.Y = prm$Objects[[i]]$dim.Y,
+                       obj.pos.X = prm$Objects[[i]]$pos.X,
+                       obj.pos.Y = prm$Objects[[i]]$pos.Y)
+    P <- tmp$P
+    L <- rbind(L, tmp$L)
   }
-
+  
+  ## Looking for the different possible workspaces in the plant
+  ## for cutters
+  L <- rbind(L, f_cuttingWorkspace(P)) ## check the function f_cuttingWorkspace()
+  
+  ## for logistic workers: begin (head) and end (tail) of the conveyor
+  L <- rbind(L, f_conveyorWorkspace(P)) ## check the function f_conveyorWorkspace()
+  
+  ## Around the Equipment 1 (ADD IF NEEDED)
+  L <- rbind(L, f_equipmentWorkspace(P, eqm_name = "Equipment 1")) ## check the function f_equipmentWorkspace()
+  
+  colnames(L) <- c("Location", "coordX", "coordY", "border")
+  # L$Location <- as.factor(L$Location)
+  
+  ## Update tile labels
+  for (i in 1:nrow(L)) {
+    P[L$coordX[i], L$coordY[i]] <- L$Location[i]
+  }
+  
   Plant <- list(L = L, P = P)
   return(Plant)
   #### END OF FUNCTION
 }
 
-##### f_addSpace() FUNCTION TO CREATE A SPACE INSIDE A PRECREATED PLANT #####
+##### f_addSpace() SUB-FUNCTION TO CREATE A SPACE INSIDE A PLANT #####
 f_addSpace <- function(
   ## INPUT
   P, ## (character matrix) The pre-created plant
@@ -88,15 +106,21 @@ f_addSpace <- function(
   space.Y0 <- space.Y1 - space.dim.Y + 1 
   ######################################################
   
-  ## Store all surface coordinates associated with this space as a location L
+  ## Store all surface coordinates associated with this space as a location data frame L
   x_vec <- space.X0:space.X1
   y_vec <- space.Y0:space.Y1
   xy_tab <- expand.grid(x_vec, y_vec)
   L <- data.frame(
     Location = rep(space.label, nrow(xy_tab)),
     coordX = xy_tab$Var1,
-    coordY = xy_tab$Var2
+    coordY = xy_tab$Var2,
+    border = rep(T, nrow(xy_tab))
   )
+  
+  ## Update values on the matrix P with the label of the added spaces
+  for (i in 1:nrow(L)) {
+    P[L$coordX[i], L$coordY[i]] <- L$Location[i]
+  }
   
   Plant <- list(L = L, P = P)
   
@@ -105,7 +129,7 @@ f_addSpace <- function(
 }
 
 
-##### f_addObject() FUNCTION TO ADD AN OBJECT INSIDE A PRECREATED PLANT #####
+##### f_addObject() SUB-FUNCTION TO ADD AN OBJECT INSIDE A PLANT #####
 f_addObject <- function(
   ## INPUT
   P, ## (numeric matrix) The pre-created plant
@@ -143,9 +167,180 @@ f_addObject <- function(
     }
   }
   
-  return(P)
+  ## Store all surface coordinates associated with this space as a location data frame L
+  x_vec <- obj.X0:obj.X1
+  y_vec <- obj.Y0:obj.Y1
+  xy_tab <- expand.grid(x_vec, y_vec)
+  L <- data.frame(
+    Location = rep(label, nrow(xy_tab)),
+    coordX = xy_tab$Var1,
+    coordY = xy_tab$Var2,
+    border = rep(F, nrow(xy_tab))
+  )
+  
+  return(list(L=L, P=P))
   #### END OF FUNCTION
 }
+
+##### f_cuttingWorkspace() SUB-FUNCTION: COORDINATES OF POSSIBLE POSITIONS FOR CUTTERS ALONG THE CONVEYOR  #####
+f_cuttingWorkspace <- function(
+  P,
+  ...
+  ## OUTPUT
+  
+) {
+  #### BEGIN OF FUNCTION
+  ## Coordinates of conveyor
+  cvy <- which(P == "Conveyor", arr.ind = T) %>% as.data.frame
+  colnames(cvy) <- c("coordX", "coordY")
+  
+  minX <- min(cvy$coordX)
+  maxX <- max(cvy$coordX)
+  minY <- min(cvy$coordY)
+  maxY <- max(cvy$coordY)
+  
+  ## Check if the conveyor is along the axis X or Y
+  cvy_dimX <- maxX - minX + 1
+  cvy_dimY <- maxY - minY + 1
+  
+  if (cvy_dimY <= cvy_dimY) {
+    along <- "Axis X"
+  } else {along <- "Axis Y"}
+  
+  ## The length of the conveyor
+  cvy_L <- max(cvy_dimX, cvy_dimY)
+  N_WS <- 2 * cvy_L
+  
+  if (along == "Axis X") { ## if the conveyor is along the 'horizontal' X axis
+    coordX <- c(seq(minX, maxX), ## coordinates X along the axis X (two sides)
+                seq(minX, maxX))
+    coordY <- c(rep(minY-1, cvy_L), ## coordinates Y +/-1 (workers close to the conveyor)
+                rep(maxY+1, cvy_L)) 
+  }
+  
+  if (along == "Axis Y") { ## if the conveyor is along the 'vertical' Y axis
+    coordY <- c(seq(minY, maxY), ## coordinates Y along the axis Y (two sides)
+                seq(minY, maxY))
+    coordX <- c(rep(minX-1, cvy_L), ## coordinates X +/-1 (workers close to the conveyor)
+                rep(maxX+1, cvy_L)) 
+  }
+  
+  Location <- paste("WS-Cutting-", stringr::str_pad(seq(1:N_WS), width=2, pad="0"), sep="")
+  
+  OUTPUT <- data.frame(Location = Location,
+                       coordX = coordX,
+                       coordY = coordY,
+                       border = rep(F, N_WS))
+  
+  return(OUTPUT)
+  #### END OF FUNCTION
+}
+
+
+##### f_conveyorWorkspace() SUB-FUNCTION: COORDINATES OF POSSIBLE POSITIONS AROUND THE HEAD/TAIL OF THE CONVEYOR #####
+f_conveyorWorkspace <- function(
+  P,
+  ...
+  ## OUTPUT
+  
+) {
+  #### BEGIN OF FUNCTION
+  ## Begin / End of the conveyor
+  cvy <- which(P == "Conveyor", arr.ind = T) %>% as.data.frame
+  colnames(cvy) <- c("coordX", "coordY")
+  
+  minX <- min(cvy$coordX)
+  maxX <- max(cvy$coordX)
+  minY <- min(cvy$coordY)
+  maxY <- max(cvy$coordY)
+  
+  ## Check if the conveyor is along the X or Y axis
+  cvy_dimX <- maxX - minX + 1
+  cvy_dimY <- maxY - minY + 1
+  
+  if (cvy_dimY <= cvy_dimY) {
+    along <- "Axis X"
+  } else {along <- "Axis Y"}
+  
+  ## The length of the conveyor
+  cvy_L <- max(cvy_dimX, cvy_dimY)
+  ## The width of the conveyor
+  cvy_W <- min(cvy_dimX, cvy_dimY)
+  
+  if (along == "Axis X") { ## if the conveyor is along the 'horizontal' X axis
+    coordX <- c(rep(minX-1, cvy_W+2), ## coordinates X: begin (head) of the horizontal conveyor
+                rep(maxX+1, cvy_W+2)) ## coordinates X: end (tail) of the horizontal conveyor
+    coordY <- c(seq(minY-1, maxY+1), ## coordinates Y +/- 1 : begin (head) of the conveyor
+                seq(minY-1, maxY+1)) ## coordinates Y +/- 1 : end (tail) of the conveyor
+  }
+  
+  if (along == "Axis Y") { ## if the conveyor is along the 'vertical' Y axis
+    coordY <- c(rep(minY-1, cvy_W+2), ## coordinates Y : begin (head) of the vertical conveyor
+                rep(maxY+1, cvy_W+2)) ## coordinates Y: end (tail) of the vertical conveyor
+    coordX <- c(seq(minX-1, maxX+1), ## coordinates Y +/- 1 : begin (head) of the conveyor
+                seq(minX-1, maxX+1)) ## coordinates Y +/- 1 : begin (tail) of the conveyor
+  }
+  
+  Location <- c(rep("WS-Conveyor-Head", cvy_W+2),
+                rep("WS-Conveyor-Tail", cvy_W+2))
+  border <- rep(F, 2*(cvy_W+2))
+  
+  OUTPUT <- data.frame(Location = Location,
+                       coordX = coordX,
+                       coordY = coordY,
+                       border = border)
+  
+  return(OUTPUT)
+  #### END OF FUNCTION
+}
+
+##### f_equimentWorkspace() SUB-FUNCTION: COORDINATES OF POSSIBLE POSITIONS AROUND THE HEAD/TAIL OF THE CONVEYOR #####
+f_equipmentWorkspace <- function(
+  P,
+  eqm_name,
+  ...
+  ## OUTPUT
+  
+) {
+  #### BEGIN OF FUNCTION
+  ## Begin / End of the conveyor
+  eqm <- which(P == eqm_name, arr.ind = T) %>% as.data.frame
+  colnames(eqm) <- c("coordX", "coordY")
+  
+  minX <- min(eqm$coordX)
+  maxX <- max(eqm$coordX)
+  minY <- min(eqm$coordY)
+  maxY <- max(eqm$coordY)
+  
+  eqm_dimX <- maxX-minX+1
+  eqm_dimY <- maxY-minY+1
+  
+  coordX <- c(seq(minX-1,maxX+1), ## top side
+              seq(minX-1,maxX+1), ## bottom side
+              rep(minX-1,eqm_dimY), ## left side
+              rep(maxX+1,eqm_dimY) ## right side
+              )
+
+  coordY <- c(rep(maxY+1,eqm_dimX+2), ## top side
+              rep(minY-1,eqm_dimX+2), ## bottom side
+              seq(minY, maxY), ## left side
+              seq(minY, maxY) ## right side
+              )
+  
+  Location <- rep(paste("WS-",eqm_name, sep=""), length(coordX))
+
+  border <- rep(F, length(coordX))
+
+  OUTPUT <- data.frame(Location = Location,
+                       coordX = coordX,
+                       coordY = coordY,
+                       border = border)
+
+  return(OUTPUT)
+  #### END OF FUNCTION
+}
+
+
 
 ##### f_initWorkers() FUNCTION TO INITIALISE A SET OF WORKERS #####
 f_initWorkers <- function(
@@ -173,7 +368,7 @@ f_initWorkers <- function(
 ) {
   #### BEGIN OF FUNCTION
   ### ID of the workers (value "W001","W002", ..)
-  W_ID = paste("W", stringr::str_pad(seq(1:prm$NWorkers), width=3, pad="0"), sep="")
+  W_ID <- paste("W", stringr::str_pad(seq(1:prm$NWorkers), width=3, pad="0"), sep="")
   
   ### Total number of the time indexes 
   NTime <- prm_time$NDays * 1440 / prm_time$Step ## amplitude Ndays in days, time step in minutes
@@ -237,7 +432,7 @@ f_initWorkers <- function(
   #### END OF FUNCTION
 }
 
-##### f_initFood() FUNCTION TO INITIALISE A SET OF FOOD PORTIONS #####
+##### en cours: f_initFood() FUNCTION TO INITIALISE A SET OF FOOD PORTIONS #####
 f_initFood <- function(
   ## Function allowing to initialize a set of food portions of several types (contact/contaminated...)
   ## depending on probability parameters provided as input argument.
@@ -246,6 +441,7 @@ f_initFood <- function(
   ## (check the script "food_parameters.R")
   ##  - $NPortions (integer): the total number of food portions
   ##  - $PortionTypeProb (numeric vector): the probability for different type of portions (contace/contaminated...)
+  prm_time,
   ...
   #### OUTPUT
   ## W (dataframe): the initialized food portions
@@ -256,14 +452,18 @@ f_initFood <- function(
   ##  - $FP_location (character): location of the food portions ("Arrival gate", "Waste area"...) (initialized as NA)
 ) {
   #### BEGIN OF FUNCTION
-  ## The ID of each food portion
-  FP_ID = paste("F", stringr::str_pad(seq(1:prm$NPortions), 
-                                      width=4, pad="0"), sep="")
+  ### ID of the food portion (value "FP001","FP002", ..)
+  FP_ID <- paste("FP", stringr::str_pad(seq(1:prm$NPortions), width=4, pad="0"), sep="")
+  
+  ### Total number of the time indexes 
+  NTime <- prm_time$NDays * 1440 / prm_time$Step ## amplitude Ndays in days, time step in minutes
+  t_ind <- rep(0:NTime, each = prm$NPortions)
   
   ## Portions with possible contact with other surfaces: initialized with the probabilities given as model parameters
-  FP_contact <- as.factor(sample(c(T,F),
-                                 size = prm$NPortions, replace=T,
-                                 prob = c(prm$ContactProb, 1-prm$ContactProb)))
+  FP_contact0 <- sample(c(T,F),
+                        size = prm$NPortions, replace=T,
+                        prob = c(prm$ContactProb, 1-prm$ContactProb))
+  FP_contact <- as.factor(c(FP_contact0, rep(NA, prm$NPortions * NTime)))
   
   # FP_type <- as.factor(sample(c("Possible contact / not contaminated", 
   #                               "Possible contact / contaminated",
@@ -272,106 +472,20 @@ f_initFood <- function(
   #                             size = prm$NPortions, replace = T,
   #                             prob = prm$PortionsTypeProv))
   
-  ## Initial coordinates and location of the food portions (initialized as NA)
-  FP_coordX <- rep(NA, prm$NPortions)
-  FP_coordY <- rep(NA, prm$NPortions)
-  FP_location <- rep(NA, prm$NPortions)
+  ### Initialize coordinates and location of the workers (NA)
+  FP_coordX <- rep(NA, prm$NPortions*(NTime+1))
+  FP_coordY <- rep(NA, prm$NPortions*(NTime+1))
+  FP_location <- rep(NA, prm$NPortions*(NTime+1))
   
-  ## time index initialized at 0
-  t <- rep(0, prm$NPortions)
-  
-  FP <- data.frame(FP_ID = FP_ID,
+
+  FP <- data.frame(FP_ID = rep(FP_ID, NTime+1),
                    FP_contact = FP_contact,
                    FP_coordX = FP_coordX,
                    FP_coordY = FP_coordY,
                    FP_location = FP_location,
-                   t = t)
+                   t_ind = t_ind)
   
   return(FP)
-  #### END OF FUNCTION
-}
-
-
-
-
-
-
-
-##### f_generateWorkspace() FUNCTION TO GENERATE AUTOMATICALLY WORKSPACE FOR EACH WORKER  #####
-## IMPLEMENTATION EN COURS !
-f_generateWorkspace <- function(
-  ## Function for generating automatically the different workspaces (tables of 1x1m.) 
-  ## around the conveyor depending on the total number of active workers
-  ## INPUT
-  Plant, # 'Plant object': list of two elements
-  # L (data.frame): different locations of the plant ('entry hall', 'wc'...) and their coordinates X and Y
-  # P (numeric matrix) : food processing plant 
-  
-  W, # (dataframe) The agents (workers/food portions) set: with at least these columns $
-  # - W_ID / S_ID / FP_ID / AIR_ID : (character) ID of the agents
-  # - W_coordX / S_coordX / FP_coordX: (numeric) coordinates (X) in the plant
-  # - W_coordY / S_coordY / FP_coordY: (numeric) coordinates (Y) in the plant
-  # - W_location / S_location / FP_location: (optional) (character) current location of the agents
-  
-  byXAxis = T, # (logical): direction of the conveyor (default: by the X axis)
-  ...
-  ## OUTPUT
-  
-) {
-  #### BEGIN OF FUNCTION
-  P <- Plant$P ## the plant
-  
-  ## total number of workspaces : total number of "active" workers ?
-  subset(W, W_active == T) %>% nrow -> N
-  
-  ## Coordinates of conveyor
-  cvy <- which(P == "Conveyor", arr.ind = T)
-  colnames(cvy) <- c("coordX", "coordY")
-  
-  ## Generate the table around the conveyor
-  switch(byXAxis,
-         ## if the workspaces are placed "by row" (horizontally along the conveyor on the X axis)
-         T = { 
-           XAB <- min(cvy[,"coordX"]) # seeking for the coordinates X for the first table
-           
-           ## the tables with be placed alternatively on the one and the other side (side A and B) of the conveyor
-           YA <- min(cvy[,"coordY"]) - 1 # coordinates Y of the tables on the side A (1m between the conveyor and the tables)
-           YB <- max(cvy[,"coordY"]) + 1 # coordinates Y of the tables on the side B (1m between the conveyor and the tables)
-           
-           ## Generate the tables
-           i <- 1
-           while (i <= N) { ## for the table i from 1 to N
-             if ((i %% 2) != 0) {
-               P[XAB, YA] <- "Workspace"
-             } else {
-               P[XAB, YB] <- "Workspace"
-               XAB <- XAB + 2
-             }
-             i <- i + 1 ## next workspace
-           }
-         },
-         ## if the workspaces are placed "by column" (vertically along the conveyor on the Y axis)
-         F = { 
-           YAB <- min(cvy[,"coordY"]) # seeking for the coordinates Y for the first table
-           
-           ## the tables with be placed alternatively on the one and the other side (side A and B) of the conveyor
-           XA <- min(cvy[,"coordX"]) - 2 # coordinates X of the tables on the side A (1m between the conveyor and the tables)
-           XB <- max(cvy[,"coordX"]) + 2 # coordinates X of the tables on the side B (1m between the conveyor and the tables)
-           
-           ## Generate the tables
-           j <- 1
-           while (j <= N) { ## for the table i from 1 to N
-             if ((j %% 2) != 0) {
-               P[XA, YAB] <- "Table"
-             } else {
-               P[XB, YAB] <- "Table"
-               YAB <- YAB + 3
-             }
-             j <- j + 1 ## next table
-           }
-         })
-  
-  return(cvy)
   #### END OF FUNCTION
 }
 
