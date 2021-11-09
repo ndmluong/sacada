@@ -22,12 +22,7 @@ f_plotPlant <- function(
           axis.title = element_blank(),
           axis.text = element_blank(),
           panel.grid = element_blank()) +
-    scale_fill_manual(values = c("border" = "black", ## border
-                                 "equipment" = "darkgrey", ## furnitures/equipment
-                                 "empty"= "white", ## empty space
-                                 "workplace" = "navyblue", ## working position
-                                 "door" = "lightgrey" ## doors
-    )) +
+    scale_fill_manual(values = f_tile_colour(Plant$P)) +
     scale_colour_manual(values = c("not contaminated" = "darkgreen", ## sick 
                                    "contaminated" = "darkred", ## not sick
                                    "Possible contact / not contaminated" = "orange", ## possible contact / not contaminated
@@ -43,6 +38,7 @@ f_plotPlant <- function(
   ## Borders
   ## Coordinates of the borders of the spaces
   Border <- f_Border(Plant) ## check function f_Border()
+  
   ## Plot
   g_Plant <- g_Plant  +
     geom_segment(data = Border, aes(x = Xmin, y = Ymin, xend = Xmax, yend = Ymin), size=1.5) + # lower border
@@ -62,15 +58,28 @@ f_plotPlant <- function(
   
   ## Internal doors
   g_Plant <- g_Plant +
-    geom_segment(data = D,
-                 aes(x = intdoor.X0, xend = intdoor.X1, y = intdoor.Y0, yend = intdoor.Y1),
-                 size=3, colour = "darkgray")
+    geom_segment(data = D, aes(x = intdoor.X0, xend = intdoor.X1, y = intdoor.Y0, yend = intdoor.Y1),
+                 size=3, colour = "gray25") +
+    geom_segment(data = D, aes(x = intdoor.X0, xend = intdoor.X1, y = intdoor.Y0, yend = intdoor.Y1),
+                 size=1.2, colour = "white")
+  
   ## External doors
   g_Plant <- g_Plant +
-    geom_segment(data = D,
-                 aes(x = extdoor.X0, xend = extdoor.X1, y = extdoor.Y0, yend = extdoor.Y1),
-                 size=3, colour = "black")
-
+    geom_segment(data = D, aes(x = extdoor.X0, xend = extdoor.X1, y = extdoor.Y0, yend = extdoor.Y1),
+                 size=3.5, colour = "gray25") +
+    geom_segment(data = D, aes(x = extdoor.X0, xend = extdoor.X1, y = extdoor.Y0, yend = extdoor.Y1),
+                 size=0.5, colour = "white")
+  
+  # ## Annotate location
+  # Annotate <- data.frame(label = names(tapply(MyPlant$L$coordY, MyPlant$L$Location, max)),
+  #                        annotateX = unname(tapply(MyPlant$L$coordX, MyPlant$L$Location, mean)),
+  #                        annotateY = unname(tapply(MyPlant$L$coordY, MyPlant$L$Location, max))
+  # )
+  # 
+  # g_Plant <- g_Plant +
+  #   geom_text(data = Annotate,
+  #             mapping = aes(x = annotateX, y = annotateY, label = label))
+  
   return(g_Plant)
   #### END OF FUNCTION
 }
@@ -85,7 +94,8 @@ f_Border <- function(
   ## OUTPUT
   ## Border (data frame): coordinates of the borders (all spaces)
 ) {
-  L <- Plant$L
+  L <- subset(Plant$L, border == T)
+  L$Location <- as.factor(L$Location)
   
   ## Border of the spaces (location)
   tapply(L$coordX, INDEX = L$Location, FUN = min) %>% names -> Location
@@ -200,6 +210,21 @@ f_coordDoor <- function(
   
 }
 
+##### f_tile_colour() SUB-FUNCTION OF f_plotPlant() FOR PERSONALIZING THE COLOURS OF THE PLANT TILES #####
+f_tile_colour <- function(
+  P # matrix : processing plant 
+) {
+  tile_name <- levels(as.factor(P))
+  
+  tile_colour <- rep("white", length(tile_name)) ## defaults colour : white
+  names(tile_colour) <- tile_name
+  
+  tile_colour["Conveyor"] <- "seashell2"
+  tile_colour["Equipment 1"] <- "seashell3"
+  
+  return(tile_colour)
+}
+
 ##### f_plotWorkers() FUNCTION TO PLOT THE AGENTS INSIDE A PRE-PLOTTED PLANT #####
 f_plotWorkers <- function(
   g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
@@ -209,25 +234,78 @@ f_plotWorkers <- function(
   ##  - W_coordY (numeric): coordinates in the X axis of the worker
   ##  - W_state (character/factor): infected/not infected worker 
   ##  - W_mask (character/factor): mask/no mask
-  t_ind = NULL, ## time index
+  ## time index
   ...
 ) {
   #### BEGIN OF FUNCTION
   ##
-  W_t <- subset(W, W_active == "active")
+  W$W_coordX <- as.numeric(W$W_coordX)
+  W$W_coordY <- as.numeric(W$W_coordY)
+  
+  W <- data.frame(W,
+                  time_minutes = W$t_ind * 5)
   
   g_Plant <- g_emptyPlant +
     geom_point(data = W,
-               mapping = aes(x=W_coordX, y=W_coordY, colour=W_status, shape=W_mask, W_ID=W_ID, frame=t_ind),
+               mapping = aes(x=W_coordX, y=W_coordY, colour=W_status, shape=W_mask,
+                             W_ID=W_ID, W_type=W_type, frame=time_minutes),
                size = 3, alpha = 0.5,
-               position = position_jitter(width = 0.3, height = 0.3, seed=408)) +
-    geom_text(data = W,
-              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID, frame=t_ind),
-              size = 2,
-              position = position_jitter(width = 0.3, height = 0.3, seed=408))
+               position = position_jitter(width = 0.1, height = 0.1, seed=408))
   
-  g_Plant <- g_Plant + 
-    labs(title = "Meat processing plant")
+  g_Plant <- g_Plant +
+    geom_text(data = W,
+              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID, frame=time_minutes),
+              size = 2,
+              position = position_jitter(width = 0.1, height = 0.1, seed=408))
+  
+  return(g_Plant)
+  #### END OF FUNCTION
+}
+
+f_plotAgents <- function(
+  g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
+  W, ## (data.frame): information of the workers with at least these attributes
+  FP = NULL,
+  ##  - W_ID (character): worker ID
+  ##  - W_coordX (numeric): coordinates in the X axis of the worker
+  ##  - W_coordY (numeric): coordinates in the X axis of the worker
+  ##  - W_state (character/factor): infected/not infected worker 
+  ##  - W_mask (character/factor): mask/no mask
+  ## time index
+  ...
+) {
+  #### BEGIN OF FUNCTION
+  ##
+  W$W_coordX <- as.numeric(W$W_coordX)
+  W$W_coordY <- as.numeric(W$W_coordY)
+  
+  W <- data.frame(W,
+                  time_minutes = W$t_ind * 5)
+  
+  g_Plant <- g_emptyPlant +
+    geom_point(data = W,
+               mapping = aes(x=W_coordX, y=W_coordY, colour=W_status, shape=W_mask,
+                             W_ID=W_ID, W_type=W_type, frame=time_minutes),
+               size = 3, alpha = 0.5,
+               position = position_jitter(width = 0.1, height = 0.1, seed=408))
+  
+  g_Plant <- g_Plant +
+    geom_text(data = W,
+              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID, frame=time_minutes),
+              size = 2,
+              position = position_jitter(width = 0.1, height = 0.1, seed=408))
+  
+  if (!is.null(FP)) {
+    FP$FP_coordX <- as.numeric(FP$FP_coordX)
+    FP$FP_coordY <- as.numeric(FP$FP_coordY)
+    FP <- data.frame(FP,
+                     time_minutes = FP$t_ind * 5)
+    g_Plant <- g_Plant +
+      geom_point(data = FP,
+                mapping = aes(x=FP_coordX, y=FP_coordY, frame=time_minutes),
+                size = 0.8, shape = 15,
+                position = position_jitter(width = 0.3, height = 0.1, seed=408))
+  }
   
   return(g_Plant)
   #### END OF FUNCTION
