@@ -1,8 +1,8 @@
 ##### USER DEFINED PARAMETERS FOR THE PLANT #####
 Parms_Plant <- list(
   #### Plant
-  dim.X = 50, ## (numeric) length of the processing plants (meter)
-  dim.Y = 30, ## (numeric) width of the processing plants (meter)
+  dim.X = 30, ## (numeric) length of the processing plants (meter)
+  dim.Y = 20, ## (numeric) width of the processing plants (meter)
   
   ######### SPACES (begin)
   Spaces = list(
@@ -31,21 +31,21 @@ Parms_Plant <- list(
     ## Cooling area
     cool = list( 
       label = "Cooling area",
-      dim.X = 6, # dimensions
-      dim.Y = 12, # dimensions
+      dim.X = 3, # dimensions
+      dim.Y = 3, # dimensions
       pos.X = 1, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.4, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
-      intdoor.side = "left",
+      pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      intdoor.side = "bottom",
       extdoor.side = NA
     )
     ,
     ## Gate (arrival of meat products)
     gate = list(
       label = "Arrival gate",
-      dim.X = 6, # dimensions
-      dim.Y = 4, # dimensions
+      dim.X = 2, # dimensions
+      dim.Y = 2, # dimensions
       pos.X = 0, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.4, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      pos.Y = 0.5, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "right",
       extdoor.side = "left"
     )
@@ -53,12 +53,23 @@ Parms_Plant <- list(
     ## Waste area
     waste = list(
       label = "Waste area",
-      dim.X = 4, # dimensions
-      dim.Y = 7, # dimensions
+      dim.X = 2, # dimensions
+      dim.Y = 3, # dimensions
       pos.X = 0.7, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "top",
       extdoor.side = "bottom"
+    )
+    ,
+    ## Office
+    office = list(
+      label = "Office",
+      dim.X = 4, # dimensions
+      dim.Y = 3, # dimensions
+      pos.X = 0, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      intdoor.side = "right",
+      extdoor.side = NA
     )
     ####### NOTE /!\ 
     ####### To add new spaces, uncomment and copy the following code section (INCLUDING THE FIRST COMMA). All fields are mandatory
@@ -86,10 +97,10 @@ Parms_Plant <- list(
     ## conveyor treadmill
     cvy = list(
       label = "Conveyor",
-      dim.X = 20, # dimensions
-      dim.Y = 3, # dimensions
+      dim.X = 15, # dimensions
+      dim.Y = 2, # dimensions
       pos.X = 0.2, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.4 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
     )
     ,
     ## 'Eplucheuse'
@@ -97,7 +108,7 @@ Parms_Plant <- list(
       label = "Equipment 1",
       dim.X = 2, # dimensions
       dim.Y = 2, # dimensions
-      pos.X = 0.8, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.X = 0.9, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
     )
     
