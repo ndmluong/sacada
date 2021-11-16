@@ -12,8 +12,8 @@ Agent-based model (ABM) for modelling the SARS-CoV-2 transmission in food facili
 
 ## Updates
 
-#### 2021-11-09
-Development
+#### 2021-11-16
+Git Updates on local computer
 
 ********************************************************************************
 
