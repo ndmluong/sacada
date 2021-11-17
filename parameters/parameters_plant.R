@@ -11,6 +11,7 @@ Parms_Plant <- list(
       label = "Entry hall",
       dim.X = 3, # dimensions (meter)
       dim.Y = 3, # dimensions (meter)
+      dim.Z = 3, # dimensions (meter)
       pos.X = 0, # (numeric from 0 to 1) Position of regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "top",
@@ -20,8 +21,9 @@ Parms_Plant <- list(
     ## WC
     wc = list( 
       label = "W.C.",
-      dim.X = 2, # dimensions 
-      dim.Y = 2, # dimensions
+      dim.X = 2, # dimensions (meter)
+      dim.Y = 2, # dimensions (meter)
+      dim.Z = 2.5, # dimensions (meter)
       pos.X = 1, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "left",
@@ -31,8 +33,9 @@ Parms_Plant <- list(
     ## Cooling area
     cool = list( 
       label = "Cooling area",
-      dim.X = 3, # dimensions
-      dim.Y = 3, # dimensions
+      dim.X = 3, # dimensions (meter)
+      dim.Y = 3, # dimensions (meter)
+      dim.Z = 3, # dimensions (meter)
       pos.X = 1, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "bottom",
@@ -42,8 +45,9 @@ Parms_Plant <- list(
     ## Gate (arrival of meat products)
     gate = list(
       label = "Arrival gate",
-      dim.X = 2, # dimensions
-      dim.Y = 2, # dimensions
+      dim.X = 2, # dimensions (meter)
+      dim.Y = 2, # dimensions (meter)
+      dim.Z = 3, # dimensions (meter)
       pos.X = 0, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0.5, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "right",
@@ -55,6 +59,7 @@ Parms_Plant <- list(
       label = "Waste area",
       dim.X = 2, # dimensions
       dim.Y = 3, # dimensions
+      dim.Z = 3, # dimensions (meter)
       pos.X = 0.7, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "top",
@@ -66,6 +71,7 @@ Parms_Plant <- list(
       label = "Office",
       dim.X = 4, # dimensions
       dim.Y = 3, # dimensions
+      dim.Z = 3, # dimensions (meter)
       pos.X = 0, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "right",
