@@ -1,8 +1,11 @@
 ##### USER DEFINED PARAMETERS FOR THE PLANT #####
 Parms_Plant <- list(
   #### Plant
-  dim.X = 30, ## (numeric) length of the processing plants (meter)
-  dim.Y = 20, ## (numeric) width of the processing plants (meter)
+  dim.X = 30, ## (numeric - m) length of the processing plants (meter)
+  dim.Y = 20, ## (numeric - m) width of the processing plants (meter)
+  dim.Z = 5,  ## (numeric - m) height of the room 
+  label = "Cutting Room",
+  Air_Cond_Type = "AHU", #Air Handing Unit
   
   ######### SPACES (begin)
   Spaces = list(
@@ -15,8 +18,9 @@ Parms_Plant <- list(
       pos.X = 0, # (numeric from 0 to 1) Position of regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "top",
-      extdoor.side = "left"
-    )
+      extdoor.side = "left",
+      Air_Cond_Type = "CMV" # Controlled Mechanical Ventilation
+
     ,
     ## WC
     wc = list( 
@@ -27,7 +31,8 @@ Parms_Plant <- list(
       pos.X = 1, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "left",
-      extdoor.side = NA
+      extdoor.side = NA, 
+      Air_Cond_Type = "CMV" # Controlled Mecanical Ventilation 
     )
     ,
     ## Cooling area
@@ -39,7 +44,8 @@ Parms_Plant <- list(
       pos.X = 1, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "bottom",
-      extdoor.side = NA
+      extdoor.side = NA,
+      Air_Cond_Type = "DEC", # Direct Expansion Coil
     )
     ,
     ## Gate (arrival of meat products)
@@ -51,7 +57,8 @@ Parms_Plant <- list(
       pos.X = 0, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0.5, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "right",
-      extdoor.side = "left"
+      extdoor.side = "left",
+      Air_Cond_Type = "DEC", # Direct Expansion Coil
     )
     ,
     ## Waste area
@@ -63,7 +70,8 @@ Parms_Plant <- list(
       pos.X = 0.7, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "top",
-      extdoor.side = "bottom"
+      extdoor.side = "bottom",
+      Air_Cond_Type = "DEC", # Direct Expansion Coil
     )
     ,
     ## Office
@@ -75,7 +83,9 @@ Parms_Plant <- list(
       pos.X = 0, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "right",
-      extdoor.side = NA
+      extdoor.side = NA,
+      Air_Cond_Type = "CMV", # Controlled Mecanical Ventilation
+
     )
     ####### NOTE /!\ 
     ####### To add new spaces, uncomment and copy the following code section (INCLUDING THE FIRST COMMA). All fields are mandatory
