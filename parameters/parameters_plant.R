@@ -6,6 +6,8 @@ Parms_Plant <- list(
   dim.Z = 5,  ## (numeric - m) height of the room 
   label = "Cutting Room",
   Air_Cond_Type = "AHU", #Air Handing Unit
+  Air_renewal = 1000, # TO MODIFY !!!!!!! (m3/h)
+  AirflowRate = 5000, # TO MODIFY !!!!!!! (m3/h)
   
   ######### SPACES (begin)
   Spaces = list(
@@ -19,8 +21,10 @@ Parms_Plant <- list(
       pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "top",
       extdoor.side = "left",
-      Air_Cond_Type = "CMV" # Controlled Mechanical Ventilation
-
+      Air_Cond_Type = "CMV", # Controlled Mechanical Ventilation
+      Air_renewal = 90, # TO MODIFY !!!!!!! (m3/h)
+      AirflowRate = 90 # TO MODIFY !!!!!!! (m3/h)
+    )
     ,
     ## WC
     wc = list( 
@@ -32,7 +36,9 @@ Parms_Plant <- list(
       pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "left",
       extdoor.side = NA, 
-      Air_Cond_Type = "CMV" # Controlled Mecanical Ventilation 
+      Air_Cond_Type = "CMV", # Controlled Mecanical Ventilation 
+      Air_renewal = 30, #  (m3/h)
+      AirflowRate = 30 #   (m3/h)
     )
     ,
     ## Cooling area
@@ -46,6 +52,8 @@ Parms_Plant <- list(
       intdoor.side = "bottom",
       extdoor.side = NA,
       Air_Cond_Type = "DEC", # Direct Expansion Coil
+      Air_renewal = 0, # TO MODIFY !!!!!!! (m3/h)
+      AirflowRate = 500 # TO MODIFY !!!!!!! (m3/h)
     )
     ,
     ## Gate (arrival of meat products)
@@ -59,6 +67,8 @@ Parms_Plant <- list(
       intdoor.side = "right",
       extdoor.side = "left",
       Air_Cond_Type = "DEC", # Direct Expansion Coil
+      Air_renewal = 0, # TO MODIFY !!!!!!! (m3/h)
+      AirflowRate = 200 # TO MODIFY !!!!!!! (m3/h)
     )
     ,
     ## Waste area
@@ -72,6 +82,8 @@ Parms_Plant <- list(
       intdoor.side = "top",
       extdoor.side = "bottom",
       Air_Cond_Type = "DEC", # Direct Expansion Coil
+      Air_renewal = 0, # TO MODIFY !!!!!!! (m3/h)
+      AirflowRate = 200 # TO MODIFY !!!!!!! (m3/h)
     )
     ,
     ## Office
@@ -85,6 +97,8 @@ Parms_Plant <- list(
       intdoor.side = "right",
       extdoor.side = NA,
       Air_Cond_Type = "CMV", # Controlled Mecanical Ventilation
+      Air_renewal = 60, # TO MODIFY !!!!!!! (m3/h)
+      AirflowRate = 60 # TO MODIFY !!!!!!! (m3/h)
 
     )
     ####### NOTE /!\ 
