@@ -1,8 +1,10 @@
 ##### FUNCTIONS #####
-source("functions/functions_init.R")
+source("functions/functions_plant.R")
 source("functions/functions_plot.R")
 source("functions/functions_actions.R")
 source("functions/functions_air.R")
+source("functions/functions_food.R")
+source("functions/functions_workers.R")
 
 ##### PARAMETERS #####
 ## Check the scripts for more details / change parameter values if needed

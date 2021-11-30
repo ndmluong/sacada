@@ -12,14 +12,14 @@ Parms_Workers <- list(
                0.9),
   pActive = c("active" = 0.8,
               "idle" = 0.2), ## proportion of active workers (per day) upon the total number of employees
-  pType = c("cutter1" = 0.4,
-            "cutter2" = 0.4,
-            "logistic1" = 0.05,
-            "logistic2" = 0.05,
-            "transverse" = 0.87),
+  pType = c("cutter1" = 0.36, ## Mallet et al. 2021
+            "cutter2" = 0.47, ## Mallet et al. 2021 
+            "logistic1" = 0.04, ## Gunther et al. 2020
+            "logistic2" = 0.04, ## Mallet et al. 2021 
+            "transverse" = 0.09),
   mandatoryWorkersType = c("transverse"),
   prev = 50/100000, ## regional prevalence
-  pCommunityActivities = 0.30, ## the proportion of the workers susceptible to have community activities
+  pCommunityActivity = 0.30, ## the proportion of the workers susceptible to have community activities
   N_perCommunityActivity = 3, ## the average number of workers within a group for activity
-  conta_prob_withinCommunity = 0.75,
+  conta_prob_withinCommunity = 0.025 ## CHECK LITERATURE (25% every 10 days)
 )
