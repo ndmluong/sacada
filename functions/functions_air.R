@@ -69,8 +69,8 @@ f_Vsed <- function(
   
   g = 9.81 # (m².S-1) -  Gravity
   mu = 1.76*10^(-5) # (Pas.s) - Dynamic viscosity at 10°C
-  rho_eau = 1000 # (kg.m-3) - Water density
-  rho_air = 1.25 # (kg.m-3) -Water density 
+  rho_eau = 1000 # (kg.m-3) - Water density at 10°C
+  rho_air = 1.25 # (kg.m-3) -Water density at 10°C
 
 return(2*(prm_air$Droplet_class*10^(-6))^2*g*(rho_eau-rho_air)/(9*mu)) # Stokes'law
 #### END OF FUNCTION
@@ -108,7 +108,7 @@ f_Air_Criteria_Calc <-function(prm_plant, prm_air)
   circ_time <- f_circ_time(prm_plant) ## en heure ????????????
   circ_time_mat <- t(matrix(rep(circ_time,nrow(sed_time)),ncol = nrow(sed_time)))
   
-  return(circ_time_mat/sed_time<1)
+  return(circ_time_mat/sed_time<1) ## 0.1 ?
 }
  
 f_drop_conc_evol <- function (prm_plant,prm_air) # ... to be continued ... 

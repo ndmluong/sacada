@@ -5,6 +5,7 @@ source("functions/functions_actions.R")
 source("functions/functions_air.R")
 source("functions/functions_food.R")
 source("functions/functions_workers.R")
+source("functions/functions_surfaces.R")
 
 ##### PARAMETERS #####
 ## Check the scripts for more details / change parameter values if needed
@@ -39,3 +40,6 @@ MyWorkers <- f_InvariantTimeSteps(Agents = MyWorkers,
                                   t_ind_to = 48)
 # Initialize the Air Agents
 MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
+
+# Initialize the Surfaces Agents
+MySurfaces <- f_initSurfaces(P = MyPlant$P, prm_time = Parms_Time)
