@@ -12,7 +12,7 @@ Parms_Workers <- list(
                0.9),
   pActive = list(
     W_gr1 = c("idle", "active", "active", "active", "active"),
-    W_gr2 = c("active", ),
+    W_gr2 = c("active" ),
     W_gr3 = c(),
     W_gr4 = c(),
     W_gr5 = c()
