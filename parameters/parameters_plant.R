@@ -7,7 +7,7 @@ Parms_Plant <- list(
   label = "Cutting Room",
   Air_Cond_Type = "AHU", #Air Handing Unit
   Air_renewal = 1000, # TO MODIFY !!!!!!! (m3/h)
-  AirflowRate = 5000, # TO MODIFY !!!!!!! (m3/h)
+  AirflowRate = 90000, # 30Vol/h TO MODIFY !!!!!!! (m3/h)
   
   ######### SPACES (begin)
   Spaces = list(

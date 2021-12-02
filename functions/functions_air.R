@@ -57,7 +57,9 @@ f_initAir <- function(
 }
 
 f_Vsed <- function(
-#############################################################################
+############################################################################# 
+# Double-Checked !!! fonction verified and results compared to kennedy et al. 
+############################################################################# 
 # Calculates the sedimentation velocity of a sphere of water in the air
 # According to Stokes law
 # INPUT
@@ -68,11 +70,14 @@ f_Vsed <- function(
   # prm = Parms_Air  
   
   g = 9.81 # (m².S-1) -  Gravity
-  mu = 1.76*10^(-5) # (Pas.s) - Dynamic viscosity at 10°C
+  mu = 1.77*10^(-5) # (Pas.s) - Dynamic viscosity at 10°C
+  # - 0°C ->1.72e-05 (for later if ever we want to take the T°C on air props... )
+  # - 5°C ->1.75e-05
+  # - 15°C ->1.79e-05
   rho_eau = 1000 # (kg.m-3) - Water density at 10°C
-  rho_air = 1.25 # (kg.m-3) -Water density at 10°C
+  rho_air = 1.24 # (kg.m-3) -Water density at 10°C 1.29 à0°C 1.22*15°C
 
-return(2*(prm_air$Droplet_class*10^(-6))^2*g*(rho_eau-rho_air)/(9*mu)) # Stokes'law
+return((prm_air$Droplet_class*10^(-6))^2*g*(rho_eau-rho_air)/(18*mu)) # Stokes'law 
 #### END OF FUNCTION
 }
 
@@ -80,7 +85,7 @@ f_sed_time <-function(prm_plant, prm_air)
   {
   # prm_air = Parms_Air
   # prm_plant = Parms_Plant
-  # Sedimentation Velocity
+  # # Sedimentation Velocity
   Vsed <- matrix(f_Vsed(prm_air),nrow=1) # (m.s-1) 
   # Height of each room 
   H_room <- matrix(c(prm_plant$dim.Z,
@@ -108,7 +113,7 @@ f_Air_Criteria_Calc <-function(prm_plant, prm_air)
   circ_time <- f_circ_time(prm_plant) ## en heure ????????????
   circ_time_mat <- t(matrix(rep(circ_time,nrow(sed_time)),ncol = nrow(sed_time)))
   
-  return(circ_time_mat/sed_time<1) ## 0.1 ?
+  return(circ_time_mat/sed_time<0.1) ## KEnnedy et al.2020 circ_time_mat << sed_time
 }
  
 f_drop_conc_evol <- function (prm_plant,prm_air) # ... to be continued ... 
