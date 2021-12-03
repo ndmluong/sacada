@@ -1,27 +1,6 @@
 ##### USER DEFINED PARAMETERS FOR THE WORKERS SET #####
 Parms_Workers <- list(
 
-  NWorkers = 200, ## total number of the workers during the entire process
-  nContaminated_Init = 1,  ## the number of contaminated workers at the day 0
-  # pContaminated = c("contaminated" = 0.1,
-  #             "not contaminated" = 0.9), ## probability of infected people among the workers
-  pMask = c("mask" = 0.80,
-            "no mask" = 0.20), ## probability of workers wearing a mask
-  Mask_Eff = c(0.9,  # Mask Efficacy for each droplet class [0 -> 1]
-               0.9, 
-               0.9, 
-               0.9),
-  pActive = list(
-    W_gr1 = c("idle", "active", "active", "active", "active"),
-    W_gr2 = c("active" ),
-    W_gr3 = c(),
-    W_gr4 = c(),
-    W_gr5 = c()
-  ),
-  pChangeTeam = 0.05,
-  # pActive = c("active" = 0.8,
-  #             "idle" = 0.2), ## proportion of active workers (per day) upon the total number of employees
-
   #### NUMBER OF WORKERS ####
   ## Total number of fixed workers (regular/temporary/subcontract)
   NWorkers = 100, 
@@ -71,7 +50,7 @@ Parms_Workers <- list(
 
   #### EPIDEMIOLOGY SCENARIO ####
   ## The number of contaminated workers at the day 0
-  nContaminated_Init = 1,
+  nContaminated_Init = 30,
   ## Regional prevalence ##
   prev = 50/100000
 )

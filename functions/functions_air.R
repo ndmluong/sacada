@@ -5,7 +5,7 @@ f_initAir <- function(
   ## Function initializing the "Air Agent" of each room. 
   ## In each Air Agent, the cenctration of each droplet size class is defined
   #### INPUT
-  prm, ## (list) the parameters associated with all attributes of the workers with at least the following elements
+  prm_plant, ## (list) the parameters associated with all attributes of the workers with at least the following elements
   ## (check the script "parameters_workers.R")
   ##  - $NWorkers (integer), ## total number of the workers during the entire process
   ##  - $InfectProb (numeric), ## probability of infected people among the workers
@@ -22,7 +22,7 @@ f_initAir <- function(
   #               time   -> time ind : time index
 
 ){ 
-# prm = Parms_Plant
+# prm_plant = Parms_Plant
 # prm_time = Parms_Time
 # prm_air = Parms_Air
 
@@ -36,14 +36,14 @@ f_initAir <- function(
   ##############################################################################
   ### ID of each rooms
   # AIR_ID <- names(prm$Spaces)
-  AIR_ID <- c(prm$label,
-              unname(unlist(lapply(prm$Spaces, function (x) return(x$label)))))
+  AIR_ID <- c(prm_plant$label,
+              unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$label)))))
   
   ### Droplet  classes d
   AIR_dclass <- paste("d", stringr::str_pad(seq(1:length(prm_air$Droplet_class)), width=2, pad="0"), sep="")
   ### Total number of the time indexes 
   NTime <- prm_time$NDays * 1440 / prm_time$Step ## amplitude Ndays in days, time step in minutes
-  t_ind <- rep(0:NTime, each = length(prm$Spaces)+1) # +1 for the cutting room not included as 'Spaces'
+  t_ind <- rep(0:NTime, each = length(prm_plant$Spaces)+1) # +1 for the cutting room not included as 'Spaces'
   
   ### Output
   AIR <- data.frame(AIR_ID = rep(AIR_ID, NTime+1),
@@ -86,12 +86,12 @@ f_sed_time <-function(prm_plant, prm_air)
   # prm_air = Parms_Air
   # prm_plant = Parms_Plant
   # # Sedimentation Velocity
-  Vsed <- matrix(f_Vsed(prm_air),nrow=1) # (m.s-1) 
+  Vsed <<- matrix(f_Vsed(prm_air),nrow=1) # (m.s-1) 
   # Height of each room 
   H_room <- matrix(c(prm_plant$dim.Z,
                     unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$dim.Z))))))
    
-  return(aperm(H_room%*%(Vsed^-1)))
+  return(H_room%*%(Vsed^-1))
 }
 
 f_circ_time <- function (prm_plant){
@@ -103,7 +103,7 @@ f_circ_time <- function (prm_plant){
   }
 
 f_Air_Criteria_Calc <-function(prm_plant, prm_air)
-  # Calculations based on Kenedy et al (2020)
+  # # Calculations based on Kenedy et al (2020)
   # prm_air = Parms_Air
   # prm_plant = Parms_Plant
   {
@@ -111,7 +111,7 @@ f_Air_Criteria_Calc <-function(prm_plant, prm_air)
   sed_time <- f_sed_time(prm_plant,prm_air)  ## en sec ????????????
   # Call function for circulation time calculation
   circ_time <- f_circ_time(prm_plant) ## en heure ????????????
-  circ_time_mat <- t(matrix(rep(circ_time,nrow(sed_time)),ncol = nrow(sed_time)))
+  circ_time_mat <- matrix(rep(circ_time,ncol(sed_time)),ncol = ncol(sed_time))
   
   return(circ_time_mat/sed_time<0.1) ## KEnnedy et al.2020 circ_time_mat << sed_time
 }
@@ -119,7 +119,7 @@ f_Air_Criteria_Calc <-function(prm_plant, prm_air)
 f_drop_conc_evol <- function (prm_plant,prm_air) # ... to be continued ... 
 {  
   
-  Method_calc <- f_Air_Criteria_Calc(Parms_Plant,Parms_Air)
+  Method_calc <<- f_Air_Criteria_Calc(Parms_Plant,Parms_Air)
   
   
   
