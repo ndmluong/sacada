@@ -108,7 +108,7 @@ f_Air_Criteria_Calc <-function(prm_plant, prm_air)
   circ_time <- f_circ_time(prm_plant) ## en heure ????????????
   circ_time_mat <- t(matrix(rep(circ_time,nrow(sed_time)),ncol = nrow(sed_time)))
   
-  return(circ_time_mat/sed_time<1)
+  return(circ_time_mat/sed_time<0.1)
 }
  
 f_drop_conc_evol <- function (prm_plant,prm_air) # ... to be continued ... 
