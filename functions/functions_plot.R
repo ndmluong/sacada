@@ -274,3 +274,13 @@ f_plotAgents <- function(
   return(g_Plant)
   #### END OF FUNCTION
 }
+
+
+f_plotWorkersTimestable <- function(
+  W,
+  ...
+) {
+  
+  df <- subset(W, Weekday == "Monday" & Hour == 0 & Min == 0)
+  
+}
