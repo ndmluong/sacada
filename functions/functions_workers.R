@@ -29,14 +29,22 @@ f_initWorkers <- function(
   W_ID <- paste("W", stringr::str_pad(seq(1:prm$NWorkers), width=3, pad="0"), sep="")
   
   ### Total number of the time indexes
+  print("========[Step 1/2 - Processing time indexes]=========================")
   print("Processing time indexes")
   NTime <- prm_time$NDays * 1440 / prm_time$Step ## amplitude Ndays in days, time step in minutes
   t_ind <- rep(0:NTime, each = prm$NWorkers)
+  print(paste("Time indexes going from 0 to", NTime))
+  
   ## Convert time indexes to D,H,M
-  t_time <- t_ind %>% sapply(FUN = function(x) f_convertTime("ind2time", dt=prm_time$Step, t_ind = x))
+  dt = prm_time$Step
+  print("Converting time indexes into D:H:M format")
+  t_time <- t_ind %>% sapply(FUN = function(x) {
+    f_convertTime("ind2time", dt=dt, t_ind = x)
+    })
   Day <- t_time[1,]
   Hour <- t_time[2,]
   Min <- t_time[3,]
+  print("Converting time into week numbers and weekdays format")
   Week <- Day %>% sapply(FUN = f_Day2Week)
   Weekday <- Day %>% sapply(FUN = f_Day2Weekday)
   
@@ -44,7 +52,8 @@ f_initWorkers <- function(
   ### States (infected/not infected) of the workers
   # Time index 0:
   # HYPOTHESE : ONE INDIVIDUAL CONTAMINATED AT DAY 0 ?
-  print("Assign the first random contaminated indivual")
+  print("========[Step 2/2 - Workers attributes]==============================")
+  print("Assign the first random contaminated worker")
   W_status0 <- rep("not contaminated", prm$NWorkers)
   set.seed(seed)
   W_status0[sample(1:prm$NWorkers, 1)] <- "contaminated"
@@ -54,6 +63,7 @@ f_initWorkers <- function(
   ### Behavior (mask/no mask) of the workers
   # At the time index 0
   # The proportion of workers wearing a mask depending on the type of mask
+  print("Simulating mask acceptability")
   pMask <- prm$pMaskAcceptability[prm$MaskType] %>% unname
   
   # Wearing mask or not for each worker
@@ -116,7 +126,9 @@ f_initWorkers <- function(
                   Hour = Hour,
                   Min = Min
   )
-  
+  print("=============================================")
+  print("Workers initialized")
+  print("=============================================")
   return(W)
   #### END OF FUNCTION
 }
@@ -281,12 +293,10 @@ f_changeTeamWeekly <- function(
   ### CHANGE TEAM FOR SOME WORKERS ###
   ## Number of workers to be switched from one team to another
   nb_changes <- rbinom(1, length(teamA_ID), prob = prob)
-  if (nb_changes == 0) {nb_changes <- nb_changes + 1} ## at least one worker
+  if (nb_changes == 0) {nb_changes <- 1} ## at least one worker
   
   ## Choose random workers to change team
-  set.seed(seed)
   W_AtoB_ID <- sample(teamA_ID, size = nb_changes)
-  set.seed(seed)
   W_BtoA_ID <- sample(teamB_ID, size = nb_changes)
   
   for (i in 1:nb_changes) { ## for each pair of workers changing the team
@@ -324,16 +334,78 @@ f_assignWorkersShift <- function(
 
 
 ##### f_assignRestingDay() FUNCTION TO ASSIGN THE RESTING DAY FOR ALL WORKERS #####
-f_assignRestingDay <- function(
+f_initActiveCounter <- function(
   W, ## data.frame (output of the )
+  seed = NULL,
   ...
 ) {
-  
+  NWorkers <- length(unique(W$W_ID))
   ### tous les samedi et tous les dimanches, tout le monde devient "resting day"
+  W$W_active[which(W$Weekday %in% c("Saturday", "Sunday"))] <- "weekend"
   
-  
-  ### tous les jours de la semaine il y a 20% en idle 
-  
-  ### initialiser les compteurs des actifs: par tranche de 5: 0, 5, 10, 15, 20, 25
+  ### initialiser les compteurs des actifs: par tranche de 5: 0, 5, 10, 15, 20, 25, 30 : actifs! 1 sem. vacances apres 30 jours de travail (6 semaines)
+  ## indice t_ind 0
+  set.seed(seed)
+  W$W_activeCounter[which(W$t_ind == 0)] <- sample(x = seq(-5, 25, by=5),
+                                            size = NWorkers,
+                                            replace = T,
+                                            prob = rep(1/7, 7)) 
   return(W)
+}
+
+##### f_calculateIndividualActiveCounter() #####
+f_calculateIndividualActiveCounter <- function(
+  W, ## data.frame with ONLY ONE WORKER and ONLY DATA AT 0:00 EVERY DAY
+  ...
+) {
+  if (W$W_activeCounter[1] < 0) {
+    W$W_active[1] <- "holiday"
+  }
+  for (i in 2:nrow(W)) {
+    if (W$W_active[i] %in% c("active", "holiday")) {
+      W$W_activeCounter[i] <- W$W_activeCounter[i-1] + 1
+    } else {
+      W$W_activeCounter[i] <- W$W_activeCounter[i-1]
+    }
+    if (W$W_activeCounter[i] == 30) {
+      W$W_activeCounter[i] <- -5
+    }
+    if (W$W_activeCounter[i] < 0 & ! W$Weekday[i] %in% c("Saturday", "Sunday")) {
+      W$W_active[i] <- "holiday"
+    }
+  }
+  return(W)
+}
+
+##### f_calculateActiveCounter() #####
+f_calculateActiveCounter <- function(
+  W
+) {
+  print("Processing active counters")
+  d00 <- W[which(W$Hour == 0 & W$Min == 0),]
+  by(data = d00,
+     INDICES = d00$W_ID,
+     FUN = f_calculateIndividualActiveCounter) -> tmp
+  
+  ## garder la boucle for ici pour preserver les numeros des lignes
+  AllCounters <- tmp[[1]]
+  for (i in 2:dim(tmp)) {
+    AllCounters <- rbind(AllCounters, tmp[[i]])
+  }
+  
+  W[row.names(AllCounters),] <- AllCounters[row.names(AllCounters),]
+  
+  
+  ## Replicate information
+  ALL_ID <- unique(W$W_ID)
+  OUTPUT <- data.frame()
+  for (i in 1:length(ALL_ID)) {
+    print(paste("Worker",ALL_ID[i]))
+    d1W <- subset(W, W_ID == ALL_ID[i])
+    d1W <- f_replicateIndividualDaily(Agent = d1W,
+                                      Invariant = c("W_activeCounter", "W_active"))
+    OUTPUT <- rbind(OUTPUT, d1W)
+  }
+  
+  return(OUTPUT)
 }
