@@ -25,11 +25,13 @@ f_convertTime <- function(
   }
   
 }
+
 ##### f_Day2Week() FUNCTION TO CONVERT A DAY NUMBER INTO A WEEK NUMBER #####
 f_Day2Week <- function(D) {
   if (D%%7 == 0) {return(D%/%7)}
   else {return(D%/%7 + 1)}
 }
+
 ##### f_Day2Weekday() FUNCTION TO CONVERT A DAY NUMBER INTO A WEEKDAY #####
 f_Day2Weekday <- function(D) {
   switch(as.character(D%%7),
@@ -42,3 +44,28 @@ f_Day2Weekday <- function(D) {
          '6' = {return("Saturday")}
   )
 }
+
+##### f_replicateIndividualDaily() FUNCTION TO REPLICATE INDIVIDUAL ATTRIBUTES #####
+f_replicateIndividualDaily <- function(
+  Agent, ## data.frame corresponding to ONE AGENT at ALL DAY
+  Invariant, ## the invariant variable(s) 
+  ...
+) {
+  by(Agent, ## for the considered agent
+     INDICES = Agent$Day, ## processing by day
+     FUN =function(x) {
+       if (nrow(x) > 1) { ## if the considered day has more than one time index
+         x[2:nrow(x), Invariant] <- x[1, Invariant]
+       }
+       return(x)
+     }) -> tmp
+  
+  replicateddata <- data.table::rbindlist(tmp)
+  
+  return(replicateddata)
+}
+
+
+
+
+
