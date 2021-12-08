@@ -256,19 +256,20 @@ f_assignWorkersTypeTeam <- function(
 
 ##### f_changeTeamWeekly() FUNCTION TO ASSIGN POSSIBLE CHANGES OF WORKERS TEAM FROM ONE WEEK TO ANOTHER #####
 f_changeTeamWeekly <- function(
-  ## Func
+  ## Function to assign possible team changes (A to B and vice versa) from one week to another and
+  ## only for a user-given proportion of workers
   ## INTPUT
-  W, ## data.frame for all workers (output of the function)
-  prob,
-  week_from,
+  W, ## data.frame for all workers (output of the function f_initWorkers)
+  prob, ## the proportion of workers susceptible to change
+  week_from, ## the week from which the workers change their teams
   seed = NULL,
   ...
 ) {
   W$W_team <- as.character(W$W_team)
+  all_ID <- unique(W$W_ID) ## ID of all workers
   
-  all_ID <- unique(W$W_ID)
-  
-  ## EXCEPTIONAL CASE: if it's the first week (recently initialized data)
+  ## EXCEPTIONAL CASE: if it's the first week (recently initialized data,
+  ## meaning that only the first rows of the week are filled (day 1, OhOO))
   ## Copy the beginning of the first day of the week to all other days of the week
   if (week_from == 1) { 
     for (i in 1:length(all_ID)) {
@@ -278,11 +279,7 @@ f_changeTeamWeekly <- function(
     }
   }
   
-  ## Worker in each team of the week
-  teamA_ID <- unique(subset(W, W_team == "teamA" & Week == week_from)$W_ID)
-  teamB_ID <- unique(subset(W, W_team == "teamB" & Week == week_from)$W_ID)
-  
-  ## Copy and paste the team of every workers from one week to another
+  ## Copy and paste the team of every workers from one week to another without any changes
   for (i in 1:length(all_ID)) {
     tmp <- W$W_team[which(W$W_ID == all_ID[i] & W$Weekday == "Monday" & W$Hour == 0 & W$Min == 0 &
                           W$Week == week_from)]
@@ -291,6 +288,10 @@ f_changeTeamWeekly <- function(
   }
 
   ### CHANGE TEAM FOR SOME WORKERS ###
+  ## Worker in each team of the week
+  teamA_ID <- unique(subset(W, W_team == "teamA" & Week == week_from)$W_ID)
+  teamB_ID <- unique(subset(W, W_team == "teamB" & Week == week_from)$W_ID)
+  
   ## Number of workers to be switched from one team to another
   nb_changes <- rbinom(1, length(teamA_ID), prob = prob)
   if (nb_changes == 0) {nb_changes <- 1} ## at least one worker
@@ -301,7 +302,8 @@ f_changeTeamWeekly <- function(
   
   for (i in 1:nb_changes) { ## for each pair of workers changing the team
     w_Ai <- W_AtoB_ID[i] ## worker Ai to be switched with Bi
-    w_Bi <- W_BtoA_ID[i]
+    w_Bi <- W_BtoA_ID[i] ## worker Bi to be switched with Ai
+    ## assign their new respective teams for the week + 1
     W$W_team[which(W$Week == (week_from+1) & W$W_ID == w_Ai)] <- "teamB"
     W$W_team[which(W$Week == (week_from+1) & W$W_ID == w_Bi)] <- "teamA"
   }
@@ -314,10 +316,13 @@ f_changeTeamWeekly <- function(
 
 ##### f_assignWorkersShift() FUNCTION TO ASSIGN THE SHIFT FOR WORKERS DEPENDING ON THEIR TYPE AND TEAM #####
 f_assignWorkersShift <- function(
+  ## Function to assign the shift for all workers depending on their respective
+  ## assigned worker types and teams.
+  ## /!\ ONLY RUN WHEN THE FUNCTION f_changeTeamWeekly() HAS BEEN SUCCESFULLY RUN
   ## INPUT
-  W ## data.frame for all workers (output of the function)
+  W ## data.frame for all workers (output of the function f_initWorkers)
   ## OUTPUT
-  ## W_OUT: updated W with the assigned team for all workers over time
+  ## W: updated W with the assigned team for all workers over time
 ) {
   apply(W, 1, function(x) {
     if (x['W_team'] == "teamA" & (as.numeric(x['Week']) %% 2 == 0)) {return("morning")} ## even week
@@ -333,18 +338,26 @@ f_assignWorkersShift <- function(
 
 
 
-##### f_assignRestingDay() FUNCTION TO ASSIGN THE RESTING DAY FOR ALL WORKERS #####
+##### f_initActiveCounter() FUNCTION TO ASSIGN THE RESTING DAY FOR ALL WORKERS #####
 f_initActiveCounter <- function(
+  ## Function to assign the resting day for all workers and over the overall timetable
+  ## Rules:
+  ##  - No active workers on Saturday and Sunday,
+  ##  - One-week holiday period after six-week active period
+  ##  - No inter-workers synchronization for holiday/active periods
+  ## INPUT
   W, ## data.frame (output of the )
   seed = NULL,
   ...
+  ## OUTPUT
+  ## W: The data frame with initialized active counters at the first time index for all workers
 ) {
   NWorkers <- length(unique(W$W_ID))
-  ### tous les samedi et tous les dimanches, tout le monde devient "resting day"
+  ## Assgin the active status of Saturday and Sunday in to "weekend"
   W$W_active[which(W$Weekday %in% c("Saturday", "Sunday"))] <- "weekend"
   
-  ### initialiser les compteurs des actifs: par tranche de 5: 0, 5, 10, 15, 20, 25, 30 : actifs! 1 sem. vacances apres 30 jours de travail (6 semaines)
-  ## indice t_ind 0
+  ## Initialize random active counters for each workers at the first time index t_ind
+  ## using 5-day gap between their respective counters (-5,0,5,10,15,20,25)
   set.seed(seed)
   W$W_activeCounter[which(W$t_ind == 0)] <- sample(x = seq(-5, 25, by=5),
                                             size = NWorkers,
@@ -353,10 +366,15 @@ f_initActiveCounter <- function(
   return(W)
 }
 
-##### f_calculateIndividualActiveCounter() #####
+##### f_calculateIndividualActiveCounter() SUB-FUNCTION OF f_calculateActiveCounter() ##### 
 f_calculateIndividualActiveCounter <- function(
-  W, ## data.frame with ONLY ONE WORKER and ONLY DATA AT 0:00 EVERY DAY
+  ## Function allowing to calculate the active counter of one worker day by day
+  ## over his/her whole time table
+  ## INPUT
+  W, ## (Subset of) data frame associated with ONE WORKER and ONLY DATA AT 0:00 EVERY DAY
   ...
+  ## OUTPUT
+  ## W: the updated data frame with calculated active counters for the considered worker and for every day 
 ) {
   if (W$W_activeCounter[1] < 0) {
     W$W_active[1] <- "holiday"
@@ -377,17 +395,24 @@ f_calculateIndividualActiveCounter <- function(
   return(W)
 }
 
-##### f_calculateActiveCounter() #####
+##### f_calculateActiveCounter() FUNCTION TO CALCULATE ACTIVE COUNTERS FOR ALL WORKERS #####
 f_calculateActiveCounter <- function(
-  W
+  ## Function to calculate active counters for all workers
+  ## and to fill cases with missing data (cases associated with every time step of each day not filled yet)
+  ## INTPUT
+  W ## Data frame with the active counters initialized at the first time index
+  ## OUTPUT
+  ## OUTPUT: data frame with calculated active counters for every workers
 ) {
   print("Processing active counters")
+  ## Extract the data at the beginning of every day
   d00 <- W[which(W$Hour == 0 & W$Min == 0),]
+  ## Calculate the active counters for all workers, one by one, store in the list tmp
   by(data = d00,
      INDICES = d00$W_ID,
      FUN = f_calculateIndividualActiveCounter) -> tmp
   
-  ## garder la boucle for ici pour preserver les numeros des lignes
+  ## Data table / list manipulation for updating W with the calculated active counters
   AllCounters <- tmp[[1]]
   for (i in 2:dim(tmp)) {
     AllCounters <- rbind(AllCounters, tmp[[i]])
@@ -395,10 +420,11 @@ f_calculateActiveCounter <- function(
   
   W[row.names(AllCounters),] <- AllCounters[row.names(AllCounters),]
   
-  
-  ## Replicate information
+  ## Replicate information for the resting (not filled) cases of every day
   ALL_ID <- unique(W$W_ID)
   OUTPUT <- data.frame()
+  ## Replicate information individually for every workers, one by one
+  ## and combine in one data frame OUTPUT
   for (i in 1:length(ALL_ID)) {
     print(paste("Worker",ALL_ID[i]))
     d1W <- subset(W, W_ID == ALL_ID[i])
@@ -409,3 +435,32 @@ f_calculateActiveCounter <- function(
   
   return(OUTPUT)
 }
+
+##### f_setupSchedule() FUNCTION TO SET UP THE OVERALL SCHEDULE FOR ALL WORKERS #####
+f_setupSchedule <- function(
+  W,
+  prm,
+  seed = NULL
+) {
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+  ## Simulate the weekly team changes
+  for (i in 1:(max(W$Week)-1)) {
+    print(paste("Simulating weekly team changes - Week", i))
+    W <- f_changeTeamWeekly(W = W,
+                            prob = prm$pChangeTeam,
+                            week_from = i)
+  }
+  
+  ## Assign working shift for all workers
+  print("Assign working shifts for all workers")
+  W <- f_assignWorkersShift(W)
+  
+  ## Calculate the active counter of every workers and fill the case 0h00
+  W <- f_initActiveCounter(W = W, seed=seed+1)
+  W <- f_calculateActiveCounter(W = W)
+  
+  return(W)
+}
+
