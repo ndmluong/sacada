@@ -4,13 +4,14 @@ library(ggplot2)
 library(reshape2)
 library(plotly)
 library(stringr)
-
-
+library(data.table)
+library(dplyr)
 
 ##### FUNCTIONS #####
 source("functions/functions_plant.R")
 source("functions/functions_plot.R")
 source("functions/functions_air.R")
+#source("functions/functions_air_module.R")
 source("functions/functions_food.R")
 source("functions/functions_workers.R")
 source("functions/functions_surfaces.R")
@@ -31,85 +32,28 @@ source("parameters/parameters_air.R")
 source("parameters/parameters_food.R")
 
 
-#### Example ####
-##### RUN #####
+##### PLANT #####
 ## Create the plant
 MyPlant <- f_createPlant(prm = Parms_Plant)
 ## Plot
 g_emptyPlant <- f_plotPlant(Plant = MyPlant,
                             prm = Parms_Plant)
 
-##### LOAD PRE-INITIALISED WORKERS #####
-load("2021_12_07_100Workers_365days_Step5_TypeTeamShiftActiveCounter.RData")
+##### WORKERS #####
+## OPTION 1: LOAD PRE-CREATED WORKERS
+load("2021_12_08_100Workers_365days_Step5_TypeTeamShiftActiveCounterSchedule.RData")
 
-##### DO NOT RUN (BEGIN) #####
-# ####### Initialize the workers
-# ## simulation time between the lines 35 and 50 : approx. 50 minutes
-# Parms_Time$NDays <- 365
-# Parms_Time$Step <- 5
-# seed = 408
-# MyWorkers <- f_initWorkers(prm = Parms_Workers, prm_time = Parms_Time, seed = seed)
+## OPTION 2: CREATE NEW WORKERS
+## (approx. 45 minutes of simulation for 100 workers, 365 days and 5-minute time step)
+seed = 408
+MyWorkers <- f_initWorkers(prm = Parms_Workers, prm_time = Parms_Time, seed = seed)
+MyWorkers <- f_setupSchedule(W = MyWorkers, prm = Parms_Workers, seed = seed)
 
-
-# ###### To be included in a function ######
-# set.seed(408)
-# for (i in 1:52) {
-#   print(paste("Simulating weekly team changes: Week", i))
-#   MyWorkers <- f_changeTeamWeekly(W= MyWorkers, prob=Parms_Workers$pChangeTeam,
-#                                   week_from = i)
-# }
-# rm(i)
-# ## Assign Worker shift
-# print("Assign working shifts for all workers")
-# MyWorkers <- f_assignWorkersShift(MyWorkers) ## a lancer seulement quand toutes les equipes sont attribuees
-# ####### ######
-# 
-# ## save.image("Workers_NDays365_Step60.RData")
-# ## save.image("2021_12_06_100Workers_365days_Step60_TypeTeamShift.RData")
-# ## save.image("2021_12_06_100Workers_365days_Step120_TypeTeamShift.RData")
-# save.image("2021_12_06_100Workers_365days_Step5_TypeTeamShift.RData")
-
-
-# ## Calculate the active counter of every workers and fill the case 0h00
-# MyWorkers <- f_initActiveCounter(W = MyWorkers, seed = 409)
-# MyWorkers <- f_calculateActiveCounter(MyWorkers)
-# 
-# save.image("2021_12_07_100Workers_365days_Step5_TypeTeamShiftActiveCounter.RData")
-# write.table(MyWorkers, file = "MyWorkers.txt", sep = "\t")
-
-##### DO NOT RUN (END) #####
-
-
-df <- subset(MyWorkers, Hour == 0 & Min == 0)
-
-gTimestable <- ggplot() +
-    theme(axis.ticks=element_blank(),
-          legend.position = "top",
-          axis.text.y = element_text(face="bold", size=8),
-          plot.title = element_text(face="bold", size=18),
-          panel.background=element_rect(fill="white"),
-          axis.text = element_text(size=16),
-          panel.grid.major.y=element_blank(),
-          panel.grid.minor.y=element_blank(),
-          panel.grid.major.x=element_blank(),
-          panel.grid.minor.x=element_blank()) +
-  geom_line(data = subset(df, Day <= 70),
-            mapping = aes(x = Day, y = W_ID), colour = "lightgray") +
-  geom_point(data = subset(df, Day <= 70 & W_active == "active"),
-             mapping = aes(x = Day, y = W_ID, colour = W_type, shape = W_shift,
-                           W_team = W_team, Week = Week, Weekday = Weekday)) +
-  geom_vline(xintercept = seq(6, 70, 7), size=0.8) +
-  geom_vline(xintercept = seq(7, 70, 7), size=0.8) +
-  scale_x_continuous(breaks=seq(0,70,7)) +
-  scale_shape_manual(values=c(1,10,19,8)) + 
-  #scale_alpha_manual(values = c(0.4,1,1,1), guide = "none") +
-  scale_colour_manual(values=c("black", "black", "darkgreen", "darkgreen", "blue", "red")) +
-  labs(x = "Time (day)", y = "Worker ID")
-gTimestable
-ggplotly(gTimestable)
-
-
-
-
-
-###########################################
+## SCHEDULE VISUALISATION
+## Plot schedule for all workers during a given period
+f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 90)
+## Plot schedule for some considered workers
+f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 90, SHOW_ID = 1:60)
+## Plot schedule with information at one given day
+f_summaryWorkersAtDay(MyWorkers, Dfocus = 43)
+f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 90, SHOW_ID = 1:60, Dfocus = 43)
