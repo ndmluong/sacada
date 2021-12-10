@@ -113,11 +113,7 @@ f_Air_Criteria_Calc <-function(prm_plant, prm_air)
   circ_time <- f_circ_time(prm_plant) ## en heure ????????????
   circ_time_mat <- matrix(rep(circ_time,ncol(sed_time)),ncol = ncol(sed_time))
   
-<<<<<<< HEAD
   return(circ_time_mat/sed_time<0.1)
-=======
-  return(circ_time_mat/sed_time<0.1) ## KEnnedy et al.2020 circ_time_mat << sed_time
->>>>>>> 885c25d3b5a18d698c367b4c47ec8a532882d660
 }
  
 f_drop_conc_evol <- function (prm_plant,prm_air) # ... to be continued ... 

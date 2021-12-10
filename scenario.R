@@ -1,12 +1,11 @@
 ##### FUNCTIONS #####
 source("functions/functions_plant.R")
 source("functions/functions_plot.R")
+source("functions/functions_actions.R")
 source("functions/functions_air.R")
 source("functions/functions_food.R")
 source("functions/functions_workers.R")
 source("functions/functions_surfaces.R")
-source("functions/functions_actions.R")
-
 ##### PARAMETERS #####
 ## Check the scripts for more details / change parameter values if needed
 ## PLANT
@@ -39,22 +38,5 @@ MyWorkers <- f_InvariantTimeSteps(Agents = MyWorkers,
                                   t_ind_from = 0,
                                   t_ind_to = 48)
 # Initialize the Air Agents
-MyAir <- f_initAir(prm_plant = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
-
-# Initialize the Surfaces Agents
+MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
 MySurfaces <- f_initSurfaces(P = MyPlant$P, prm_time = Parms_Time)
-
-# MyWorkers <- f_emploidutempsquandtoutvabien(MyWorkers) 
-# 
-# 
-#   week?_loop(week in 1:8)
-#   day?_loop(day in 1 : 7){ 
-#   
-#     
-#     
-#     (Myair,exposition, sedimentation)  <- functions_airmodule(MyWorkers, MySurfaces,dt, day)
-#     MySurfaces(sedimentation)
-#     
-#   } #day loop end
-#   
-#   MyWorkers <- f_update_State(exposition) # exposition pour voir s'il tombent maladent

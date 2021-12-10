@@ -22,12 +22,12 @@ Parms_Air <- list(
                         c(0.084, 0.009, 0.003, 0.002, 0, 0), # Breathing (insp noze, exp mouth) details in Morawska
                         c(0.567, 0.093, 0.012, 0.006, 0, 0)), # Cough
   
-  # (m3/h) Respiration rate Adams (1993)
+  # (m3/min) Respiration rate Adams (1993)
   RespRate = c(0.49,  # Resting
                0.54,  # Standing
                1.38,  # Light excercise
                2.35,  # Moderate exercise
-               3.3)   # Heavy  exercise
+               3.3)/60   # Heavy  exercise
   
   )
 

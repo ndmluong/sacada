@@ -7,30 +7,35 @@ prm_workers = Parms_Workers
 AIR_ID <- c(prm_plant$label,
             unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$label)))))
 
-MyWorkers$W_location <- sample(AIR_ID,
-                  size = Parms_Workers$NWorkers, replace = T,
-                  prob = c(0.7,0.025,0.025,0.05,0.05,0.05,0.1))
+MyWorkers <- subset(MyWorkers,Week<2)
+MyWorkers <- dplyr::arrange(MyWorkers, t_ind, W_ID)
+
+MyWorkers$W_location <- rep(sample(AIR_ID,
+                  size = prm_workers$NWorkers, replace = T,
+                  prob = c(0.8,0.025,0.05,0.025,0.025,0.025,0.05)),2016)
 # Pour le test, les opérateurs arrivent vers 6h, prennent une pause à 12h, travaillent jusqu' à 22h
-MyWorkers$W_location[MyWorkers$t_ind<72]=NA
-MyWorkers$W_location[MyWorkers$t_ind>144 & MyWorkers$t_ind<156]=NA
-MyWorkers$W_location[MyWorkers$t_ind>240]=NA
+MyWorkers$W_location[MyWorkers$Hour<6]=NA
+MyWorkers$W_location[MyWorkers$Hour>12 & MyWorkers$Hour<15]=NA
+MyWorkers$W_location[MyWorkers$Hour>22]=NA
+MyWorkers$W_location[MyWorkers$Day>5]=NA
 
 status<-c("contaminated","not contaminated")
-MyWorkers$W_status <- sample(status,
+MyWorkers$W_status <- rep(sample(status,
                                size = Parms_Workers$NWorkers, replace = T,
-                               prob = c(0.5,0.5))
-
+                               prob = c(0.5,0.5)) ,  2016)
 status<-c("mask","no mask")
-MyWorkers$W_mask<- sample(status,
+MyWorkers$W_mask<- rep(sample(status,
                              size = Parms_Workers$NWorkers, replace = T,
-                             prob = c(0.5,0.5))
+                             prob = c(0.5,0.5)), 2016)
 
-
-MyAir[MyAir$t_ind==0,2:(1+length(prm_air$Droplet_class))] = matrix(1e3,7,6)*Method_calc
 Method_calc <<- f_Air_Criteria_Calc(Parms_Plant,Parms_Air)
+MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
+
+MyAir[MyAir$t_ind==0,2:(1+length(prm_air$Droplet_class))] = matrix(0,7,6)*(Method_calc)
+MyAir <- subset(MyAir,t_ind<2016)
 
 
-ind = 1
+ind = 500
 #########################################
 
 # Number of contaminated and non containayted workers in the rooms at time ind
@@ -54,7 +59,9 @@ NW_inRoom <- function(MyWorkers,prm_plant,ind){
 Who_is <- function(Sub_MyWorkers,prm_plant,NWorkers,ind){
 # To sum up who is where, how is he and is he wearing a mask
    # For the test
-  # Sub_MyWorkers <-subset(MyWorkers,t_ind == ind)
+  ind=536
+  Sub_MyWorkers <-subset(MyWorkers,t_ind == ind)
+  NWorkers = prm_workers$NWorkers
    # Number of contaminated and non contaminated workers in the rooms
   i=1
   Cont_mask <- matrix(NA,NWorkers,7) # NWORKER NROOMS 
@@ -91,7 +98,7 @@ Who_is <- function(Sub_MyWorkers,prm_plant,NWorkers,ind){
 
 
  f_dCd<- function (Cd,S_rooms,V_rooms,prm_time,MyWorkers,prm_plant,prm_workers,ind){
-  # Calaculate the droplet concentration variation in the air of the rooms at time step dt
+  # Calculate the droplet concentration variation in the air of the rooms at time step dt
   # Only contaminated droplet are modeled
    # Impact of air renewal on the droplet concentration in the air, expressed as a dilution  (Y=1-V_renew/V_rooms)
   # dAir_renewal = matrix(rep(V_rooms-V_renew*prm_time$Step *60,ncol(Vsed)),ncol = ncol(Vsed)) # (m3)
@@ -101,9 +108,9 @@ Who_is <- function(Sub_MyWorkers,prm_plant,NWorkers,ind){
   # contaminated droplets emission by contaminated workers  
   NEmployees <- NW_inRoom(MyWorkers,prm_plant,ind) # NEmployees[[1]] (contaminated (sick&symptomatique)) NEmployees[[3]] (non contaminated)
   
-  dexhale <- as.matrix(NEmployees[[1]])%*%prm_air$Cd_exp[1,] * prm_air$RespRate[3]/60     # [d/m3/min]
+  dexhale <- as.matrix(NEmployees[[1]])%*%prm_air$Cd_exp[1,] * prm_air$RespRate[3]     # [d/m3/min]
   # contaminated droplets absortion by contaminated workers  
-  dinhale <- matrix(rep(as.matrix(NEmployees[[2]]+NEmployees[[1]]) %*% prm_air$RespRate[3]/60,ncol(Vsed)),ncol = ncol(Vsed))  # m3/min
+  dinhale <- matrix(rep(as.matrix(NEmployees[[2]]+NEmployees[[1]]) %*% prm_air$RespRate[3],ncol(Vsed)),ncol = ncol(Vsed))  # m3/min
 
 
   return((dexhale*Method_calc - (V_renew + dsed + dinhale)*Cd)*prm_time$Step/V_rooms)
@@ -115,11 +122,11 @@ Who_is <- function(Sub_MyWorkers,prm_plant,NWorkers,ind){
 # 
 # return(Ved)
 
-for (ind in 1:(1440/prm_time$Step)){
+for (ind in 1:max(MyAir$t_ind)){### A modifier !!!!!! #### à mettre par jour
  print(ind)
   
   
-  W_condition  <- Who_is(subset(MyWorkers,t_ind == ind),prm_plant,prm_workers$NWorkers, ind)
+  # W_condition  <- Who_is(subset(MyWorkers,t_ind == ind),prm_plant,prm_workers$NWorkers, ind)
   
   
   
@@ -131,9 +138,11 @@ for (ind in 1:(1440/prm_time$Step)){
  
  # plot on same grid, each series colored differently -- 
  # good if the series have same scale
- ggplot(MyAir[1:(288*7),], aes(t_ind,d03)) + geom_point(aes(colour = AIR_ID))
+ ggplot(MyAir, aes(t_ind,d01)) + geom_point(aes(colour = AIR_ID))
+ ggplot(MyAir, aes(t_ind,d02)) + geom_point(aes(colour = AIR_ID))
+ ggplot(MyAir, aes(t_ind,d03)) + geom_point(aes(colour = AIR_ID))
+ ggplot(MyAir, aes(t_ind,d04)) + geom_point(aes(colour = AIR_ID))
  
-
  
  # Number of contaminated employees in the rooms
   # Number of non-contaminated employees in the rooms 
@@ -148,7 +157,7 @@ for (ind in 1:(1440/prm_time$Step)){
               unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$dim.X*x$dim.Y*x$dim.Z)))))
  # Airflow rate of air renewal m3/s
  V_renew <- c(prm_plant$Air_renewal,
-              unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$Air_renewal)))))/3600
+              unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$Air_renewal)))))/60
  
  
 
