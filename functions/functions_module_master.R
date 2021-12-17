@@ -1,4 +1,5 @@
 library(ggplot2)
+library(stringr)
 #### FOR THE TESTS !!!!!! 
 prm_plant = Parms_Plant
 prm_air = Parms_Air
@@ -14,17 +15,19 @@ MyWorkers <- dplyr::arrange(MyWorkers, t_ind, W_ID)
 
 MyWorkers$W_location <- rep(sample(AIR_ID,
                   size = prm_workers$NWorkers, replace = T,
-                  prob = c(0.8,0.025,0.025,0.05,0.025,0.025,0.05)),2016)
+                  prob = c(0.7,0.05,0.05,0.05,0.05,0.05,0.05)),2016)
 # Pour le test, les opérateurs arrivent vers 6h, prennent une pause à 12h, travaillent jusqu' à 22h
 MyWorkers$W_location[MyWorkers$Hour<6]='Home'
 MyWorkers$W_location[MyWorkers$Hour>12 & MyWorkers$Hour<15]='Home'
 MyWorkers$W_location[MyWorkers$Hour>22]='Home'
 MyWorkers$W_location[MyWorkers$Day>5]='Home'
 
+MyWorkers$W_location[is.na(MyWorkers$W_location)]<-"Home"
+
 status<-c("contaminated","not contaminated")
 MyWorkers$W_status <- rep(sample(status,
                                size = Parms_Workers$NWorkers, replace = T,
-                               prob = c(0.1,0.9)) ,  2016)
+                               prob = c(0.3,0.7)) ,  2016*8+1)
 status<-c("mask","no mask")
 MyWorkers$W_mask<- rep(sample(status,
                              size = Parms_Workers$NWorkers, replace = T,
@@ -42,7 +45,7 @@ ind = 1
 
 
 
-Who_is <- function(Sub_MyWorkers,prm_plant,NWorkers,ind){
+f_Who_is <- function(Sub_MyWorkers,prm_plant,NWorkers,ind){
 # To sum up who is where, how is he and is he wearing a mask
    # For the test
   # ind=536
@@ -50,7 +53,8 @@ Who_is <- function(Sub_MyWorkers,prm_plant,NWorkers,ind){
   # NWorkers = prm_workers$NWorkers
    # Number of contaminated and non contaminated workers in the rooms
   i=1
-  
+
+  Sub_MyWorkers$W_location[str_starts(Sub_MyWorkers$W_location,"WS")]<-prm_plant$label
   # Who is in which room, weering a mask or not
   Cont_mask <- matrix(FALSE,NWorkers,7) # size = NWORKER,NROOMS, TRUE/FALSE 
   Cont_nomask <- matrix(FALSE,NWorkers,7) # size = NWORKER,NROOMS, TRUE/FALSE
@@ -119,7 +123,7 @@ f_Module_Master <- function (prm_plant, prm_air, prm_time, prm_workers){
       p_emission <- sample(c(1,2,3,4), size = prm_workers$NWorkers, prob= c(0.25,0.25,0.25,0.25), replace = T)
       
       # 1 - What is happening at time ind ? [[1]] cont_mask; [[2]] cont_no_mask; [[3]] no_cont_mask; [[4]] no_cont_no_mask
-      W_Loc_N_mask <- Who_is(subset(MyWorkers,t_ind == ind),prm_plant,prm_workers$NWorkers)
+      W_Loc_N_mask <- f_Who_is(subset(MyWorkers,t_ind == ind),prm_plant,prm_workers$NWorkers)
       
       # 2 - TRANSFERS ----------------------------------------------------------
       # 2.1 FROM AIR to SURFACES : Droplet sedimention of the surfaces
@@ -170,12 +174,40 @@ f_Module_Master <- function (prm_plant, prm_air, prm_time, prm_workers){
     }
  return(MyAir)
 ########## End of day time loop ######################
- }
+}
+
+
 MyAir <- f_Module_Master(prm_plant, prm_air, prm_time, prm_workers)
- # plot on same grid, each series colored differently -- 
+MyAir[MyAir$AIR_ID=='Waste area',2:6]<-0
+# plot on same grid, each series colored differently -- 
  # good if the series have same scale
  MyAir[MyAir$AIR_ID=='Arrival gate',2:6]<-0
- ggplot(MyAir, aes(t_ind,d01)) + geom_point(aes(colour = AIR_ID))
+ MyAir[MyAir$AIR_ID=='Entry hall',2:6]<-0
+ MyAir[MyAir$AIR_ID=='Cooling area',2:6]<-0
+ 
+ 
+ ggplot() + 
+   geom_point(MyAir, mapping=aes(x=t_ind, y=d01), colour="red") +
+   geom_point(MyAir, mapping=aes(x=t_ind, y=d02), colour="blue") + 
+   geom_point(MyAir, mapping=aes(x=t_ind, y=d03), colour="green") + 
+   geom_point(MyAir, mapping=aes(x=t_ind, y=d04), colour="orange") + 
+   
+      facet_grid(AIR_ID ~ .)
+ 
+ ggplot(subset(MyAir,AIR_ID=="Cutting Room")) + 
+   geom_point( mapping=aes(x=t_ind, y=d01), colour="red") +
+   geom_point( mapping=aes(x=t_ind, y=d02), colour="blue") + 
+   geom_point( mapping=aes(x=t_ind, y=d03), colour="green") + 
+   geom_point( mapping=aes(x=t_ind, y=d04), colour="orange")
+   
+ ggplot(subset(MyAir,AIR_ID=="Cutting Room"  & t_ind>250 & t_ind<400)) + 
+   geom_line( mapping=aes(x=t_ind, y=d01), colour="red") +
+   geom_line( mapping=aes(x=t_ind, y=d02), colour="blue") + 
+   geom_line( mapping=aes(x=t_ind, y=d03), colour="green") + 
+   geom_line( mapping=aes(x=t_ind, y=d04), colour="orange")   
+   
+   
+ 
  ggplot(MyAir, aes(t_ind,d02)) + geom_point(aes(colour = AIR_ID))
  ggplot(MyAir, aes(t_ind,d03)) + geom_point(aes(colour = AIR_ID))
  ggplot(MyAir, aes(t_ind,d04)) + geom_point(aes(colour = AIR_ID))
