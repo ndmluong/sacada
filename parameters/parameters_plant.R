@@ -52,7 +52,7 @@ Parms_Plant <- list(
       intdoor.side = "bottom",
       extdoor.side = NA,
       Air_Cond_Type = "DEC", # Direct Expansion Coil
-      Air_renewal = 0, # TO MODIFY !!!!!!! (m3/h)
+      Air_renewal = 120, # TO MODIFY !!!!!!! (m3/h)
       AirflowRate = 500 # TO MODIFY !!!!!!! (m3/h)
     )
     ,
@@ -67,7 +67,7 @@ Parms_Plant <- list(
       intdoor.side = "right",
       extdoor.side = "left",
       Air_Cond_Type = "DEC", # Direct Expansion Coil
-      Air_renewal = 0, # TO MODIFY !!!!!!! (m3/h)
+      Air_renewal = 30, # TO MODIFY !!!!!!! (m3/h)
       AirflowRate = 200 # TO MODIFY !!!!!!! (m3/h)
     )
     ,
@@ -82,7 +82,7 @@ Parms_Plant <- list(
       intdoor.side = "top",
       extdoor.side = "bottom",
       Air_Cond_Type = "DEC", # Direct Expansion Coil
-      Air_renewal = 0, # TO MODIFY !!!!!!! (m3/h)
+      Air_renewal = 120, # TO MODIFY !!!!!!! (m3/h)
       AirflowRate = 200 # TO MODIFY !!!!!!! (m3/h)
     )
     ,
