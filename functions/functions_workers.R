@@ -60,6 +60,9 @@ f_initWorkers <- function(
   # Initialization for the subsequent time indexes as NA
   W_status <- as.factor(c(W_status0, rep(NA, prm$NWorkers * NTime)))
   
+  ## Status counter
+  W_statusCounter <- rep(NA, prm$NWorkers*(NTime+1))
+  
   ### Behavior (mask/no mask) of the workers
   # At the time index 0
   # The proportion of workers wearing a mask depending on the type of mask
@@ -94,7 +97,7 @@ f_initWorkers <- function(
   W_location <- rep(NA, prm$NWorkers*(NTime+1))
   
   ### Initialize the working (or not-working phase) of the workers (NA)
-  W_active <- rep("active", prm$NWorkers*(NTime+1))
+  W_active <- rep("active", prm$NWorkers*(NTime+1)) ## active by default
   W_activeCounter <- rep(NA, prm$NWorkers*(NTime+1))
   
   ## Community activities
@@ -108,6 +111,7 @@ f_initWorkers <- function(
   ### Output
   W <- data.frame(W_ID = rep(W_ID, NTime+1),
                   W_status = W_status,
+                  W_statusCounter = W_statusCounter,
                   W_mask = W_mask,
                   W_type = W_type,
                   W_team = W_team,
@@ -272,30 +276,48 @@ f_changeTeamWeekly <- function(
   ## meaning that only the first rows of the week are filled (day 1, OhOO))
   ## Copy the beginning of the first day of the week to all other days of the week
   if (week_from == 1) { 
-    for (i in 1:length(all_ID)) {
-      tmp <- W$W_team[which(W$W_ID == all_ID[i] & W$Weekday == "Monday" & W$Hour == 0 & W$Min == 0 &
-                              W$Week == week_from)]
-      W$W_team[which(W$W_ID == all_ID[i] & W$Week == week_from)] <- tmp
-    }
-  }
-  
-  ## Copy and paste the team of every workers from one week to another without any changes
-  for (i in 1:length(all_ID)) {
-    tmp <- W$W_team[which(W$W_ID == all_ID[i] & W$Weekday == "Monday" & W$Hour == 0 & W$Min == 0 &
-                          W$Week == week_from)]
-    W$W_team[which(W$W_ID == all_ID[i] & 
-                     W$Week == (week_from+1))] <- tmp
+    # for (i in 1:length(all_ID)) {
+    #   tmp <- W$W_team[which(W$W_ID == all_ID[i] & W$Weekday == "Monday" & W$Hour == 0 & W$Min == 0 &
+    #                           W$Week == week_from)]
+    #   W$W_team[which(W$W_ID == all_ID[i] & W$Week == week_from)] <- tmp
+    # }
+    
+    ## /!\ Optimized code (begin)
+    lapply(all_ID, FUN = function(x) {
+      d1 <- subset(W, W_ID == x)
+      d1$W_team[which(d1$Week == week_from)] <- d1$W_team[which(d1$Weekday == "Monday" & d1$Hour == 0 & d1$Min == 0 &
+                                                                     d1$Week == week_from)]
+      return(d1)
+    }) %>% data.table::rbindlist() -> W
+    ## /!\ Optimized code (end)
   }
 
+  # Copy and paste the team of every workers from one week to another without any changes
+  # for (i in 1:length(all_ID)) {
+  # tmp <- W$W_team[which(W$W_ID == all_ID[i] & W$Weekday == "Monday" & W$Hour == 0 & W$Min == 0 &
+  #                       W$Week == week_from)]
+  # W$W_team[which(W$W_ID == all_ID[i] &
+  #                  W$Week == (week_from+1))] <- tmp
+  # }
+  
+  ## /!\ Optimized code (begin)
+  lapply(all_ID, FUN = function(x) {
+    d1 <- subset(W, W_ID == x)
+    d1$W_team[which(d1$Week == (week_from+1))] <- d1$W_team[which(d1$Weekday == "Monday" & d1$Hour == 0 & d1$Min == 0 &
+                                                                       d1$Week == week_from)]
+    return(d1)
+  }) %>% data.table::rbindlist() -> W
+  ## /!\ Optimized code (end)
+  
   ### CHANGE TEAM FOR SOME WORKERS ###
   ## Worker in each team of the week
   teamA_ID <- unique(subset(W, W_team == "teamA" & Week == week_from)$W_ID)
   teamB_ID <- unique(subset(W, W_team == "teamB" & Week == week_from)$W_ID)
-  
+
   ## Number of workers to be switched from one team to another
   nb_changes <- rbinom(1, length(teamA_ID), prob = prob)
   if (nb_changes == 0) {nb_changes <- 1} ## at least one worker
-  
+
   ## Choose random workers to change team
   W_AtoB_ID <- sample(teamA_ID, size = nb_changes)
   W_BtoA_ID <- sample(teamB_ID, size = nb_changes)
@@ -307,8 +329,10 @@ f_changeTeamWeekly <- function(
     W$W_team[which(W$Week == (week_from+1) & W$W_ID == w_Ai)] <- "teamB"
     W$W_team[which(W$Week == (week_from+1) & W$W_ID == w_Bi)] <- "teamA"
   }
-  
+
   W$W_team <- as.factor(W$W_team)
+  
+  #W <- dplyr::arrange(W, t_ind, W_ID)
   
   return(W)
 }
@@ -405,33 +429,59 @@ f_calculateActiveCounter <- function(
   ## OUTPUT: data frame with calculated active counters for every workers
 ) {
   print("Processing active counters")
+  ## data manipulation: row_ID added, necessary for matching values after calculation of active counters
+  ## W <- data.frame(row_ID = 1:nrow(W), W) 
   ## Extract the data at the beginning of every day
-  d00 <- W[which(W$Hour == 0 & W$Min == 0),]
+  d00 <- subset(W, Hour == 0 & Min == 0)
+  dComp <- subset(W, !(Hour == 0 & Min == 0)) ## the complementary subset
+  
   ## Calculate the active counters for all workers, one by one, store in the list tmp
   by(data = d00,
      INDICES = d00$W_ID,
      FUN = f_calculateIndividualActiveCounter) -> tmp
   
   ## Data table / list manipulation for updating W with the calculated active counters
-  AllCounters <- tmp[[1]]
-  for (i in 2:dim(tmp)) {
-    AllCounters <- rbind(AllCounters, tmp[[i]])
-  }
+  AllCounters <- data.table::rbindlist(tmp)
   
-  W[row.names(AllCounters),] <- AllCounters[row.names(AllCounters),]
+  # ## Matching by the rows ID to copy values obtained from AllCounters to W
+  # ROWS <- AllCounters$row_ID
+  # for (r in 1:length(ROWS)) {
+  #   W[which(W$row_ID == ROWS[r]), ] <- AllCounters[which(AllCounters$row_ID == ROWS[r]),]
+  # }
+  
+  ## Re-arrange the data frame
+  rbind(AllCounters, dComp) %>% 
+    dplyr::arrange(t_ind, W_ID) -> W
   
   ## Replicate information for the resting (not filled) cases of every day
-  ALL_ID <- unique(W$W_ID)
-  OUTPUT <- data.frame()
-  ## Replicate information individually for every workers, one by one
-  ## and combine in one data frame OUTPUT
-  for (i in 1:length(ALL_ID)) {
-    print(paste("Worker",ALL_ID[i]))
-    d1W <- subset(W, W_ID == ALL_ID[i])
-    d1W <- f_replicateIndividualDaily(Agent = d1W,
-                                      Invariant = c("W_activeCounter", "W_active"))
-    OUTPUT <- rbind(OUTPUT, d1W)
-  }
+  ALL_ID <- unique(as.character(W$W_ID))
+  # # ## Replicate information individually for every workers, one by one
+  # # ## and combine in one data frame OUTPUT
+  # # 
+  # ########### /!\ Non-Optimized code (begin)
+  # # OUTPUT <- data.frame()
+  # # for (i in 1:length(ALL_ID)) {
+  # #   print(paste("Worker",ALL_ID[i]))
+  # #   d1W <- subset(W, W_ID == ALL_ID[i])
+  # #   d1W <- f_replicateIndividualDaily(Agent = d1W,
+  # #                                     Invariant = c("W_activeCounter", "W_active"))
+  # #   OUTPUT <- rbind(OUTPUT, d1W)
+  # # }
+  # ############ /!\ Non-Optimized code (end)
+  # 
+  ############ /!\ Optimized code (begin)
+  lapply(ALL_ID, FUN = function(x) {
+    print(paste("Worker", x))
+    d1 <- subset(W, W_ID == x)
+    d1 <- f_replicateIndividualDaily(Agent = d1,
+                                     Invariant = "W_activeCounter")
+    d1 <- f_replicateIndividualDaily(Agent = d1,
+                                     Invariant = c("W_active"))
+    return(d1)
+  }) %>%
+    data.table::rbindlist() %>%
+    dplyr::arrange(t_ind, W_ID) -> OUTPUT
+  ############ /!\ Optimized code (end)
   
   return(OUTPUT)
 }
@@ -459,6 +509,7 @@ f_setupSchedule <- function(
   
   ## Calculate the active counter of every workers and fill the case 0h00
   W <- f_initActiveCounter(W = W, seed=seed+1)
+  
   W <- f_calculateActiveCounter(W = W)
   
   return(W)

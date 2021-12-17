@@ -51,11 +51,13 @@ f_createPlant <- function(
   }
   
   ## Looking for the different possible workspaces in the plant
-  ## for cutters
-  L <- rbind(L, f_cuttingWorkspace(P)) ## check the function f_cuttingWorkspace()
+  ## for cutters 1 and 2
+  L <- rbind(L, f_cuttingWorkspace(P, cvytype = 1)) ## check the function f_cuttingWorkspace()
+  L <- rbind(L, f_cuttingWorkspace(P, cvytype = 2))
   
   ## for logistic workers: begin (head) and end (tail) of the conveyor
-  L <- rbind(L, f_conveyorWorkspace(P)) ## check the function f_conveyorWorkspace()
+  L <- rbind(L, f_conveyorWorkspace(P, cvytype = 1)) ## check the function f_conveyorWorkspace()
+  L <- rbind(L, f_conveyorWorkspace(P, cvytype = 2))
   
   ## Around the Equipment 1 (ADD IF NEEDED)
   L <- rbind(L, f_equipmentWorkspace(P, eqm_name = "Equipment 1")) ## check the function f_equipmentWorkspace()
@@ -185,13 +187,16 @@ f_addObject <- function(
 ##### f_cuttingWorkspace() SUB-FUNCTION: COORDINATES OF POSSIBLE POSITIONS FOR CUTTERS ALONG THE CONVEYOR  #####
 f_cuttingWorkspace <- function(
   P,
+  cvytype = 1,
   ...
   ## OUTPUT
   
 ) {
   #### BEGIN OF FUNCTION
   ## Coordinates of conveyor
-  cvy <- which(P == "Conveyor", arr.ind = T) %>% as.data.frame
+  cvyname <- paste("Conveyor", cvytype, sep = "") ## name of the conveyor depending on the type of cutter
+  
+  cvy <- which(P == cvyname, arr.ind = T) %>% as.data.frame
   colnames(cvy) <- c("coordX", "coordY")
   
   minX <- min(cvy$coordX)
@@ -224,8 +229,8 @@ f_cuttingWorkspace <- function(
     coordX <- c(rep(minX-1, cvy_L), ## coordinates X +/-1 (workers close to the conveyor)
                 rep(maxX+1, cvy_L)) 
   }
-  
-  Location <- paste("WS-Cutting-", stringr::str_pad(seq(1:N_WS), width=2, pad="0"), sep="")
+
+  Location <- paste("WS-Cutting", cvytype, "-", stringr::str_pad(seq(1:N_WS), width=2, pad="0"), sep="")
   
   OUTPUT <- data.frame(Location = Location,
                        coordX = coordX,
@@ -240,13 +245,15 @@ f_cuttingWorkspace <- function(
 ##### f_conveyorWorkspace() SUB-FUNCTION: COORDINATES OF POSSIBLE POSITIONS AROUND THE HEAD/TAIL OF THE CONVEYOR #####
 f_conveyorWorkspace <- function(
   P,
+  cvytype = 1,
   ...
   ## OUTPUT
   
 ) {
   #### BEGIN OF FUNCTION
   ## Begin / End of the conveyor
-  cvy <- which(P == "Conveyor", arr.ind = T) %>% as.data.frame
+  cvyname <- paste("Conveyor", cvytype, sep="")
+  cvy <- which(P == cvyname, arr.ind = T) %>% as.data.frame
   colnames(cvy) <- c("coordX", "coordY")
   
   minX <- min(cvy$coordX)
@@ -281,8 +288,8 @@ f_conveyorWorkspace <- function(
                 seq(minX-1, maxX+1)) ## coordinates Y +/- 1 : begin (tail) of the conveyor
   }
   
-  Location <- c(rep("WS-Conveyor-Head", cvy_W+2),
-                rep("WS-Conveyor-Tail", cvy_W+2))
+  Location <- c(rep(paste("WS-Conveyor",cvytype,"-Head", sep=""), cvy_W+2),
+                rep(paste("WS-Conveyor",cvytype,"-Tail", sep=""), cvy_W+2))
   border <- rep(F, 2*(cvy_W+2))
   
   OUTPUT <- data.frame(Location = Location,

@@ -1,8 +1,8 @@
 ##### USER DEFINED PARAMETERS FOR THE PLANT #####
 Parms_Plant <- list(
   #### Plant
-  dim.X = 30, ## (numeric - m) length of the processing plants (meter)
-  dim.Y = 20, ## (numeric - m) width of the processing plants (meter)
+  dim.X = 50, ## (numeric - m) length of the processing plants (meter)
+  dim.Y = 30, ## (numeric - m) width of the processing plants (meter)
   dim.Z = 5,  ## (numeric - m) height of the room 
   label = "Cutting Room",
   Air_Cond_Type = "AHU", #Air Handing Unit
@@ -126,10 +126,19 @@ Parms_Plant <- list(
   Objects = list(
     ## conveyor treadmill
     cvy = list(
-      label = "Conveyor",
-      dim.X = 15, # dimensions
-      dim.Y = 2, # dimensions
+      label = "Conveyor1",
+      dim.X = 13, # dimensions
+      dim.Y = 3, # dimensions
       pos.X = 0.2, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
+    )
+    ,
+    ## New object
+    cvy2 = list(
+      label = "Conveyor2",
+      dim.X = 18, # dimensions
+      dim.Y = 3, # dimensions
+      pos.X = 0.5, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
     )
     ,
@@ -138,8 +147,8 @@ Parms_Plant <- list(
       label = "Equipment 1",
       dim.X = 2, # dimensions
       dim.Y = 2, # dimensions
-      pos.X = 0.9, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.X = 0.85, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.7 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
     )
     
     ####### NOTE /!\ 

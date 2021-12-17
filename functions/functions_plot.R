@@ -19,6 +19,7 @@ f_plotPlant <- function(
           legend.position = "none",
           panel.background=element_rect(fill="white"),
           plot.title = element_text(hjust = 0.5, face="bold", size=20),
+          plot.subtitle = element_text(hjust = 0.5, size=15),
           axis.title = element_blank(),
           axis.text = element_blank(),
           panel.grid = element_blank()) +
@@ -219,7 +220,8 @@ f_tile_colour <- function(
   tile_colour <- rep("white", length(tile_name)) ## defaults colour : white
   names(tile_colour) <- tile_name
   
-  tile_colour["Conveyor"] <- "seashell2"
+  tile_colour["Conveyor1"] <- "seashell2"
+  tile_colour["Conveyor2"] <- "seashell2"
   tile_colour["Equipment 1"] <- "seashell3"
   
   return(tile_colour)
@@ -275,6 +277,50 @@ f_plotAgents <- function(
   #### END OF FUNCTION
 }
 
+
+##### f_plotWorkers() FUNCTION TO PLOT THE WORKERS INSIDE A PRE-PLOTTED PLANT AT A GIVEN TIME INDEX #####
+f_plotWorkers <- function(
+  g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
+  W, ## (data.frame): information of the workers with at least these attributes
+  ti,
+  ...
+) {
+  #### BEGIN OF FUNCTION
+  ##
+  W$W_coordX <- as.numeric(W$W_coordX)
+  W$W_coordY <- as.numeric(W$W_coordY)
+  Wti <- subset(W, t_ind == ti)
+  Wsub <- subset(Wti, W_active == "active")
+  
+  g_Plant <- g_emptyPlant +
+    geom_point(data = Wsub,
+               mapping = aes(x = W_coordX, y = W_coordY,
+                             colour = W_type,
+                             shape = W_shift,
+                             W_team = W_team, Week = Week, Weekday = Weekday),
+               size = 2.5) +
+    scale_shape_manual(name = "Working shift",
+                       values=c(1,10,19,13)) + 
+    scale_colour_manual(name = "Type of employees",
+                        values=c("black", "black", "darkgreen", "darkgreen", "blue", "blue"))
+  
+  ## workers ID as label
+  g_Plant <- g_Plant +
+    geom_text(data = Wsub,
+              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID),
+              size = 2.5,
+              position = position_jitter(width = 0.1, height = 0.5, seed=408))
+  
+  g_Plant <- g_Plant +
+    labs(subtitle = paste("Day ", unique(Wti$Day),
+                          " - ", unique(Wti$Weekday),
+                          " - ", unique(Wti$Hour), "h", stringr::str_pad(unique(Wti$Min), width=2, pad="0"),
+                          sep = ""))
+  
+  return(g_Plant)
+  #### END OF FUNCTION
+}
+
 ##### f_plotScehedule() FUNCTION TO VISUALISE THE SCHEDULE OF ALL WORKERS #####
 f_plotSchedule <- function(
   W,
@@ -317,9 +363,9 @@ f_plotSchedule <- function(
     geom_vline(xintercept = seq(f_Day2Week(Dmin)*7, Dmax, 7),  size=0.5, linetype = "longdash") +
     scale_x_continuous(breaks=seq(Dmin,Dmax,7)) +
     scale_shape_manual(name = "Working shift",
-                       values=c(1,10,19,8)) + 
+                       values=c(1,10,19,13)) + 
     scale_colour_manual(name = "Type of employees",
-                        values=c("black", "black", "darkgreen", "darkgreen", "blue", "red")) +
+                        values=c("black", "black", "darkgreen", "darkgreen", "blue", "blue")) +
     labs(x = "Time (day)", y = "Worker ID",
          title = paste("Schedule (", length(unique(df$W_ID)), "/", length(unique(W$W_ID)), " workers shown, days ", Dmin, " to ", Dmax, ")", sep =""))
   

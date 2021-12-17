@@ -2,7 +2,7 @@
 f_convertTime <- function(
   ## Convert between the time to the time index
   ## INPUT,
-  method, ## string: 'time2ind' or 'ind2time'
+  method = "time2ind", ## string: 'time2ind' or 'ind2time'
   dt,
   D = NULL, # (integer): the considered day
   H = NULL, # (integer): the considered time of the day
@@ -53,19 +53,65 @@ f_replicateIndividualDaily <- function(
 ) {
   by(Agent, ## for the considered agent
      INDICES = Agent$Day, ## processing by day
-     FUN =function(x) {
+     FUN = function(x) {
        if (nrow(x) > 1) { ## if the considered day has more than one time index
-         x[2:nrow(x), Invariant] <- x[1, Invariant]
+         x <- arrange(x, t_ind)
+         x[[Invariant]][2:nrow(x)] <- x[[Invariant]][1]
        }
        return(x)
-     }) -> tmp
+     }) %>%
+    data.table::rbindlist() %>%
+    dplyr::arrange(t_ind, W_ID) -> Agent
   
-  replicateddata <- data.table::rbindlist(tmp)
-  
-  return(replicateddata)
+  return(Agent)
 }
 
 
+##### f_replicatetime2time() FUNCTION TO REPLICATE INDIVIDUAL ATTRIBUTES #####
+f_replicateIndividualtime2time <- function(
+  Agent, ## data.frame corresponding to ONE AGENT at ONE GIVEN DAY
+  Invariant, ## the invariant variable(s)
+  time_begin, ## vector of two element c(H,M)
+  time_end, ## vector of two element c(H,M)
+  dt,
+  ...
+) {
+  D = as.numeric(unique(Agent$Day))
+  
+  t_ind_begin <- f_convertTime(method = "time2ind", dt=dt, D=D, H=time_begin[1], M=time_begin[2])
+  t_ind_end <- f_convertTime(method = "time2ind", dt=dt, D=D, H=time_end[1], M=time_end[2])
+  
+  Agent[[Invariant]][which(between(Agent$t_ind,(t_ind_begin+1),t_ind_end))] <- Agent[[Invariant]][which(Agent$t_ind == t_ind_begin)]
 
+  return(Agent)
+}
 
+f_replicateWorkerstime2time <- function(
+  W,
+  selectW,
+  Invariant,
+  time_begin,
+  time_end,
+  D,
+  dt,
+  ...
+) {
+  WD <- subset(W, Day == D & W_ID %in% selectW)
+  Wcomp <- subset(W, !(Day == D & W_ID %in% selectW))
+  
+  lapply(selectW, FUN = function(x) {
+    d1 <- subset(WD, W_ID == x)
+    d1 <- f_replicateIndividualtime2time(Agent = d1,
+                                         Invariant = Invariant,
+                                         time_begin = time_begin,
+                                         time_end = time_end,
+                                         dt = dt)
+    return(d1)
+  }) %>%
+    rbindlist() -> WD_output
+  
+  rbind(WD_output, Wcomp) -> W_output
+  
+  return(W_output)
+}
 
