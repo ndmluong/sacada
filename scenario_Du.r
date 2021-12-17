@@ -65,7 +65,7 @@ f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
 # Plot schedule for some considered workers
 f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20, SHOW_ID = 1:60)
 # Plot schedule with information at one given day
-f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 56, SHOW_ID = 1:60, Dfocus = 1)
+f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 56, SHOW_ID = 1:60, Dfocus = 4)
 
 
 ### ASSIGN LOCATION BASED ON SCHEDULE ###
@@ -101,6 +101,6 @@ by(data = MyWorkers,
 save.image("2021_12_16_100Workers_56days_Step5_Schedule_Location_Mask.RData")
 
 
-
+MyWorkers$W_location[is.na(MyWorkers$W_location)] <- "Home"
 
 
