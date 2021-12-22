@@ -28,7 +28,7 @@ MyWorkers$W_location[is.na(MyWorkers$W_location)]<-"Home"
 status<-c("contaminated","not contaminated")
 MyWorkers$W_status <- rep(sample(status,
                                size = Parms_Workers$NWorkers, replace = T,
-                               prob = c(0.02,0.98)) ,  2016*8+1)
+                               prob = c(0.05,0.95)) ,  2016*8+1)
 status<-c("mask","no mask")
 MyWorkers$W_mask<- rep(sample(status,
                              size = Parms_Workers$NWorkers, replace = T,
@@ -198,7 +198,7 @@ for (Day in 1:57 ){
   
   MyAir <- OUT[[1]]
   Expocum <-OUT[[2]]
-  Viral_Load <-1e10
+  Viral_Load <-5e8
   P=Viral_Load*prm_air$d_Vol
   
   ### VERIFIER LA DOSE PER CLASS: Parametre size en particulier
@@ -224,9 +224,12 @@ for (Day in 1:57 ){
   
   print(New_sicks_W)
   
-  MyWorkers$W_status[MyWorkers$W_ID==New_sicks_W & MyWorkers$t_ind>ind_max] <-"contaminated"
-  print(ind_max)
+  for (IDW in New_sicks_W){
+        MyWorkers$W_status[MyWorkers$W_ID==IDW & MyWorkers$t_ind>ind_max] <-"contaminated"
+      }
+
 }
+plot(x = seq(1:length(N_contaminated)),y = N_contaminated)
 
 
 # plot on same grid, each series colored differently -- 
