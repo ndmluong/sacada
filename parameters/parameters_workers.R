@@ -51,5 +51,12 @@ Parms_Workers <- list(
   ## The number of contaminated workers at the day 0
   nContaminated_Init = 30,
   ## Regional prevalence ##
-  prev = 50/100000
+  prev = 50/100000,
+  
+  ## Contamination counter (expressed in day)
+  ContaBeginDay = 1,
+  InfectiousBeginDay = 3,
+  PossibleSymptomeBeginDay = 5,
+  NonInfectiousBeginDay = 12,
+  ContaEndDay = 15
 )
