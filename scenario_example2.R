@@ -1,7 +1,10 @@
 ##### FUNCTIONS #####
-source("functions/functions_init.R")
+source("functions/functions_plant.R")
 source("functions/functions_plot.R")
 source("functions/functions_actions.R")
+source("functions/functions_air.R")
+source("functions/functions_food.R")
+source("functions/functions_workers.R")
 
 ##### PARAMETERS #####
 ## Check the scripts for more details / change parameter values if needed
@@ -11,6 +14,8 @@ source("parameters/parameters_plant.R")
 source("parameters/parameters_time.R")
 ## WORKERS
 source("parameters/parameters_workers.R")
+## AIR
+source("parameters/parameters_air.R")
 ## FOOD PORTIONS
 source("parameters/parameters_food.R")
 

@@ -19,6 +19,7 @@ f_plotPlant <- function(
           legend.position = "none",
           panel.background=element_rect(fill="white"),
           plot.title = element_text(hjust = 0.5, face="bold", size=20),
+          plot.subtitle = element_text(hjust = 0.5, size=15),
           axis.title = element_blank(),
           axis.text = element_blank(),
           panel.grid = element_blank()) +
@@ -219,49 +220,14 @@ f_tile_colour <- function(
   tile_colour <- rep("white", length(tile_name)) ## defaults colour : white
   names(tile_colour) <- tile_name
   
-  tile_colour["Conveyor"] <- "seashell2"
+  tile_colour["Conveyor1"] <- "seashell2"
+  tile_colour["Conveyor2"] <- "seashell2"
   tile_colour["Equipment 1"] <- "seashell3"
   
   return(tile_colour)
 }
 
-##### f_plotWorkers() FUNCTION TO PLOT THE AGENTS INSIDE A PRE-PLOTTED PLANT #####
-f_plotWorkers <- function(
-  g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
-  W, ## (data.frame): information of the workers with at least these attributes
-  ##  - W_ID (character): worker ID
-  ##  - W_coordX (numeric): coordinates in the X axis of the worker
-  ##  - W_coordY (numeric): coordinates in the X axis of the worker
-  ##  - W_state (character/factor): infected/not infected worker 
-  ##  - W_mask (character/factor): mask/no mask
-  ## time index
-  ...
-) {
-  #### BEGIN OF FUNCTION
-  ##
-  W$W_coordX <- as.numeric(W$W_coordX)
-  W$W_coordY <- as.numeric(W$W_coordY)
-  
-  W <- data.frame(W,
-                  time_minutes = W$t_ind * 5)
-  
-  g_Plant <- g_emptyPlant +
-    geom_point(data = W,
-               mapping = aes(x=W_coordX, y=W_coordY, colour=W_status, shape=W_mask,
-                             W_ID=W_ID, W_type=W_type, frame=time_minutes),
-               size = 3, alpha = 0.5,
-               position = position_jitter(width = 0.1, height = 0.1, seed=408))
-  
-  g_Plant <- g_Plant +
-    geom_text(data = W,
-              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID, frame=time_minutes),
-              size = 2,
-              position = position_jitter(width = 0.1, height = 0.1, seed=408))
-  
-  return(g_Plant)
-  #### END OF FUNCTION
-}
-
+##### f_plotAgents() FUNCTION TO PLOT THE AGENTS INSIDE A PRE-PLOTTED PLANT #####
 f_plotAgents <- function(
   g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
   W, ## (data.frame): information of the workers with at least these attributes
@@ -309,4 +275,144 @@ f_plotAgents <- function(
   
   return(g_Plant)
   #### END OF FUNCTION
+}
+
+
+##### f_plotWorkers() FUNCTION TO PLOT THE WORKERS INSIDE A PRE-PLOTTED PLANT AT A GIVEN TIME INDEX #####
+f_plotWorkers <- function(
+  g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
+  W, ## (data.frame): information of the workers with at least these attributes
+  ti,
+  ...
+) {
+  #### BEGIN OF FUNCTION
+  ##
+  W$W_coordX <- as.numeric(W$W_coordX)
+  W$W_coordY <- as.numeric(W$W_coordY)
+  Wti <- subset(W, t_ind == ti)
+  Wsub <- subset(Wti, W_active == "active")
+  
+  g_Plant <- g_emptyPlant +
+    geom_point(data = Wsub,
+               mapping = aes(x = W_coordX, y = W_coordY,
+                             colour = W_type,
+                             shape = W_shift,
+                             W_team = W_team, Week = Week, Weekday = Weekday),
+               size = 2.5) +
+    scale_shape_manual(name = "Working shift",
+                       values=c(1,10,19,13)) + 
+    scale_colour_manual(name = "Type of employees",
+                        values=c("black", "black", "darkgreen", "darkgreen", "blue", "blue"))
+  
+  ## workers ID as label
+  g_Plant <- g_Plant +
+    geom_text(data = Wsub,
+              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID),
+              size = 2.5,
+              position = position_jitter(width = 0.1, height = 0.5, seed=408))
+  
+  g_Plant <- g_Plant +
+    labs(subtitle = paste("Day ", unique(Wti$Day),
+                          " - ", unique(Wti$Weekday),
+                          " - ", unique(Wti$Hour), "h", stringr::str_pad(unique(Wti$Min), width=2, pad="0"),
+                          sep = ""))
+  
+  return(g_Plant)
+  #### END OF FUNCTION
+}
+
+##### f_plotScehedule() FUNCTION TO VISUALISE THE SCHEDULE OF ALL WORKERS #####
+f_plotSchedule <- function(
+  W,
+  Dmin,
+  Dmax,
+  Dfocus = NULL,
+  SHOW_ID = NULL,
+  ...
+) {
+  df <- subset(W, Hour == 0 & Min == 0 & Day >= Dmin & Day <= Dmax)
+  
+  all_ID <- unique(W$W_ID)
+  
+  if (!is.null(SHOW_ID)) {
+    selected_ID <- all_ID[SHOW_ID]
+    df <- subset(df, W_ID %in% selected_ID)
+  }
+  
+  gSchedule <- ggplot() +
+    theme(axis.ticks=element_blank(),
+          legend.position = "right",
+          axis.text.y = element_text(face="bold", size=6),
+          axis.text.x = element_text(size=8),
+          plot.title = element_text(face="bold", size=16),
+          panel.background=element_rect(fill="white"),
+          axis.text = element_text(size=16),
+          panel.grid.major.y=element_blank(),
+          panel.grid.minor.y=element_blank(),
+          panel.grid.major.x=element_blank(),
+          panel.grid.minor.x=element_blank()) +
+    geom_line(data = df,
+              mapping = aes(x = Day, y = W_ID), colour = "lightgray") +
+    geom_point(data = subset(df, W_active == "active"),
+               mapping = aes(x = Day, y = W_ID,
+                             colour = W_type,
+                             shape = W_shift,
+                             W_team = W_team, Week = Week, Weekday = Weekday),
+               size = 2) +
+    geom_vline(xintercept = seq(f_Day2Week(Dmin)*7 -1, Dmax, 7), size=0.5, linetype = "longdash") +
+    geom_vline(xintercept = seq(f_Day2Week(Dmin)*7, Dmax, 7),  size=0.5, linetype = "longdash") +
+    scale_x_continuous(breaks=seq(Dmin,Dmax,7)) +
+    scale_shape_manual(name = "Working shift",
+                       values=c(1,10,19,13)) + 
+    scale_colour_manual(name = "Type of employees",
+                        values=c("black", "black", "darkgreen", "darkgreen", "blue", "blue")) +
+    labs(x = "Time (day)", y = "Worker ID",
+         title = paste("Schedule (", length(unique(df$W_ID)), "/", length(unique(W$W_ID)), " workers shown, days ", Dmin, " to ", Dmax, ")", sep =""))
+  
+  if (!is.null(Dfocus)) {
+    gSchedule <- gSchedule +
+      geom_vline(xintercept = c(Dfocus-0.5,Dfocus+0.5),
+                 size = 1.2, colour = "darkorange") +
+      annotate(geom = "label",
+               x = (Dmax+Dmin)/2, y = 15, colour = "darkorange",
+               label = f_summaryWorkersAtDay(W = W,
+                                             Dfocus = Dfocus,
+                                             SHOW = F))
+  }
+  
+  return(gSchedule)
+  
+}
+
+##### f_summaryWorkersAtDay() FUNCTION TO SHOW SUMMARY SCHEDULE INFORMATION AT A GIVEN DAY #####
+f_summaryWorkersAtDay <- function(
+  W,
+  Dfocus,
+  SHOW = T
+) {
+  dd <- subset(W, Day == Dfocus & Hour == 0 & Min == 0)
+  dtA <- subset(dd, W_active == "active" & W_team == "teamA")
+  dtB <- subset(dd, W_active == "active" & W_team == "teamB")
+  dtT <- subset(dd, W_active == "active" & W_team == "transverse")
+  paste("Focus on Day ", Dfocus, " (Week ", unique(dd$Week), "-", unique(dd$Weekday), ")", "\n",
+        "Active workers: ", sum(dd$W_active == "active"),"/", length(dd$W_active), "\n",
+        "Team A (", unique(dtA$W_shift), "): ",
+        sum(dtA$W_type == "cutter1"), " cutter1, ",
+        sum(dtA$W_type == "cutter2"), " cutter2, ",
+        sum(dtA$W_type == "logistic1"), " logistic1, ",
+        sum(dtA$W_type == "logistic2"), " logistic2","\n",
+        "Team B (", unique(dtB$W_shift), "): ",
+        sum(dtB$W_type == "cutter1"), " cutter1, ",
+        sum(dtB$W_type == "cutter2"), " cutter2, ",
+        sum(dtB$W_type == "logistic1"), " logistic1, ",
+        sum(dtB$W_type == "logistic2"), " logistic2","\n",
+        "Transverse workers: ",
+        sum(dtT$W_type == "transverse1"), " transverse1 (day shift), ",
+        sum(dtT$W_type == "transverse2"), " transverse2 (night shift)",
+        sep = "") -> summary_text
+  
+  if (SHOW == T) {
+    cat(summary_text)
+  } else return(summary_text)
+  
 }
