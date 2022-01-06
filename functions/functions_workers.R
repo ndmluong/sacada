@@ -54,11 +54,11 @@ f_initWorkers <- function(
   # HYPOTHESE : ONE INDIVIDUAL CONTAMINATED AT DAY 0 ?
   print("========[Step 2/2 - Workers attributes]==============================")
   print("Assign the first random contaminated worker")
-  W_status0 <- rep("not contaminated", prm$NWorkers)
+  W_status0 <- rep("susceptible", prm$NWorkers)
   set.seed(seed)
-  W_status0[sample(1:prm$NWorkers, 1)] <- "contaminated"
+  W_status0[sample(1:prm$NWorkers, 1)] <- "initialised as infected"
   # Initialization for the subsequent time indexes as NA
-  W_status <- as.factor(c(W_status0, rep(NA, prm$NWorkers * NTime)))
+  W_status <- c(W_status0, rep(NA, prm$NWorkers * NTime))
   
   ## Status counter
   W_statusCounter <- rep(NA, prm$NWorkers*(NTime+1))

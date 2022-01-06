@@ -54,9 +54,12 @@ Parms_Workers <- list(
   prev = 50/100000,
   
   ## Contamination counter (expressed in day)
-  ContaBeginDay = 1,
-  InfectiousBeginDay = 3,
-  PossibleSymptomeBeginDay = 5,
-  NonInfectiousBeginDay = 12,
-  ContaEndDay = 15
+  InfectedDay = 1,
+  InfectiousDay = 3,
+  SymptomDay = 5,
+  NonInfectiousDay = 12,
+  ContaEndDay = 15,
+  
+  ## Probability to develop symptoms
+  pSymptom = 0.60
 )
