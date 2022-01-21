@@ -15,7 +15,7 @@ source("functions/functions_contamination.R")
 source("functions/functions_dailyWork.R")
 # source("functions/functions_food.R")
 # source("functions/functions_module_master.R")
-# source("functions/functions_module_master_proposition_modif.R")
+source("functions/functions_module_master_proposition_modif.R")
 source("functions/functions_plant.R")
 source("functions/functions_plot.R")
 # source("functions/functions_surfaces.R")
@@ -29,7 +29,7 @@ source("parameters/parameters_plant.R") ## PLANT
 source("parameters/parameters_time.R") ## TIME
 source("parameters/parameters_workers.R") ## WORKERS
 source("parameters/parameters_air.R") ## AIR
-# source("parameters/parameters_food.R") ## FOOD PORTIONS
+source("parameters/parameters_conta.R") ## CONTAMINATION
 
 
 ##### PLANT #####
@@ -59,9 +59,9 @@ MyWorkers <- f_setupSchedule(W = MyWorkers, prm = Parms_Workers, seed = seed)
 # Plot schedule for all workers during a given period
 f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
 # Plot schedule for some considered workers
-f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20, SHOW_ID = 1:60)
+f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
 # Plot schedule with information at one given day
-f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 56, SHOW_ID = 1:60, Dfocus = 4)
+f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
 
 
 ### ASSIGN LOCATION BASED ON SCHEDULE ###
@@ -93,210 +93,99 @@ by(data = MyWorkers,
   data.table::rbindlist() %>%
   dplyr::arrange(t_ind, W_ID) -> MyWorkers
 
+save.image("2022_01_19_checkpoint1.RData")
+
+save.image("2022_01_19_checkpoint2_init5.RData")
+
 
 ## Random state (in day) of the first initialized contaminated worker
 MyWorkers <- f_initStatusCounterDay1(W = MyWorkers, prm_workers = Parms_Workers, prm_time = Parms_Time, seed = seed)
 
-save.image("2022_01_06_100Workers_56days_Step5_Schedule_Location_Mask_StatusCounter_SIRday0.RData")
 
 ### AEROSOL ###
 # prm_plant = Parms_Plant
 # prm_air = Parms_Air
 # prm_time = Parms_Time
 # prm_workers = Parms_Workers
+source("functions/functions_module_master_proposition_modif.R")
+source("functions/functions_contamination.R")
 
 MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
 AIR_ID <- c(Parms_Plant$label,
             unname(unlist(lapply(Parms_Plant$Spaces, function (x) return(x$label)))))
 
+Method_calc <- f_Air_Criteria_Calc(Parms_Plant,Parms_Air) ## Check if the droplets stay in air
 
-## CALCULATION THE SUM OF EXPOSITION AT A GIVEN DAY
-day <- 1
+## Assign 0 values for the first time index (required for the first run of f_Module_Master)
+MyAir[MyAir$t_ind==0, 2:(1+length(Parms_Air$Droplet_class))] = matrix(0,7,4) * Method_calc 
 
-f_Who_is(Sub_MyWorkers = subset(MyWorkers, t_ind == 0),
-         prm_plant = Parms_Plant,
-         NWorkers = Parms_Workers$NWorkers,
-         ind = 0) # OK
-
-Dose_per_class1 <- matrix(0,100,1)
-Dose_per_class2 <- matrix(0,100,1)
-Dose_per_class3 <- matrix(0,100,1)
-Dose_per_class4 <- matrix(0,100,1)
-
-print(paste("Day ", day, sep = ""))
-
-ind_min <- subset(MyWorkers, Day == day)$t_ind %>% min()
-ind_max <- subset(MyWorkers, Day == day)$t_ind %>% max()
-
-OUT <- f_Module_Master(MyAir = MyAir,
-                       prm_plant = Parms_Plant,
-                       prm_air = Parms_Air,
-                       prm_time = Parms_Time,
-                       prm_workers = Parms_Workers,
-                       ind_min = 0, ind_max = 287)
-
-MyAir <- OUT[[1]]
-Expocum <-OUT[[2]]
-Viral_Load <-5e8
-P=Viral_Load*prm_air$d_Vol
-
-### VERIFIER LA DOSE PER CLASS: Parametre size en particulier
-Dose_per_class1[Expocum[,1]>0] <- rbinom(n = sum(Expocum[,1]>0),size= round(Expocum[Expocum[,1]>0,1]), prob = P[1])
-Dose_per_class2[Expocum[,2]>0] <- rbinom(n = sum(Expocum[,2]>0),size= round(Expocum[Expocum[,2]>0,2]), prob = P[2])
-Dose_per_class3[Expocum[,3]>0] <- rbinom(n = sum(Expocum[,3]>0),size= round(Expocum[Expocum[,3]>0,3]), prob = P[3])
-Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
-
-Dose_tot[,Day]=Dose_per_class1+Dose_per_class2+Dose_per_class3+Dose_per_class4
-# Dose_per_class <- lapply(1:length(prm_air$Droplet_class), function (x) 
-#   return(rbinom(n = sum(Expocum[,x]>0),size= round(Expocum[Expocum[,x]>0,x]), prob = P[x])))
-# Dose_tot[,Day] <- Reduce("+",Dose_per_class[[1:4]])
-
-Risk=0
-Risk_W=0
-New_sicks=0  
-New_sicks_W=0
-
-Risk = 1-exp(-Dose_tot[,Day]/50)
-Risk_W=unique(MyWorkers$W_ID[Risk>0])
-New_sicks <- rbinom(n = sum(Risk>0), size = 1, prob = Risk[Risk>0])
-New_sicks_W <- Risk_W[New_sicks>0]
-
-print(New_sicks_W)
-
-for (IDW in New_sicks_W){
-  MyWorkers$W_status[MyWorkers$W_ID==IDW & MyWorkers$t_ind>ind_max] <-"contaminated"
-}
+# Dose_tot <- matrix(0, Parms_Workers$NWorkers, max(MyWorkers$Day)-1) # nb workers * nb day
 
 
-
-
-
-
-
-### CONTAMINATIONS ###
+## RUN MODEL
 W <- MyWorkers
 
 
 
+W <- f_dailyContamination(W = W,
+                          MyAir = MyAir,
+                          day = 5,
+                          prm_plant = Parms_Plant,
+                          prm_workers = Parms_Workers,
+                          prm_time = Parms_Time,
+                          prm_air = Parms_Air,
+                          prm_conta = Parms_Conta,
+                          seed = seed)
 
-W$W_statusCounter[which(W$W_status == "initialiseds infected")] <- sample(Parms_Workers$ContaBeginDay:Parms_Workers$ContaEndDay, size = 1)
-
-
-day <- 2
-prev = 500/100000
-prev = Parms_Workers$prev
-
-set.seed(seed)
-
-W <- dplyr::arrange(W, t_ind, W_ID)
-
-WDm1 <- subset(W, Day == day-1 & Hour == 0 & Min == 0)
-
-WDF <- subset(W, Day == day)
-WD <- subset(WDF, Hour == 0 & Min == 0)
-
-
-WD$W_status <- WDm1$W_status
-WD$W_statusCounter <- WDm1$W_statusCounter + 1
-WD$W_status[WD$W_statusCounter > 15] <- "not contaminated"
-WD$W_statusCounter[WD$W_statusCounter > 15] <- NA
-
-## inci = 237/100000
-lapply(unique(WD$W_ID), FUN = function(x) {
-  W1 <- subset(WD, W_ID == x)
-  if (W1$W_status == "not contaminated") {
-    if (rbinom(1,1,prob = prev) == 1) {
-      W1$W_status <- "contaminated"
-      W1$W_statusCounter <- 1
-    }
-  }
-  return(W1)
-}) %>% 
-  rbindlist() %>%
-  dplyr::arrange(t_ind, W_ID) -> WD
-
-WDF[which(WDF$Day == day & WDF$Hour == 0 & WDF$Min == 0), ] <- WD
-
-
-by(WDF, ## for the considered agent
-   INDICES = WDF$W_ID, ## processing by day
-   FUN = function(x) {
-     return(f_replicateIndividualtime2time(Agent = x, Invariant = "W_status", time_begin = c(0,0), time_end = c(23,55), dt = Parms_Time$Step))
-   }) %>%
-  data.table::rbindlist() %>%
-  dplyr::arrange(t_ind, W_ID) -> WDtest
-
-
-W[which(W$Day == day), ] <- WDF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### CODE STEVEN
-Dose_tot<-matrix(0,prm_workers$NWorkers,max(MyWorkers$Day))
-N_contaminated=0
-# for (Day in unique(MyWorkers$Day-1) ){
-MyWorkers$W_location[is.na(MyWorkers$W_location)]<-"home"
-for (Day in 1:57 ){
-  
-  Dose_per_class1 <- matrix(0,100,1)
-  Dose_per_class2 <- matrix(0,100,1)
-  Dose_per_class3 <- matrix(0,100,1)
-  Dose_per_class4 <- matrix(0,100,1)
-  
-  print(Day)
-  ind_min <- 24*60/Parms_Time$Step*(Day-1)
-  ind_max <- 24*60/Parms_Time$Step*(Day)-1
-  
-  N_contaminated[Day] = sum (MyWorkers$W_status[MyWorkers$t_ind==ind_min] =="contaminated")
-  print(N_contaminated[Day])
-  OUT <- f_Module_Master(prm_plant, prm_air, prm_time, prm_workers,ind_min,ind_max)
-  
-  MyAir <- OUT[[1]]
-  Expocum <-OUT[[2]]
-  Viral_Load <-5e8
-  P=Viral_Load*prm_air$d_Vol
-  
-  ### VERIFIER LA DOSE PER CLASS: Parametre size en particulier
-  Dose_per_class1[Expocum[,1]>0] <- rbinom(n = sum(Expocum[,1]>0),size= round(Expocum[Expocum[,1]>0,1]), prob = P[1])
-  Dose_per_class2[Expocum[,2]>0] <- rbinom(n = sum(Expocum[,2]>0),size= round(Expocum[Expocum[,2]>0,2]), prob = P[2])
-  Dose_per_class3[Expocum[,3]>0] <- rbinom(n = sum(Expocum[,3]>0),size= round(Expocum[Expocum[,3]>0,3]), prob = P[3])
-  Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
-  
-  Dose_tot[,Day]=Dose_per_class1+Dose_per_class2+Dose_per_class3+Dose_per_class4
-  # Dose_per_class <- lapply(1:length(prm_air$Droplet_class), function (x) 
-  #   return(rbinom(n = sum(Expocum[,x]>0),size= round(Expocum[Expocum[,x]>0,x]), prob = P[x])))
-  # Dose_tot[,Day] <- Reduce("+",Dose_per_class[[1:4]])
-  
-  Risk=0
-  Risk_W=0
-  New_sicks=0  
-  New_sicks_W=0
-  
-  Risk = 1-exp(-Dose_tot[,Day]/50)
-  Risk_W=unique(MyWorkers$W_ID[Risk>0])
-  New_sicks <- rbinom(n = sum(Risk>0), size = 1, prob = Risk[Risk>0])
-  New_sicks_W <- Risk_W[New_sicks>0]
-  
-  print(New_sicks_W)
-  
-  for (IDW in New_sicks_W){
-    MyWorkers$W_status[MyWorkers$W_ID==IDW & MyWorkers$t_ind>ind_max] <-"contaminated"
-  }
-  
+for (day in 2:15) {
+  W <- f_dailyContamination(W = W,
+                            MyAir = MyAir,
+                            day = day,
+                            prm_plant = Parms_Plant,
+                            prm_workers = Parms_Workers,
+                            prm_time = Parms_Time,
+                            prm_air = Parms_Air,
+                            prm_conta = Parms_Conta,
+                            seed = seed)
 }
-plot(x = seq(1:length(N_contaminated)),y = N_contaminated)
+
+
+
+### Contamination via communities
+day <- 2
+# WD <- subset(W, Day == day & Hour == 0 & Min == 0)
+
+W_com <- subset(W408, Day == day & Hour == 0 & Min == 0 & !is.na(W_communes))
+
+SusceptibleWorkers <- W_com$W_ID[W_com$W_status == "susceptible"] ## ! %in% InfectedWorkers
+
+sapply(SusceptibleWorkers, FUN = function(wi) { ## for each susceptible worker
+  comm_ID <- W_com$W_communes[W_com$W_ID == wi] %>% as.character()
+  comm <- subset(W_com, W_communes == comm_ID)
+  
+  W_infected_source <- comm$W_statusCounter[comm$W_statusCounter > 0 & comm$W_statusCounter < 16]
+  
+  if (length(W_infected_source) > 0) {
+    resp_wi <- rbinom(n=1, size=1, prob = 0.1)
+    if (resp_wi > 0) {
+      writeLines(paste("- Worker ", wi,
+                       " infected probably by the workers ", W_infected_source,
+                       " within the community ", comm_ID, sep = ""))
+    }
+  } else {
+    resp_wi <- 0
+  }
+  return(resp_wi)
+})
+
+
+
+NewInfectedWorkers_Comm <- CommInfection_resp[CommInfection_resp > 0] %>% names()
+
+if (length(NewInfectedWorkers_Comm) > 0) {
+  InfectedWorker
+}
+
 
 
 # plot on same grid, each series colored differently -- 

@@ -1,3 +1,60 @@
+##### f_updateStatusByCounter #####
+f_updateStatusByCounter <- function(
+  W,
+  day,
+  prm_workers
+) {
+  WD <- subset(W, Day == day)
+  Wcomp <- subset(W, Day != day)
+  
+  WD$W_status <- as.character(WD$W_status)
+  
+  WD$W_status[which(WD$W_statusCounter == 0 )] <- "susceptible"
+  WD$W_status[which(WD$W_statusCounter %in% prm_workers$InfectedDay:(prm_workers$InfectiousDay-1))] <- "infected"
+  WD$W_status[which(WD$W_statusCounter %in% prm_workers$InfectiousDay:(prm_workers$SymptomDay-1))] <- "infectious"
+  
+  ## ID of the workers entering the "symptom period" (presenting the Counter at SymptomDay)
+  W_SymptomBegin <- subset(WD, W_statusCounter == prm_workers$SymptomDay)$W_ID %>% unique()
+  
+  if (length(W_SymptomBegin) > 0) { ## if there is any worker(s) entrying the symptom period at the given day
+    SymptomEvent <- sample(c("symptomatic", "asymptomatic"), ## random sampling for these workers for presenting a symptom or not
+                           size = length(W_SymptomBegin), replace = T,
+                           prob = c(prm_workers$pSymptom, 1-prm_workers$pSymptom))
+    writeLines(paste("/!\\ Begin of the symptomatic period for the workers: ", W_SymptomBegin))
+    writeLines(paste("with their respective symptoms development as follows: ", SymptomEvent))
+    ## /!\ this section needs to be optimized 
+    for (wi in 1:length(W_SymptomBegin)) {
+      WD$W_status[which(WD$W_ID == W_SymptomBegin[wi] &
+                         WD$W_statusCounter == prm_workers$SymptomDay)] <- SymptomEvent[wi]
+    }
+    ## /!\ this section needs to be optimized (end)
+  }
+  
+  ## ID of the workers during the "symptom period", knowing already that they became symptomatic or symptomatic
+  W_SymptomPeriod <- subset(WD, W_statusCounter %in% (prm_workers$SymptomDay+1):(prm_workers$NonInfectiousDay-1))$W_ID
+  
+  if (length(W_SymptomPeriod) > 0) {
+    ## /!\ this section needs to be optimized 
+    for (wi in 1:length(W_SymptomPeriod)) {
+      SymptomStatus <- subset(W,
+                              W_ID == W_SymptomPeriod[wi] &
+                                W_statusCounter == prm_workers$SymptomDay)$W_status %>% unique()
+      WD$W_status[which(WD$W_ID == W_SymptomPeriod[wi] &
+                         WD$W_statusCounter %in% (prm_workers$SymptomDay+1):(prm_workers$NonInfectiousDay-1))] <- SymptomStatus
+    }
+    ## /!\ this section needs to be optimized (end)
+  }
+  
+  WD$W_status[which(WD$W_statusCounter %in% prm_workers$NonInfectiousDay:prm_workers$ContaEndDay)] <- "non-infectious"
+  WD$W_status[which(WD$W_statusCounter > prm_workers$ContaEndDay)] <- "recovered"
+  
+  rbind(WD, Wcomp) %>%
+    dplyr::arrange(t_ind, W_ID) -> W
+  
+  return(W)
+}
+
+##### f_initStatusCounterDay1 #####
 f_initStatusCounterDay1 <- function(
   W,
   prm_workers,
@@ -20,22 +77,208 @@ f_initStatusCounterDay1 <- function(
   
   W$W_status <- as.character(W$W_status)
   
-  ## Random state (in day) of the first initialized contaminated worker
-  W$W_statusCounter[which(W$Day == 1 & W$W_status == "initialised as infected")] <- sample(prm_workers$InfectedDay:prm_workers$ContaEndDay, size = 1)
+  # ## Random state (in day) of the first initialized contaminated worker
+  # W$W_statusCounter[which(W$Day == 1 & W$W_status == "initialised as infected")] <- sample(prm_workers$InfectedDay:prm_workers$ContaEndDay, size = 1)
+  W$W_statusCounter[which(W$Day == 1 & W$W_status == "initialised as infected")] <- 1
   W$W_statusCounter[which(W$Day == 1 & W$W_status == "susceptible")] <- 0
   
-  W$W_status[which(W$Day == 1 &
-                     W$W_statusCounter %in% prm_workers$InfectedDay:(prm_workers$InfectiousDay-1))] <- "infected"
-  W$W_status[which(W$Day == 1 &
-                     W$W_statusCounter %in% prm_workers$InfectiousDay:(prm_workers$SymptomDay-1))] <- "infectious"
-  W$W_status[which(W$Day == 1 &
-                     W$W_statusCounter %in% prm_workers$SymptomDay:(prm_workers$NonInfectiousDay-1))] <- sample(c("symptomatic", "asymptomatic"),
-                                                                                                                size=1,
-                                                                                                                prob=c(prm_workers$pSymptom, 1-prm_workers$pSymptom))
-  W$W_status[which(W$Day == 1 &
-                     W$W_statusCounter %in% prm_workers$NonInfectiousDay:prm_workers$ContaEndDay)] <- "non-infectious"
-  W$W_status[which(W$Day == 1 &
-                     W$W_statusCounter > prm_workers$ContaEndDay)] <- "recovered"
+  W <- f_updateStatusByCounter(W = W, day = 1, prm_workers = prm_workers)
   
   return(W)
+}
+
+##### f_DRM_Watanabe() Watanabe's dose-response function #####
+f_DRM_Watanabe <- function(
+  dose, ## (numeric, vector) the dose(s) inhaled by different individuals (the number of virions)
+  r ## (numeric) the form parameter of the Watanabe dose-response model
+) {
+  
+  P_infection <- 1 - exp(- r * dose)
+  
+  return(P_infection)
+}
+
+
+#### f_dailyContamination #####
+f_dailyContamination <- function(
+  W,
+  MyAir,
+  day,
+  prm_plant,
+  prm_workers,
+  prm_time,
+  prm_air,
+  prm_conta,
+  seed = NULL
+) {
+  W_ID <- unique(W$W_ID) %>% sort()
+  
+  if (!is.null(seed)) {set.seed(seed+day)}
+  
+  writeLines(paste("\n ===================== Daily contamination : Day ", day, " =====================", sep =""))
+  
+  InfectedWorkers <- subset(W, Day == day-1 & W_statusCounter>0)$W_ID %>% unique() # already infected
+  
+  ################### INFECTION SOURCE 1: AEROSOL ################################
+  writeLines("\n (i) Aerosol")
+  # The total cumulative number of the droplets
+  # inhaled by each worker on the PREVIOUS day
+  writeLines("- Calculating the cumulative number of droplets inhaled by each worker")
+  MASTER <- f_Module_Master(MyAir = MyAir,
+                            prm_plant = prm_plant,
+                            prm_air = prm_air,
+                            prm_time = prm_time,
+                            prm_workers = prm_workers,
+                            ind_min = subset(MyWorkers, Day == day-1)$t_ind %>% min(),
+                            ind_max = subset(MyWorkers, Day == day-1)$t_ind %>% max()) # OK
+
+  MyAir <<- MASTER[[1]] # Updating the cumulative number of droplets for every days OK
+  Expocum <- MASTER[[2]] # sum inhaled OF THE GIVEN DAY day
+
+  writeLines("- Dose-response model processing")
+
+  RNA_virion_ratio <- prm_conta$RNA_virion_ratio # the ratio between the number of RNA copies and virions
+  RNA_load <- prm_conta$RNA_load ## in number of RNA copies per mL
+
+  VP <- RNA_load * prm_air$d_Vol # 4 classes
+
+  ##### ASSUMPTION 1 : 1 RNA copies per droplet !
+  # The percentage of droplets contaminated by RNA copies
+  P <- VP
+  Dose_per_class1 <- rep(0, prm_workers$NWorkers)
+  Dose_per_class2 <- rep(0, prm_workers$NWorkers)
+  Dose_per_class3 <- rep(0, prm_workers$NWorkers)
+  Dose_per_class4 <- rep(0, prm_workers$NWorkers)
+
+  Dose_per_class1[Expocum[,1]>0] <- rbinom(n = sum(Expocum[,1]>0),size= round(Expocum[Expocum[,1]>0,1]), prob = P[1])
+  Dose_per_class2[Expocum[,2]>0] <- rbinom(n = sum(Expocum[,2]>0),size= round(Expocum[Expocum[,2]>0,2]), prob = P[2])
+  Dose_per_class3[Expocum[,3]>0] <- rbinom(n = sum(Expocum[,3]>0),size= round(Expocum[Expocum[,3]>0,3]), prob = P[3])
+  Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
+
+  # Total dose for every classes inhaled by each worker at the day day
+  Dose_tot = Dose_per_class1 + Dose_per_class2 + Dose_per_class3 + Dose_per_class4
+
+  Virion_dose <- Dose_tot / RNA_virion_ratio
+  ##### ASSUMTION 1 (END)
+
+  # # ##### ASSUMPTION 2 : Calculate the number of RNA copies per droplet for each droplet class
+  # # set.seed(seed+day)
+  # # Nd <- rpois(n = length(Parms_Air$Droplet_class),
+  # #             lambda = VPR)
+  # # 
+  # # RNA_per_class1 <- round(Expocum[, 1]) * Nd[1]
+  # # RNA_per_class2 <- round(Expocum[, 2]) * Nd[2]
+  # # RNA_per_class3 <- round(Expocum[, 3]) * Nd[3]
+  # # RNA_per_class4 <- round(Expocum[, 4]) * Nd[4]
+  # # 
+  # # RNA_tot = RNA_per_class1 + RNA_per_class2 + RNA_per_class3 + RNA_per_class4 # number of RNA copies inhaled by each worker
+  # # 
+  # # Virion_dose <- RNA_tot / RNA_virion_ratio
+  # # ##### ASSUMTION 2 (END)
+  # 
+  # ##### ASSUMPTION 3 : Calculate the number of virion per droplet for each droplet class
+  # # by applying the RNA-Virion ratio from the beginning
+  # VPR <- VP / RNA_virion_ratio
+  # 
+  # Ndr <- rpois(n = length(prm_air$Droplet_class),
+  #              lambda = VPR)
+  # 
+  # Virion_dose <- round(Expocum[,1]) * Ndr[1] + round(Expocum[,2]) * Ndr[2] + round(Expocum[,3]) * Ndr[3] + round(Expocum[,4]) * Ndr[4]
+  # ##### ASSUMTION 3 (END)
+  # 
+  # ##### DOSE-RESPONSE MODEL : WATANABE MODEL
+  # # r: best fit for the form parameter of the Watanabe's dose-response model
+  # # Calculate the infection probability for each worker
+  # P_infection <- f_DRM_Watanabe(dose = Virion_dose,
+  #                               r = prm_conta$DRM1_r)
+  # 
+  # # The response of each worker (get contaminated or not) based on their respective infection probability
+  # resp <- rbinom(n = length(P_infection), size = 1, prob = P_infection)
+  # 
+  # # Gathering the previously infected workers with the newly infected ones
+  # NewInfectedWorkers_Air <- character() # newly infected via aerosol
+  # 
+  # if (length(resp[resp == 1])) { # if there are workers getting infected via the aerosol through infection probability
+  #   NewInfectedWorkers_Air <- W_ID[resp == 1] # looking for their corresponding IDs
+  #   writeLines(paste(">>> Newly infected workers through aerosol : ID(s)", NewInfectedWorkers_Air, " <<<"))
+  #   InfectedWorkers <- c(InfectedWorkers, NewInfectedWorkers_Air) %>% unique # combine with the workers already infected
+  # } else {writeLines(">>> Newly infected workers through aerosol : 0 <<<")}
+  
+
+  
+  
+  
+  ################### INFECTION PATH 2: REGIONAL PREVALENCE ####################
+  writeLines("\n (ii) Regional epidemic situation")
+  
+  # Looking for the susceptible workers
+  SusceptibleWorkers <- W_ID[! W_ID %in% InfectedWorkers]
+  
+  Infection_Regional <- rbinom(n = length(SusceptibleWorkers),
+                               size = 1,
+                               prob = prm_workers$prev)
+  
+  if (length(Infection_Regional[Infection_Regional == 1]) > 0) { # if there are workers getting infected due to regional epidemic situations
+    NewInfectedWorkers_Reg <- SusceptibleWorkers[Infection_Regional == 1] # looking for their corresponding IDs
+    writeLines(paste(">>> Newly infected workers due to regional epidemic situation : ID(s)", NewInfectedWorkers_Reg, " <<<"))
+    InfectedWorkers <- c(InfectedWorkers, NewInfectedWorkers_Reg) %>% unique # combine with the workers already infected
+  } else {writeLines(">>> Newly infected workers due to regional epidemic situation : 0 <<<")}
+  
+  
+  ################### INFECTION PATH 3: COMMUNITY ACTIVITY #####################
+  writeLines("\n (iii) Community activities")
+
+  # Extracting data associated with the workers having community activities
+  W_com <- subset(W, Day == day & Hour == 0 & Min == 0 & !is.na(W_communes))
+
+  # Looking for the susceptible workers among the above workers
+  SusceptibleWorkers <- W_com$W_ID[W_com$W_status == "susceptible"]
+
+  # For each of these susceptible worker, denoted wi
+  sapply(SusceptibleWorkers, FUN = function(wi) {
+    # Focus on his community
+    comm_ID <- W_com$W_communes[W_com$W_ID == wi] %>% as.character()
+    comm <- subset(W_com, W_communes == comm_ID)
+
+    # Identify if there are potential source of infection (infectious workers)
+    W_infected_source <- comm$W_ID[comm$W_statusCounter > 0 & comm$W_statusCounter < 16]
+
+    if (length(W_infected_source) > 0) { # if there is at least one infected worker within the community
+      ## the worker wi has a risk to get infected
+      resp_wi <- rbinom(n=1, size=1, prob = prm_workers$conta_prob_withinCommunity)
+
+      if (resp_wi > 0) { # if the worker wi actually gets infected, show infection information
+        writeLines(paste("- Worker ", wi,
+                         " infected probably by the workers ", W_infected_source,
+                         " within the community ", comm_ID, sep = ""))
+      }
+    } else { # otherwise, if there is any infected worker within the community
+      resp_wi <- 0 # the worker wi has 0 risk to get infected
+    }
+    return(resp_wi)
+  }) -> CommInfection_resp
+
+  # Gathering all workers possibly get infected through community activities
+  NewInfectedWorkers_Comm <- CommInfection_resp[CommInfection_resp > 0] %>% names()
+
+  # Combine with other workers already infected via other infection source
+  if (length(NewInfectedWorkers_Comm) > 0) {
+    InfectedWorkers <- c(InfectedWorkers, NewInfectedWorkers_Comm) %>% unique()
+  } else {
+    writeLines(">>> Newly infected workers due to community activities : 0 <<<")
+  }
+  
+  
+  ################### UPDATING COUNTERS #####################
+  writeLines("\n Updating data")
+  # By default, copy all status counters from the previous day
+  W$W_statusCounter[which(W$Day == day)] <- W$W_statusCounter[which(W$Day == day-1)] 
+  # Update the status counters for the infected workers (including the previously and newly infected ones)
+  W$W_statusCounter[which(W$Day == day & W$W_ID %in% InfectedWorkers)] <- W$W_statusCounter[which(W$Day == day-1 & W$W_ID %in% InfectedWorkers)] + 1 
+  # Update the status for all workers based on their respective counter
+  W <- f_updateStatusByCounter(W = W, day = day, prm_workers = prm_workers)
+  
+  ## OUTPUT
+  return(W)
+  ## END OF FUNCTION
 }

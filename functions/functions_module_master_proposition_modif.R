@@ -1,49 +1,3 @@
-# library(ggplot2)
-# library(stringr)
-# library(plotly)
-# #### FOR THE TESTS !!!!!! 
-# prm_plant = Parms_Plant
-# prm_air = Parms_Air
-# prm_time = Parms_Time
-# prm_workers = Parms_Workers
-# MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
-# 
-# AIR_ID <- c(prm_plant$label,
-#             unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$label)))))
-# 
-# MyWorkers <- subset(MyWorkers,Week<2)
-# MyWorkers <- dplyr::arrange(MyWorkers, t_ind, W_ID)
-# 
-# MyWorkers$W_location <- rep(sample(AIR_ID,
-#                                    size = prm_workers$NWorkers, replace = T,
-#                                    prob = c(0.7,0.05,0.05,0.05,0.05,0.05,0.05)),2016)
-# # Pour le test, les opérateurs arrivent vers 6h, prennent une pause à 12h, travaillent jusqu' à 22h
-# MyWorkers$W_location[MyWorkers$Hour<6]='Home'
-# MyWorkers$W_location[MyWorkers$Hour>12 & MyWorkers$Hour<15]='Home'
-# MyWorkers$W_location[MyWorkers$Hour>22]='Home'
-# MyWorkers$W_location[MyWorkers$Day>5]='Home'
-# 
-# MyWorkers$W_location[is.na(MyWorkers$W_location)]<-"Home"
-# 
-# status<-c("contaminated","not contaminated")
-# MyWorkers$W_status <- rep(sample(status,
-#                                  size = Parms_Workers$NWorkers, replace = T,
-#                                  prob = c(0.05,0.95)) ,  2016*8+1)
-# status<-c("mask","no mask")
-# MyWorkers$W_mask<- rep(sample(status,
-#                               size = Parms_Workers$NWorkers, replace = T,
-#                               prob = c(0.5,0.05)), 2016)
-# 
-# Method_calc <<- f_Air_Criteria_Calc(Parms_Plant,Parms_Air)
-# MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
-# 
-# MyAir[MyAir$t_ind==0,2:(1+length(prm_air$Droplet_class))] = matrix(0,7,4)*(Method_calc)
-# MyAir <- subset(MyAir,t_ind<1440)
-# 
-# 
-# ind = 1
-# #########################################
-
 ##### f_Who_is() to sum up who is where, how is he and is he wearing a mask at A GIVEN TIME INDEX #####
 f_Who_is <- function(
   # To sum up who is where, how is he and is he wearing a mask at A GIVEN TIME INDEX
@@ -62,13 +16,6 @@ f_Who_is <- function(
   ## Convert all workspace locations "WS..." into "Cutting room" (prm_plant$label)
   Sub_MyWorkers$W_location[str_starts(Sub_MyWorkers$W_location,"WS")] <- prm_plant$label
   
-  ### /!\ NOT SAFE TO INDICATE THE PRECISE NUMBER OF ROOMS (7) IN A GENERIC FUNCTION 
-  # # Who is in which room, weering a mask or not
-  # Cont_mask <- matrix(FALSE,NWorkers,7) # size = NWORKER,NROOMS, TRUE/FALSE 
-  # Cont_nomask <- matrix(FALSE,NWorkers,7) # size = NWORKER,NROOMS, TRUE/FALSE
-  # Non_Cont_mask <- matrix(FALSE,NWorkers,7) # size = NWORKER,NROOMS, TRUE/FALSE
-  # Non_Cont_no_mask <- matrix(FALSE,NWorkers,7) # size = NWORKER,NROOMS, TRUE/FALSE
-  
   ### --> /!\ MODIFICATION PROPOSITION (automatised)
   # The total number of the room = nb of spaces declared in prm_plant + cutting room
   NRooms <- length(prm_plant$Spaces) + 1 
@@ -78,16 +25,6 @@ f_Who_is <- function(
   Non_Cont_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
   Non_Cont_no_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
   ###
-  
-  ### For the cutting room
-  # Cont_mask[,1] <- Sub_MyWorkers$W_status =="contaminated" &
-  #   Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
-  # Cont_nomask[,1]  =Sub_MyWorkers$W_status =="contaminated" &
-  #   Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
-  # Non_Cont_mask[,1]  = Sub_MyWorkers$W_status =="not contaminated" &
-  #   Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
-  # Non_Cont_no_mask[,1]  = Sub_MyWorkers$W_status =="not contaminated" &
-  #   Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
   
   Cont_mask[,1] <- Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
     Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
@@ -134,8 +71,11 @@ f_Module_Master <- function (
   prm_time,
   prm_workers,
   ind_min,
-  ind_max
+  ind_max,
+  seed = NULL ## added for simulation purposes
 ) {
+  if (!is.null(seed)) {set.seed(seed)} ## added for simulation purposes
+  
   # Surfaces of the room (m2)
   S_rooms <- c(prm_plant$dim.X * prm_plant$dim.Y, # surface of the cutting room
                unname(unlist(lapply(prm_plant$Spaces, function(x) return(x$dim.X * x$dim.Y)))))
@@ -150,11 +90,6 @@ f_Module_Master <- function (
   # CAREFULL IF CHANGE UNITS (m3/h into m3/s) IN THE PARMS_PLANT (CURRENTLY IN m3/h)
   V_renew <- c(prm_plant$Air_renewal,
                unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$Air_renewal)))))/3600 
-  
-  ### /!\ ADDED 
-  Method_calc <<- f_Air_Criteria_Calc(prm_plant, prm_air)
-  Vsed = f_Vsed(prm_air) #
-  ###
   
   ## The cumulative number in different classes of droplets exposed to each worker
   W_droplet_Expos_cumul = matrix(0, prm_workers$NWorkers, length(prm_air$Droplet_class))
@@ -180,7 +115,7 @@ f_Module_Master <- function (
     
     # 2 - TRANSFERS ----------------------------------------------------------
     # 2.1 FROM AIR to SURFACES : Droplet sedimentation of the surfaces
-    dsed = S_rooms * Vsed*60    # (m3/min)
+    dsed = S_rooms%*%Vsed*60    # (m3/min)
     #  ----------------------------------------------------------------------
     # 2.2 FROM AIR to WORKERS # !!!!ATTENTION, FAUTE ici le masque n'absorbe pas les gouttes :::)
     Resp_inh = ((W_Loc_N_mask[[1]]+W_Loc_N_mask[[3]])*0.1 + (W_Loc_N_mask[[2]]+W_Loc_N_mask[[4]]))*resp
@@ -230,122 +165,3 @@ f_Module_Master <- function (
   
   return(list(MyAir,W_droplet_Expos_cumul))
 }
-
-
-
-# Dose_tot<-matrix(0,prm_workers$NWorkers,max(MyWorkers$Day))
-# N_contaminated=0
-# # for (Day in unique(MyWorkers$Day-1) ){
-# MyWorkers$W_location[is.na(MyWorkers$W_location)]<-"home"
-# for (Day in 1:57 ){
-#   
-#   Dose_per_class1 <- matrix(0,100,1)
-#   Dose_per_class2 <- matrix(0,100,1)
-#   Dose_per_class3 <- matrix(0,100,1)
-#   Dose_per_class4 <- matrix(0,100,1)
-#   
-#   print(Day)
-#   ind_min <- 24*60/Parms_Time$Step*(Day-1)
-#   ind_max <- 24*60/Parms_Time$Step*(Day)-1
-#   
-#   N_contaminated[Day] = sum (MyWorkers$W_status[MyWorkers$t_ind==ind_min] =="contaminated")
-#   print(N_contaminated[Day])
-#   OUT <- f_Module_Master(prm_plant, prm_air, prm_time, prm_workers,ind_min,ind_max)
-#   
-#   MyAir <- OUT[[1]]
-#   Expocum <-OUT[[2]]
-#   Viral_Load <-5e8
-#   P=Viral_Load*prm_air$d_Vol
-#   
-#   ### VERIFIER LA DOSE PER CLASS: Parametre size en particulier
-#   Dose_per_class1[Expocum[,1]>0] <- rbinom(n = sum(Expocum[,1]>0),size= round(Expocum[Expocum[,1]>0,1]), prob = P[1])
-#   Dose_per_class2[Expocum[,2]>0] <- rbinom(n = sum(Expocum[,2]>0),size= round(Expocum[Expocum[,2]>0,2]), prob = P[2])
-#   Dose_per_class3[Expocum[,3]>0] <- rbinom(n = sum(Expocum[,3]>0),size= round(Expocum[Expocum[,3]>0,3]), prob = P[3])
-#   Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
-#   
-#   Dose_tot[,Day]=Dose_per_class1+Dose_per_class2+Dose_per_class3+Dose_per_class4
-#   # Dose_per_class <- lapply(1:length(prm_air$Droplet_class), function (x) 
-#   #   return(rbinom(n = sum(Expocum[,x]>0),size= round(Expocum[Expocum[,x]>0,x]), prob = P[x])))
-#   # Dose_tot[,Day] <- Reduce("+",Dose_per_class[[1:4]])
-#   
-#   Risk=0
-#   Risk_W=0
-#   New_sicks=0  
-#   New_sicks_W=0
-#   
-#   Risk = 1-exp(-Dose_tot[,Day]/50)
-#   Risk_W=unique(MyWorkers$W_ID[Risk>0])
-#   New_sicks <- rbinom(n = sum(Risk>0), size = 1, prob = Risk[Risk>0])
-#   New_sicks_W <- Risk_W[New_sicks>0]
-#   
-#   print(New_sicks_W)
-#   
-#   for (IDW in New_sicks_W){
-#     MyWorkers$W_status[MyWorkers$W_ID==IDW & MyWorkers$t_ind>ind_max] <-"contaminated"
-#   }
-#   
-# }
-# plot(x = seq(1:length(N_contaminated)),y = N_contaminated)
-# 
-# 
-# # plot on same grid, each series colored differently -- 
-# # good if the series have same scale
-# MyAir[MyAir$AIR_ID=='Waste area',2:6]<-0
-# 
-# MyAir[MyAir$AIR_ID=='Arrival gate',2:6]<-0
-# MyAir[MyAir$AIR_ID=='Entry hall',2:6]<-0
-# MyAir[MyAir$AIR_ID=='Cooling area',2:6]<-0
-# 
-# 
-# ggplot() + 
-#   geom_point(MyAir, mapping=aes(x=t_ind, y=d01), colour="red") +
-#   geom_point(MyAir, mapping=aes(x=t_ind, y=d02), colour="blue") + 
-#   geom_point(MyAir, mapping=aes(x=t_ind, y=d03), colour="green") + 
-#   geom_point(MyAir, mapping=aes(x=t_ind, y=d04), colour="orange") + 
-#   
-#   facet_grid(AIR_ID ~ .)
-# 
-# ggplot(subset(MyAir,AIR_ID=="Cutting Room")) + 
-#   geom_point( mapping=aes(x=t_ind, y=d01), colour="red") +
-#   geom_point( mapping=aes(x=t_ind, y=d02), colour="blue") + 
-#   geom_point( mapping=aes(x=t_ind, y=d03), colour="green") + 
-#   geom_point( mapping=aes(x=t_ind, y=d04), colour="orange") -> g1
-# 
-# ggplot(subset(MyAir,AIR_ID=="Cooling area")) + 
-#   geom_point( mapping=aes(x=t_ind, y=d01), colour="red") +
-#   geom_point( mapping=aes(x=t_ind, y=d02), colour="blue") + 
-#   geom_point( mapping=aes(x=t_ind, y=d03), colour="green") + 
-#   geom_point( mapping=aes(x=t_ind, y=d04), colour="orange") -> g2
-# 
-# 
-# ggplotly(g1)
-# ggplotly(g2)
-# ggplot(subset(MyAir,AIR_ID=="Cutting Room"  & t_ind>250 & t_ind<400)) + 
-#   geom_line( mapping=aes(x=t_ind, y=d01), colour="red") +
-#   geom_line( mapping=aes(x=t_ind, y=d02), colour="blue") + 
-#   geom_line( mapping=aes(x=t_ind, y=d03), colour="green") + 
-#   geom_line( mapping=aes(x=t_ind, y=d04), colour="orange")   
-# 
-# 
-# ggplot(MyAir, aes(t_ind,d01)) + geom_point(aes(colour = AIR_ID))
-# 
-# ggplot(MyAir, aes(t_ind,d02)) + geom_point(aes(colour = AIR_ID))
-# ggplot(MyAir, aes(t_ind,d03)) + geom_point(aes(colour = AIR_ID))
-# ggplot(MyAir, aes(t_ind,d04)) + geom_point(aes(colour = AIR_ID))
-# 
-# 
-# # Number of contaminated employees in the rooms
-# # Number of non-contaminated employees in the rooms 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# Delta_Cd < -f_AirModuleCalc(V_rooms,V_renew,S_rooms)
-# 
-# Cd[i+1] = Cd[i]+Delta_Cd*dt/V_rooms # Number of droplets (m-3)
-# 
-# 
