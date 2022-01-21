@@ -93,12 +93,11 @@ by(data = MyWorkers,
   data.table::rbindlist() %>%
   dplyr::arrange(t_ind, W_ID) -> MyWorkers
 
-
-
-
 ## Random state (in day) of the first initialized contaminated worker
 MyWorkers <- f_initStatusCounterDay1(W = MyWorkers, prm_workers = Parms_Workers, prm_time = Parms_Time, seed = seed)
+
 save.image("2022_01_20_checkpoint1.RData")
+
 
 ### AEROSOL ###
 # prm_plant = Parms_Plant
