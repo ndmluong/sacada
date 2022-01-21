@@ -302,7 +302,7 @@ f_plotWorkers <- function(
     scale_shape_manual(name = "Working shift",
                        values=c(1,10,19,13)) + 
     scale_colour_manual(name = "Type of employees",
-                        values=c("black", "black", "darkgreen", "darkgreen", "blue", "blue"))
+                        values=c("black", "black", "darkgreen", "darkgreen", "blue", "darkorange"))
   
   ## workers ID as label
   g_Plant <- g_Plant +
@@ -365,7 +365,7 @@ f_plotSchedule <- function(
     scale_shape_manual(name = "Working shift",
                        values=c(1,10,19,13)) + 
     scale_colour_manual(name = "Type of employees",
-                        values=c("black", "black", "darkgreen", "darkgreen", "blue", "blue")) +
+                        values=c("black", "black", "darkgreen", "darkgreen", "blue", "darkorange")) +
     labs(x = "Time (day)", y = "Worker ID",
          title = paste("Schedule (", length(unique(df$W_ID)), "/", length(unique(W$W_ID)), " workers shown, days ", Dmin, " to ", Dmax, ")", sep =""))
   

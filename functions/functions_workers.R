@@ -56,7 +56,7 @@ f_initWorkers <- function(
   print("Assign the first random contaminated worker")
   W_status0 <- rep("susceptible", prm$NWorkers)
   set.seed(seed)
-  W_status0[sample(1:prm$NWorkers, 1)] <- "initialised as infected"
+  W_status0[sample(1:prm$NWorkers, prm$nContaminated_Init)] <- "initialised as infected"
   # Initialization for the subsequent time indexes as NA
   W_status <- c(W_status0, rep(NA, prm$NWorkers * NTime))
   
@@ -75,7 +75,7 @@ f_initWorkers <- function(
                     size = prm$NWorkers,
                     prob = c(pMask,1-pMask))
   # Initialization for the subsequent time indexes as NA
-  W_mask <- as.factor(c(W_mask0, rep(NA, prm$NWorkers * NTime)))
+  W_mask <- c(W_mask0, rep(NA, prm$NWorkers * NTime))
   
   ### Assign the types and teams for all workers
   # at time 0
@@ -106,7 +106,7 @@ f_initWorkers <- function(
   AssignedCommunity <- f_assignCommunes(prm, seed = seed) ## check the (sub)function f_assignCommunes()
   
   W_communityActivity <- AssignedCommunity$W_communityActivity0 %>% rep(NTime+1) 
-  W_communes <- AssignedCommunity$W_communes0 %>% rep(NTime+1) %>% as.factor
+  W_communes <- AssignedCommunity$W_communes0 %>% rep(NTime+1)
   
   ### Output
   W <- data.frame(W_ID = rep(W_ID, NTime+1),
