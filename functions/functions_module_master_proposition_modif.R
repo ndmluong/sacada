@@ -66,6 +66,8 @@ f_Who_is <- function(
 f_Module_Master <- function (
   MyAir, # /!\ MyAir (WHICH WILL BE USED/CHANGED FURTHER INSED THE FUNCTION) 
   # WAS ADDED HERE AS A FUNCTION INPUT BECAUSE IT SHOULD NOT BE A GLOBAL VARIABLE
+  MyWorkers, ## ADDED
+  # indi_viral_load,# numeric vector : individual viral load 
   prm_plant,
   prm_air,
   prm_time,

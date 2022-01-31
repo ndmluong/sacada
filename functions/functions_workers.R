@@ -29,22 +29,22 @@ f_initWorkers <- function(
   W_ID <- paste("W", stringr::str_pad(seq(1:prm$NWorkers), width=3, pad="0"), sep="")
   
   ### Total number of the time indexes
-  print("========[Step 1/2 - Processing time indexes]=========================")
-  print("Processing time indexes")
+  writeLines("========[Step 1/2 - Processing time indexes]=========================")
+  writeLines("Processing time indexes")
   NTime <- prm_time$NDays * 1440 / prm_time$Step ## amplitude Ndays in days, time step in minutes
   t_ind <- rep(0:NTime, each = prm$NWorkers)
-  print(paste("Time indexes going from 0 to", NTime))
+  writeLines(paste("Time indexes going from 0 to", NTime))
   
   ## Convert time indexes to D,H,M
   dt = prm_time$Step
-  print("Converting time indexes into D:H:M format")
+  writeLines("Converting time indexes into D:H:M format")
   t_time <- t_ind %>% sapply(FUN = function(x) {
     f_convertTime("ind2time", dt=dt, t_ind = x)
     })
   Day <- t_time[1,]
   Hour <- t_time[2,]
   Min <- t_time[3,]
-  print("Converting time into week numbers and weekdays format")
+  writeLines("Converting time into week numbers and weekdays format")
   Week <- Day %>% sapply(FUN = f_Day2Week)
   Weekday <- Day %>% sapply(FUN = f_Day2Weekday)
   
@@ -52,8 +52,8 @@ f_initWorkers <- function(
   ### States (infected/not infected) of the workers
   # Time index 0:
   # HYPOTHESE : ONE INDIVIDUAL CONTAMINATED AT DAY 0 ?
-  print("========[Step 2/2 - Workers attributes]==============================")
-  print("Assign the first random contaminated worker")
+  writeLines("========[Step 2/2 - Workers attributes]==============================")
+  writeLines("Assign the first random contaminated worker")
   W_status0 <- rep("susceptible", prm$NWorkers)
   set.seed(seed)
   W_status0[sample(1:prm$NWorkers, prm$nContaminated_Init)] <- "initialised as infected"
@@ -66,7 +66,7 @@ f_initWorkers <- function(
   ### Behavior (mask/no mask) of the workers
   # At the time index 0
   # The proportion of workers wearing a mask depending on the type of mask
-  print("Simulating mask acceptability")
+  writeLines("Simulating mask acceptability")
   pMask <- prm$pMaskAcceptability[prm$MaskType] %>% unname
   
   # Wearing mask or not for each worker
@@ -79,7 +79,7 @@ f_initWorkers <- function(
   
   ### Assign the types and teams for all workers
   # at time 0
-  print("Assign workers types and teams")
+  writeLines("Assign workers types and teams")
   W_TT <- f_assignWorkersTypeTeam(prm = prm, seed=seed)  ## check the function f_assignWorkersTypeTeam
   W_type0 <- W_TT$W_type
   W_team0 <- W_TT$W_team
@@ -102,7 +102,7 @@ f_initWorkers <- function(
   
   ## Community activities
   ## Assign the workers to the different communes if applicable
-  print("Assign workers community")
+  writeLines("Assign workers community")
   AssignedCommunity <- f_assignCommunes(prm, seed = seed) ## check the (sub)function f_assignCommunes()
   
   W_communityActivity <- AssignedCommunity$W_communityActivity0 %>% rep(NTime+1) 
@@ -130,9 +130,9 @@ f_initWorkers <- function(
                   Hour = Hour,
                   Min = Min
   )
-  print("=============================================")
-  print("Workers initialized")
-  print("=============================================")
+  writeLines("=============================================")
+  writeLines("Workers initialized")
+  writeLines("=============================================")
   return(W)
   #### END OF FUNCTION
 }
@@ -428,7 +428,7 @@ f_calculateActiveCounter <- function(
   ## OUTPUT
   ## OUTPUT: data frame with calculated active counters for every workers
 ) {
-  print("Processing active counters")
+  writeLines("Processing active counters")
   ## data manipulation: row_ID added, necessary for matching values after calculation of active counters
   ## W <- data.frame(row_ID = 1:nrow(W), W) 
   ## Extract the data at the beginning of every day
@@ -461,17 +461,17 @@ f_calculateActiveCounter <- function(
   # ########### /!\ Non-Optimized code (begin)
   # # OUTPUT <- data.frame()
   # # for (i in 1:length(ALL_ID)) {
-  # #   print(paste("Worker",ALL_ID[i]))
+  # #   writeLines(paste("Worker",ALL_ID[i]))
   # #   d1W <- subset(W, W_ID == ALL_ID[i])
   # #   d1W <- f_replicateIndividualDaily(Agent = d1W,
   # #                                     Invariant = c("W_activeCounter", "W_active"))
   # #   OUTPUT <- rbind(OUTPUT, d1W)
   # # }
   # ############ /!\ Non-Optimized code (end)
-  # 
+
   ############ /!\ Optimized code (begin)
   lapply(ALL_ID, FUN = function(x) {
-    print(paste("Worker", x))
+    writeLines(paste("Worker", x))
     d1 <- subset(W, W_ID == x)
     d1 <- f_replicateIndividualDaily(Agent = d1,
                                      Invariant = "W_activeCounter")
@@ -497,14 +497,14 @@ f_setupSchedule <- function(
   }
   ## Simulate the weekly team changes
   for (i in 1:(max(W$Week)-1)) {
-    print(paste("Simulating weekly team changes - Week", i))
+    writeLines(paste("Simulating weekly team changes - Week", i))
     W <- f_changeTeamWeekly(W = W,
                             prob = prm$pChangeTeam,
                             week_from = i)
   }
   
   ## Assign working shift for all workers
-  print("Assign working shifts for all workers")
+  writeLines("Assign working shifts for all workers")
   W <- f_assignWorkersShift(W)
   
   ## Calculate the active counter of every workers and fill the case 0h00

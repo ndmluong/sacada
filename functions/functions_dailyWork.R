@@ -6,7 +6,7 @@ f_dailyWork_AM <- function(
   dt,
   seed = NULL
 ) {
-  print(paste("## Day ", D, " - Morning team", sep=""))
+  writeLines(paste("## Day ", D, " - Morning team", sep=""))
   active <- subset(W, W_active == "active" & Day == D)
   
   AM_ID <- subset(active, W_shift == "morning")$W_ID %>% unique()
@@ -91,7 +91,7 @@ f_dailyWork_T1 <- function(
   dt,
   seed = NULL
 ) {
-  print(paste("## Day ", D, " - Transverse1 workers", sep=""))
+  writeLines(paste("## Day ", D, " - Transverse1 workers", sep=""))
   
   active <- subset(W, W_active == "active" & Day == D)
   
@@ -186,7 +186,7 @@ f_dailyWork_PM <- function(
   dt,
   seed = NULL
 ) {
-  print(paste("## Day ", D, " - Afternoon team", sep=""))
+  writeLines(paste("## Day ", D, " - Afternoon team", sep=""))
   active <- subset(W, W_active == "active" & Day == D)
   
   PM_ID <- subset(active, W_shift == "afternoon")$W_ID %>% unique()
@@ -274,7 +274,7 @@ f_dailyWork_T2 <- function(
   dt,
   seed = NULL
 ) {
-  print(paste("## Day ", D, " - Transverse2 workers", sep=""))
+  writeLines(paste("## Day ", D, " - Transverse2 workers", sep=""))
   active <- subset(W, W_active == "active" & Day == D)
   
   T2_ID <- subset(active, W_type == "transverse2")$W_ID %>% unique()
@@ -314,7 +314,7 @@ f_dailyWork_AllTeams <- function(
   seed = NULL
 ) {
   if (!is.null(seed)) {set.seed(seed)}
-  print(paste("########## Day ", D, " ##########", sep=""))
+  writeLines(paste("########## Day ", D, " ##########", sep=""))
   W <- f_dailyWork_AM(Plant, W, D, dt)
   W <- f_dailyWork_T1(Plant, W, D, dt)
   W <- f_dailyWork_PM(Plant, W, D, dt)
@@ -331,7 +331,7 @@ f_dailyMaskWearing <- function(
 ) {
   D <- unique(WD$Day)
   
-  print(paste("## Day ", D, " - Check 'Mask wearing' status of all active workers", sep=""))
+  writeLines(paste("## Day ", D, " - Check 'Mask wearing' status of all active workers", sep=""))
   
   active <- subset(WD, W_active == "active")
   Wcomp <- subset(WD, W_active != "active")

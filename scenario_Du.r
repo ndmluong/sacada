@@ -96,7 +96,6 @@ by(data = MyWorkers,
 ## Random state (in day) of the first initialized contaminated worker
 MyWorkers <- f_initStatusCounterDay1(W = MyWorkers, prm_workers = Parms_Workers, prm_time = Parms_Time, seed = seed)
 
-save.image("2022_01_20_checkpoint1.RData")
 
 
 ### AEROSOL ###
@@ -122,66 +121,78 @@ MyAir[MyAir$t_ind==0, 2:(1+length(Parms_Air$Droplet_class))] = matrix(0,7,4) * M
 ## RUN MODEL
 W <- MyWorkers
 
-
-
-W <- f_dailyContamination(W = W,
-                          MyAir = MyAir,
-                          day = 5,
-                          prm_plant = Parms_Plant,
-                          prm_workers = Parms_Workers,
-                          prm_time = Parms_Time,
-                          prm_air = Parms_Air,
-                          prm_conta = Parms_Conta,
-                          seed = seed)
-
-for (day in 2:15) {
-  W <- f_dailyContamination(W = W,
-                            MyAir = MyAir,
-                            day = day,
-                            prm_plant = Parms_Plant,
-                            prm_workers = Parms_Workers,
-                            prm_time = Parms_Time,
-                            prm_air = Parms_Air,
-                            prm_conta = Parms_Conta,
-                            seed = seed)
+for (day in 6:15) {
+  CONTA <- f_dailyContamination(W = W,
+                                MyAir = MyAir,
+                                day = day,
+                                prm_plant = Parms_Plant,
+                                prm_workers = Parms_Workers,
+                                prm_time = Parms_Time,
+                                prm_air = Parms_Air,
+                                prm_conta = Parms_Conta,
+                                seed = seed)
+  W <- CONTA$W
+  MyAir <- CONTA$MyAir
 }
 
 
 
-### Contamination via communities
-day <- 2
-# WD <- subset(W, Day == day & Hour == 0 & Min == 0)
+InfectionSummary <- data.frame(Day = seq(1,56),
+                               Infected_cumul = rep(NA,56),
+                               Infectious = rep(NA, 56),
+                               Symptomatic = rep(NA, 56),
+                               Asymptomatic = rep(NA, 56),
+                               Recovered_cumul = rep(NA,56))
 
-W_com <- subset(W408, Day == day & Hour == 0 & Min == 0 & !is.na(W_communes))
-
-SusceptibleWorkers <- W_com$W_ID[W_com$W_status == "susceptible"] ## ! %in% InfectedWorkers
-
-sapply(SusceptibleWorkers, FUN = function(wi) { ## for each susceptible worker
-  comm_ID <- W_com$W_communes[W_com$W_ID == wi] %>% as.character()
-  comm <- subset(W_com, W_communes == comm_ID)
-  
-  W_infected_source <- comm$W_statusCounter[comm$W_statusCounter > 0 & comm$W_statusCounter < 16]
-  
-  if (length(W_infected_source) > 0) {
-    resp_wi <- rbinom(n=1, size=1, prob = 0.1)
-    if (resp_wi > 0) {
-      writeLines(paste("- Worker ", wi,
-                       " infected probably by the workers ", W_infected_source,
-                       " within the community ", comm_ID, sep = ""))
-    }
-  } else {
-    resp_wi <- 0
-  }
-  return(resp_wi)
-})
-
-
-
-NewInfectedWorkers_Comm <- CommInfection_resp[CommInfection_resp > 0] %>% names()
-
-if (length(NewInfectedWorkers_Comm) > 0) {
-  InfectedWorker
+for (day in 1:nrow(InfectionSummary)) {
+  dW <- subset(W, Hour == 0 & Min == 0 & Day == day)
+  InfectionSummary$Infected_cumul[day] <- length(dW$W_statusCounter[dW$W_statusCounter > 0])
+  InfectionSummary$Infectious[day] <- length(dW$W_statusCounter[dW$W_statusCounter > 2 & dW$W_statusCounter < 12])
+  InfectionSummary$Symptomatic[day] <- length(dW$W_status[dW$W_status == "symptomatic"])
+  InfectionSummary$Asymptomatic[day] <- length(dW$W_status[dW$W_status == "asymptomatic"])
+  InfectionSummary$Recovered_cumul[day] <- length(dW$W_statusCounter[dW$W_statusCounter > 15])
 }
+
+
+
+ggplot(data=InfectionSummary) +
+  geom_line(aes(x = Day, y = Infected_cumul), colour = "red", size = 2) +
+  geom_line(aes(x = Day, y = Recovered_cumul), colour = "darkgreen", size = 2) +
+  theme(axis.ticks=element_blank(),
+        #legend.position = "none",
+        panel.background=element_rect(fill="white"),
+        plot.title = element_text(face="bold", size=15),
+        axis.title = element_text(face="bold", size=10),
+        axis.text = element_text(size=10),
+        panel.grid.major.y=element_line(colour="lightgrey"),
+        panel.grid.major.x=element_line(colour="lightgrey"),
+        panel.grid.minor.y=element_line(colour="white"),
+        panel.grid.minor.x=element_line(colour="lightgrey")) +
+  scale_x_continuous(breaks = seq(1, 56, by = 7)) +
+  scale_y_continuous(breaks = seq(0, max(InfectionSummary$Infected_cumul), by = 2)) +
+  labs(title = "Cumulative number of infected / recovered workers") +
+  xlab("time (day)") + ylab("Cumulative number of workers") -> g1
+
+ggplot(data=InfectionSummary) +
+  geom_line(aes(x = Day, y = Infectious), colour = "darkorange", size = 2) +
+  geom_line(aes(x = Day, y = Symptomatic), colour = "orange") +
+  theme(axis.ticks=element_blank(),
+        #legend.position = "none",
+        panel.background=element_rect(fill="white"),
+        plot.title = element_text(face="bold", size=15),
+        axis.title = element_text(face="bold", size=10),
+        axis.text = element_text(size=10),
+        panel.grid.major.y=element_line(colour="lightgrey"),
+        panel.grid.major.x=element_line(colour="lightgrey"),
+        panel.grid.minor.y=element_line(colour="white"),
+        panel.grid.minor.x=element_line(colour="lightgrey")) +
+  scale_x_continuous(breaks = seq(1, 56, by = 7)) +
+  scale_y_continuous(breaks = seq(0, max(InfectionSummary$Infected_cumul), by = 2)) +
+  coord_cartesian(ylim = c(0, max(InfectionSummary$Infected_cumul))) +
+  labs(title = "Daily number of infectious workers") +
+  xlab("time (day)") + ylab("Daily number of workers") -> g2
+
+gridExtra::grid.arrange(g1,g2,nrow=2)
 
 
 
@@ -195,54 +206,43 @@ MyAir[MyAir$AIR_ID=='Cooling area',2:6]<-0
 
 
 ggplot() + 
-  geom_point(MyAir, mapping=aes(x=t_ind, y=d01), colour="red") +
-  geom_point(MyAir, mapping=aes(x=t_ind, y=d02), colour="blue") + 
-  geom_point(MyAir, mapping=aes(x=t_ind, y=d03), colour="green") + 
-  geom_point(MyAir, mapping=aes(x=t_ind, y=d04), colour="orange") + 
+  geom_line(MyAir, mapping=aes(x=t_ind, y=d01), colour="red") +
+  geom_line(MyAir, mapping=aes(x=t_ind, y=d02), colour="blue") + 
+  geom_line(MyAir, mapping=aes(x=t_ind, y=d03), colour="green") + 
+  geom_line(MyAir, mapping=aes(x=t_ind, y=d04), colour="orange") + 
+  xlab("time index") + ylab("number of droplets") +
+  theme(axis.ticks=element_blank(),
+        #legend.position = "none",
+        #panel.background=element_rect(fill="grey"),
+        plot.title = element_text(face="bold", size=15),
+        axis.title = element_text(face="bold", size=10),
+        axis.text = element_text(size=10)) + 
+  scale_x_continuous(breaks = seq(1, max(MyAir$t_ind), by = 2016)) +
+  facet_grid(AIR_ID ~ .) -> g3
+
+
+
+
+
+# for (wi in 1:length(W_SymptomBegin)) {
+#   WD$W_status[which(WD$W_ID == W_SymptomBegin[wi] &
+#                      WD$W_statusCounter == prm_workers$SymptomDay)] <- SymptomEvent[wi]
+# }
+
+WD <- MyWorkers
+
+W_SymptomBegin <- c("W012", "W018", "W033")
+SymptomEvent <- c("S1","S2","S3")
+names(SymptomEvent) <- W_SymptomBegin
+
+WComp <- subset(WD, !W_ID %in% W_SymptomBegin)
+
+lapply(W_SymptomBegin, FUN = function(x) {
+  W1 <- subset(WD, W_ID == x)
+  W1$W_status[which(W1$Day == 1)] <- unname(SymptomEvent[x])
+  return(W1)
+}) %>%
+  data.table::rbindlist() %>%
+  rbind(subset(WD, !W_ID %in% W_SymptomBegin)) -> aa
   
-  facet_grid(AIR_ID ~ .)
-
-ggplot(subset(MyAir,AIR_ID=="Cutting Room")) + 
-  geom_point( mapping=aes(x=t_ind, y=d01), colour="red") +
-  geom_point( mapping=aes(x=t_ind, y=d02), colour="blue") + 
-  geom_point( mapping=aes(x=t_ind, y=d03), colour="green") + 
-  geom_point( mapping=aes(x=t_ind, y=d04), colour="orange") -> g1
-
-ggplot(subset(MyAir,AIR_ID=="Cooling area")) + 
-  geom_point( mapping=aes(x=t_ind, y=d01), colour="red") +
-  geom_point( mapping=aes(x=t_ind, y=d02), colour="blue") + 
-  geom_point( mapping=aes(x=t_ind, y=d03), colour="green") + 
-  geom_point( mapping=aes(x=t_ind, y=d04), colour="orange") -> g2
-
-
-ggplotly(g1)
-ggplotly(g2)
-ggplot(subset(MyAir,AIR_ID=="Cutting Room"  & t_ind>250 & t_ind<400)) + 
-  geom_line( mapping=aes(x=t_ind, y=d01), colour="red") +
-  geom_line( mapping=aes(x=t_ind, y=d02), colour="blue") + 
-  geom_line( mapping=aes(x=t_ind, y=d03), colour="green") + 
-  geom_line( mapping=aes(x=t_ind, y=d04), colour="orange")   
-
-
-ggplot(MyAir, aes(t_ind,d01)) + geom_point(aes(colour = AIR_ID))
-
-ggplot(MyAir, aes(t_ind,d02)) + geom_point(aes(colour = AIR_ID))
-ggplot(MyAir, aes(t_ind,d03)) + geom_point(aes(colour = AIR_ID))
-ggplot(MyAir, aes(t_ind,d04)) + geom_point(aes(colour = AIR_ID))
-
-
-# Number of contaminated employees in the rooms
-# Number of non-contaminated employees in the rooms 
-
-
-
-
-
-
-
-
-Delta_Cd < -f_AirModuleCalc(V_rooms,V_renew,S_rooms)
-
-Cd[i+1] = Cd[i]+Delta_Cd*dt/V_rooms # Number of droplets (m-3)
-
 
