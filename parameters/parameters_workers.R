@@ -29,11 +29,11 @@ Parms_Workers <- list(
   
   #### COMMUNITY ACTIVITIES ####
   ## Proportion of the workers susceptible to have community activities
-  pCommunityActivity = 0.40, 
+  pCommunityActivity = 0.70, 
   ## Average number of workers within a commune for activity
-  N_perCommunityActivity = 4, 
+  N_perCommunityActivity = 5, 
   ## Probability of contamination within a commune for activity
-  conta_prob_withinCommunity = 0.027, ## CHECK LITERATURE DATA (average daily value of 25% every 10 days)
+  conta_prob_withinCommunity = 0.10, ## CHECK LITERATURE DATA (average daily value of 25% every 10 days)
   
   #### MASKS ####
   ## Type of the mask worn by the workers (by default: "Surgical mask")
@@ -49,7 +49,7 @@ Parms_Workers <- list(
 
   #### EPIDEMIOLOGY SCENARIO ####
   ## The number of contaminated workers at the day 0
-  nContaminated_Init = 3,
+  nContaminated_Init = 5,
   ## Regional prevalence ##
   prev = 50/100000,
   

@@ -13,6 +13,7 @@ f_initWorkers <- function(
   ## (check the script "parameters_workers.R")
   prm_time, ## (list) the parameters associated with the timetable
   ## (check the script "parameters_time.R")
+  seed = NULL,
   ...
   #### OUTPUT
   ## W (dataframe): the initialised workers
@@ -24,12 +25,13 @@ f_initWorkers <- function(
   ##  - $W_location (character): location in the plant ("Entry hall", "W.C.",...), initialized as NA
 ) {
   #### BEGIN OF FUNCTION
-  set.seed(seed)
+  if (!is.null(seed)) {set.seed(seed)}
+  
   ### ID of the workers (value "W001","W002", ..)
   W_ID <- paste("W", stringr::str_pad(seq(1:prm$NWorkers), width=3, pad="0"), sep="")
   
   ### Total number of the time indexes
-  writeLines("========[Step 1/2 - Processing time indexes]=========================")
+  writeLines("=========== Initializing workers: Step 1/2 - Processing time indexes ===========")
   writeLines("Processing time indexes")
   NTime <- prm_time$NDays * 1440 / prm_time$Step ## amplitude Ndays in days, time step in minutes
   t_ind <- rep(0:NTime, each = prm$NWorkers)
@@ -52,7 +54,7 @@ f_initWorkers <- function(
   ### States (infected/not infected) of the workers
   # Time index 0:
   # HYPOTHESE : ONE INDIVIDUAL CONTAMINATED AT DAY 0 ?
-  writeLines("========[Step 2/2 - Workers attributes]==============================")
+  writeLines("=========== Initializing workers: Step 2/2 - Workers attributes ===========")
   writeLines("Assign the first random contaminated worker")
   W_status0 <- rep("susceptible", prm$NWorkers)
   set.seed(seed)
@@ -130,9 +132,8 @@ f_initWorkers <- function(
                   Hour = Hour,
                   Min = Min
   )
-  writeLines("=============================================")
-  writeLines("Workers initialized")
-  writeLines("=============================================")
+  writeLines("============================ Workers initialized ============================")
+
   return(W)
   #### END OF FUNCTION
 }
@@ -147,7 +148,7 @@ f_assignCommunes <- function(
   #### BEGIN OF FUNCTION
   ### Community activities
   # The workers with/without community activities
-  set.seed(seed)
+  # set.seed(seed)
   W_communityActivity0 <- sample(x = c(T,F),
                                  size = prm$NWorkers, replace = T,
                                  prob = c(prm$pCommunityActivity, 1-prm$pCommunityActivity))
@@ -227,7 +228,6 @@ f_assignWorkersTypeTeam <- function(
             )
   
   ## Sampling the workers with combined characteristics (type and team)
-  set.seed(seed)
   W_TT <- sample(x = names(p_TT),
                  size = prm$NWorkers, replace = T,
                  prob = unname(p_TT))
@@ -428,7 +428,7 @@ f_calculateActiveCounter <- function(
   ## OUTPUT
   ## OUTPUT: data frame with calculated active counters for every workers
 ) {
-  writeLines("Processing active counters")
+  writeLines("Processing active counter for all workers")
   ## data manipulation: row_ID added, necessary for matching values after calculation of active counters
   ## W <- data.frame(row_ID = 1:nrow(W), W) 
   ## Extract the data at the beginning of every day
@@ -482,7 +482,7 @@ f_calculateActiveCounter <- function(
     data.table::rbindlist() %>%
     dplyr::arrange(t_ind, W_ID) -> OUTPUT
   ############ /!\ Optimized code (end)
-  
+  writeLines("======= Processing active counter for all workers: done ==========")
   return(OUTPUT)
 }
 

@@ -131,7 +131,8 @@ f_dailyContamination <- function(
   prm_time,
   prm_air,
   prm_conta,
-  seed = NULL
+  seed = NULL,
+  ...
 ) {
   W_ID <- unique(W$W_ID) %>% sort()
   
@@ -145,20 +146,18 @@ f_dailyContamination <- function(
   writeLines("\n (i) Aerosol")
   # The total cumulative number of the droplets
   # inhaled by each worker on the PREVIOUS day
-  writeLines("- Calculating the cumulative number of droplets inhaled by each worker")
+  # writeLines("- Calculating the cumulative number of droplets inhaled by each worker")
   MASTER <- f_Module_Master(MyAir = MyAir,
                             MyWorkers = W,
                             prm_plant = prm_plant,
                             prm_air = prm_air,
                             prm_time = prm_time,
                             prm_workers = prm_workers,
-                            ind_min = subset(MyWorkers, Day == day-1)$t_ind %>% min(),
-                            ind_max = subset(MyWorkers, Day == day-1)$t_ind %>% max()) # OK
+                            ind_min = subset(W, Day == day-1)$t_ind %>% min(),
+                            ind_max = subset(W, Day == day-1)$t_ind %>% max()) # OK
 
   MyAir <- MASTER[[1]] # Updating the cumulative number of droplets for every days OK
   Expocum <- MASTER[[2]] # sum inhaled OF THE GIVEN DAY day
-
-  writeLines("- Dose-response model processing")
 
   RNA_virion_ratio <- prm_conta$RNA_virion_ratio # the ratio between the number of RNA copies and virions
   RNA_load <- prm_conta$RNA_load ## in number of RNA copies per mL

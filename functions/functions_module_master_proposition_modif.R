@@ -74,7 +74,8 @@ f_Module_Master <- function (
   prm_workers,
   ind_min,
   ind_max,
-  seed = NULL ## added for simulation purposes
+  seed = NULL, ## added for simulation purposes
+  ...
 ) {
   if (!is.null(seed)) {set.seed(seed)} ## added for simulation purposes
   
