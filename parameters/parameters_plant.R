@@ -130,7 +130,7 @@ Parms_Plant <- list(
       dim.X = 13, # dimensions
       dim.Y = 3, # dimensions
       pos.X = 0.15, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
     )
     ,
     ## New object
@@ -139,7 +139,7 @@ Parms_Plant <- list(
       dim.X = 18, # dimensions
       dim.Y = 3, # dimensions
       pos.X = 0.45, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
     )
     ,
     ## 'Eplucheuse'
@@ -148,7 +148,7 @@ Parms_Plant <- list(
       dim.X = 2, # dimensions
       dim.Y = 2, # dimensions
       pos.X = 0.85, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.75 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.75 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
     )
     
     ####### NOTE /!\ 
