@@ -168,30 +168,30 @@ pack_rows("*Overall proportion for different types of workers *" , 5, 10)
 
 
 ### Parameters associated to air
-
-# ```{r table of air parameter, echo=FALSE}
-# data<-read.csv("parameters_air.csv",sep=";",header = T)
-# data<-as.data.frame(data)
-# data<-data[,-6]
-# knitr::kable(
-#   data,col.names = gsub("[.]", " ", names(data)),
-#   caption = 'Table 4. Set of parameters used for charateryzing air in the meat plant.'
-# )%>%kable_styling('striped', font_size = 10)
-# 
-# ```
+To be completed
+<!-- # ```{r table of air parameter, echo=FALSE} -->
+<!-- # data<-read.csv("parameters_air.csv",sep=";",header = T) -->
+<!-- # data<-as.data.frame(data) -->
+<!-- # data<-data[,-6] -->
+<!-- # knitr::kable( -->
+<!-- #   data,col.names = gsub("[.]", " ", names(data)), -->
+<!-- #   caption = 'Table 4. Set of parameters used for charateryzing air in the meat plant.' -->
+<!-- # )%>%kable_styling('striped', font_size = 10) -->
+<!-- #  -->
+<!-- # ``` -->
 
 ### Parameters associated to food
-
-# ```{r table of food parameter, echo=FALSE}
-# data<-read.csv("parameters_food.csv",sep=";",header = T)
-# data<-as.data.frame(data)
-# data<-data[,-6]
-# knitr::kable(
-#   data,col.names = gsub("[.]", " ", names(data)),
-#   caption = 'Table 5. Set of parameters used for charateryzing food in the meat plant.'
-# )%>%kable_styling('striped', font_size = 10)
-# 
-# ```
+To be completed
+<!-- # ```{r table of food parameter, echo=FALSE} -->
+<!-- # data<-read.csv("parameters_food.csv",sep=";",header = T) -->
+<!-- # data<-as.data.frame(data) -->
+<!-- # data<-data[,-6] -->
+<!-- # knitr::kable( -->
+<!-- #   data,col.names = gsub("[.]", " ", names(data)), -->
+<!-- #   caption = 'Table 5. Set of parameters used for charateryzing food in the meat plant.' -->
+<!-- # )%>%kable_styling('striped', font_size = 10) -->
+<!-- #  -->
+<!-- # ``` -->
 
 
 ### Parameters relative to the simulation time. 
