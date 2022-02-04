@@ -131,6 +131,7 @@ f_dailyContamination <- function(
   prm_time,
   prm_air,
   prm_conta,
+  inf_log,
   seed = NULL,
   ...
 ) {
@@ -138,7 +139,7 @@ f_dailyContamination <- function(
   
   if (!is.null(seed)) {set.seed(seed+day)}
   
-  writeLines(paste("\n ===================== Daily contamination : Day ", day, " =====================", sep =""))
+  writeLines(paste("\n ===================== Daily contamination : Day ", day, " ===========================", sep =""))
   
   InfectedWorkers <- subset(W, Day == day-1 & W_statusCounter>0)$W_ID %>% unique() # already infected
   
@@ -217,14 +218,18 @@ f_dailyContamination <- function(
   # The response of each worker (get contaminated or not) based on their respective infection probability
   resp <- rbinom(n = length(P_infection), size = 1, prob = P_infection)
 
-  # Gathering the previously infected workers with the newly infected ones
-  NewInfectedWorkers_Air <- character() # newly infected via aerosol
+  # ID of the new workers infected via aerosol (response = 1) if they were not infected previously
+  NewInfectedWorkers_Air <- W_ID[resp == 1 & (! W_ID %in% InfectedWorkers)]
 
-  if (length(resp[resp == 1])) { # if there are workers getting infected via the aerosol through infection probability
-    NewInfectedWorkers_Air <- W_ID[resp == 1 & (! W_ID %in% InfectedWorkers)] # looking for their corresponding IDs
-    writeLines(paste(">>> Newly infected workers through aerosol : ID(s)", NewInfectedWorkers_Air, " <<<"))
+  if (length(NewInfectedWorkers_Air) > 0) { # if there are workers getting infected via the aerosol through infection probability
+    writeLines(paste(">>> Newly infected workers via aerosol : ID(s)", NewInfectedWorkers_Air, " <<<"))
     InfectedWorkers <- c(InfectedWorkers, NewInfectedWorkers_Air) %>% unique # combine with the workers already infected
-  } else {writeLines(">>> Newly infected workers through aerosol : 0 <<<")}
+    
+    # Update the infection log
+    inf_log$InfectedDay[inf_log$W_ID %in% NewInfectedWorkers_Air] <- day 
+    inf_log$InfectionSource[inf_log$W_ID %in% NewInfectedWorkers_Air] <- "aerosol"
+    
+  } else {writeLines(">>> Newly infected workers via aerosol : 0 <<<")}
   
 
   
@@ -244,6 +249,11 @@ f_dailyContamination <- function(
     NewInfectedWorkers_Reg <- SusceptibleWorkers[Infection_Regional == 1] # looking for their corresponding IDs
     writeLines(paste(">>> Newly infected workers due to regional epidemic situation : ID(s)", NewInfectedWorkers_Reg, " <<<"))
     InfectedWorkers <- c(InfectedWorkers, NewInfectedWorkers_Reg) %>% unique # combine with the workers already infected
+    
+    # Update the infection log
+    inf_log$InfectedDay[inf_log$W_ID %in% NewInfectedWorkers_Air] <- day 
+    inf_log$InfectionSource[inf_log$W_ID %in% NewInfectedWorkers_Air] <- "epidemy"
+    
   } else {writeLines(">>> Newly infected workers due to regional epidemic situation : 0 <<<")}
   
   
@@ -276,7 +286,7 @@ f_dailyContamination <- function(
                          " within the community ", comm_ID, sep = ""))
       }
     }
-    else { # otherwise, if there is any infected worker within the community
+    else { # otherwise, if there is not any infected worker within the community
       resp_wi <- 0 # the worker wi has 0 risk to get infected
     }
     
@@ -286,9 +296,15 @@ f_dailyContamination <- function(
   # Gathering all workers possibly get infected through community activities
   NewInfectedWorkers_Comm <- CommInfection_resp[CommInfection_resp > 0] %>% names()
 
+
   # Combine with other workers already infected via other infection source
   if (length(NewInfectedWorkers_Comm) > 0) {
     InfectedWorkers <- c(InfectedWorkers, NewInfectedWorkers_Comm) %>% unique()
+    
+    # Update the infection log
+    inf_log$InfectedDay[inf_log$W_ID %in% NewInfectedWorkers_Comm] <- day 
+    inf_log$InfectionSource[inf_log$W_ID %in% NewInfectedWorkers_Comm] <- "community"
+    
   } else {
     writeLines(">>> Newly infected workers due to community activities : 0 <<<")
   }
@@ -304,6 +320,6 @@ f_dailyContamination <- function(
   W <- f_updateStatusByCounter(W = W, day = day, prm_workers = prm_workers)
   
   
-  return(list(W = W, MyAir = MyAir))
+  return(list(W = W, MyAir = MyAir, inf_log = inf_log))
   ## END OF FUNCTION
 }
