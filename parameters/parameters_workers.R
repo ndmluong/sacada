@@ -29,7 +29,7 @@ Parms_Workers <- list(
   
   #### COMMUNITY ACTIVITIES ####
   ## Proportion of the workers susceptible to have community activities
-  pCommunityActivity = 0.70, 
+  pCommunityActivity = 0.50, 
   ## Average number of workers within a commune for activity
   N_perCommunityActivity = 5, 
   

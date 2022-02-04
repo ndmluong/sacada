@@ -19,7 +19,7 @@ f_updateStatusByCounter <- function(
   if (length(W_SymptomBegin) > 0) { ## if there is any worker(s) entrying the symptom period at the given day
     SymptomEvent <- sample(c("symptomatic", "asymptomatic"), ## random sampling for these workers for presenting a symptom or not
                            size = length(W_SymptomBegin), replace = T,
-                           prob = c(prm_workers$pSymptom, 1-prm_workers$pSymptom))
+                           prob = c(1 - prm_workers$pAsymptom, prm_workers$pAsymptom))
     writeLines(paste("/!\\ Begin of the symptomatic period for the worker(s): ", toString(W_SymptomBegin),
                      "\nwith their respective symptoms development as follows: ", toString(SymptomEvent), sep=""))
     # ## /!\ NON-OPTIMIZED CODE
@@ -67,8 +67,8 @@ f_updateStatusByCounter <- function(
     # ## /!\ OPTIMIZED CODE (END)
   }
   
-  WD$W_status[which(WD$W_statusCounter %in% prm_workers$NonInfectiousDay:prm_workers$ContaEndDay)] <- "non-infectious"
-  WD$W_status[which(WD$W_statusCounter > prm_workers$ContaEndDay)] <- "recovered"
+  WD$W_status[which(WD$W_statusCounter %in% prm_workers$NonInfectiousDay:(prm_workers$RecoveredDay-1))] <- "non-infectious"
+  WD$W_status[which(WD$W_statusCounter >= prm_workers$RecoveredDay)] <- "recovered"
   
   rbind(WD, Wcomp) %>%
     dplyr::arrange(t_ind, W_ID) -> W
@@ -120,12 +120,28 @@ f_DRM_Watanabe <- function(
   return(P_infection)
 }
 
+##### f_individual_viral_load ####
+f_individual_viral_load <- function(
+  prm_workers,
+  prm_conta
+) {
+  RNA_dist_parms <- prm_conta$RNA_dist[[prm_conta$VoC]]
+  
+  indi_viral_load <- EnvStats::rtri(n = prm_workers$NWorkers,
+                                    min = RNA_dist_parms["min"],
+                                    mode = RNA_dist_parms["mode"],
+                                    max = RNA_dist_parms["max"])
+  names(indi_viral_load) <- unique(MyWorkers$ID) %>% sort()
+  
+  return(indi_viral_load)
+}
 
 #### f_dailyContamination #####
 f_dailyContamination <- function(
   W,
   MyAir,
   day,
+  indi_viral_load,
   prm_plant,
   prm_workers,
   prm_time,
@@ -150,6 +166,7 @@ f_dailyContamination <- function(
   # writeLines("- Calculating the cumulative number of droplets inhaled by each worker")
   MASTER <- f_Module_Master(MyAir = MyAir,
                             MyWorkers = W,
+                            indi_viral_load = indi_viral_load,
                             prm_plant = prm_plant,
                             prm_air = prm_air,
                             prm_time = prm_time,

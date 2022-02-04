@@ -53,6 +53,10 @@ f_run_2M <- function(
   ## Random state (in day) of the first initialized contaminated worker
   MyWorkers <- f_initStatusCounterDay1(W = MyWorkers, prm_workers = prm_workers, prm_time = prm_time, seed = seed)
   
+  #### Inter-individuals variability in the viral load (RNA load), in log10 copies/ml
+  indi_viral_load <- f_individual_viral_load(prm_workers = Parms_Workers,
+                                             prm_conta = Parms_Conta)
+  
   ### AEROSOL ###
   ## Initializing the agents (classes of droplets)
   MyAir <- f_initAir(prm = prm_plant, prm_time = prm_time, prm_air = prm_air)
