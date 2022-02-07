@@ -2,9 +2,12 @@
 Parms_Workers <- list(
   #### NUMBER OF WORKERS ####
   ## Total number of fixed workers (regular/temporary/subcontract)
-  NWorkers = 100, 
+  NWorkers = 100,
+  
+  ####*****Not used yet *****###
   ## Total number of exterior workers
   NWorkers_ext = 15,
+  ####****************###
   
   #### TYPE OF WORKERS - TEAMS - SHIFT ####
   ## The ratio between the total number of workers over the required number of workers per working day
@@ -23,9 +26,12 @@ Parms_Workers <- list(
             "teamB" = 0.5),
   ## Proportion of workers (cutters/logistics) susceptible to change the teams (A/B) for a given week
   pChangeTeam = 0.05,
+  
+  ####*****Not used yet *****###
   ## Worker types with important mission having high probabilities to be present at work 
   ## despite their possible contamination/symptoms
   mandatoryWorkersType = c("transverse1"),
+  ###*******************###
   
   #### COMMUNITY ACTIVITIES ####
   ## Proportion of the workers susceptible to have community activities

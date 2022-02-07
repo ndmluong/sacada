@@ -128,17 +128,6 @@ knitr::kable(
 ```
 
 
-```{r table of time parameter, echo=FALSE}
-data<-read.csv("parameters_time.csv",sep=";",header = T)
-data<-as.data.frame(data)
-data<-data[,-6]
-knitr::kable(
-  data,col.names = gsub("[.]", " ", names(data)),
-  caption = 'Table 2. Set of parameters used for charateryzing the durations of the simulation.'
-)%>%kable_styling('striped', font_size = 10)
-
-```
-
 ### Parameters associated to worker
 
 *The parameter relative to the simulation time will be entered in the file :  parameters_workers.R*
@@ -154,6 +143,8 @@ The operators are differentiated according to their functions
 
 ![Figure 3 : Plan of the processing plant with worker](images/map_of_plant_obj_worker.png)
 
+The number of employees is defined as follows. 
+
 ```{r table of worker parameter, echo=FALSE}
 data<-read.csv("parameters_worker.csv",sep=";",header = T)
 data<-as.data.frame(data)
@@ -166,6 +157,17 @@ pack_rows("*Overall proportion for different types of workers *" , 5, 10)
 
 ```
 
+<span style="color:red">NWorkers not yet used</span>
+
+The proportion of types of workers of cutters and logistics worked in two teams.This proportion is defined in the variable **pTeam**, where the proportion of workers in each team is defined, between 0 and 1, with the total of "teamA" and "teamB" being equal to 1. (For example : teamA = 0.5, teamB = 0.5),
+Moreover, this worker can alternatively change the working shift (morning/afternoon) from one week to another, and so change of team. The proportion of workers is definided in **pChangeTeam** (0 to 1). The value will be 0.05 (5%) <span style="color:red"> Sources </span>.
+
+
+
+#### Parameters will be may be implemented
+
+Worker types with important mission having high probabilities to be present at work despite their possible contamination/symptoms
+--> mandatoryWorkersType = c("transverse1")
 
 ### Parameters associated to air
 To be completed
@@ -200,12 +202,9 @@ To be completed
 
 It consists in filling two parameters: 
 
-- the total duration that will be simulated ("NDays" in the ABM, in days)
-- the simulated time interval of the simulation ("Step" in the ABM, in minutes)
+- the total duration that will be simulated ("NDays" in the ABM, in days), for example, 365 days; 
+- the simulated time interval of the simulation ("Step" in the ABM, in minutes), for example 5 minutes.
 
-Parms_Time <- list(
-  NDays = 365, ## total number of days during the entire process
-  Step = 5 ## time step (in minutes)
-)
+
 
 ## References
