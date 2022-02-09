@@ -4,6 +4,7 @@ author: "ANR SACADA"
 date: "02/02/2022"
 output:
   html_document:
+      theme: paper
       toc: TRUE
       toc_depth: 2
       toc_float:
@@ -11,6 +12,7 @@ output:
           smooth_scroll: TRUE
       number_sections: TRUE    
 bibliography: Ref_Sacada.bib
+link-citations: TRUE
 ---
 
 ```{r setup, include=FALSE}
