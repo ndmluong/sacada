@@ -131,7 +131,6 @@ f_individual_viral_load <- function(
                                     min = RNA_dist_parms["min"],
                                     mode = RNA_dist_parms["mode"],
                                     max = RNA_dist_parms["max"])
-  names(indi_viral_load) <- unique(MyWorkers$ID) %>% sort()
   
   return(indi_viral_load)
 }
@@ -178,7 +177,9 @@ f_dailyContamination <- function(
   Expocum <- MASTER[[2]] # sum inhaled OF THE GIVEN DAY day
 
   RNA_virion_ratio <- prm_conta$RNA_virion_ratio # the ratio between the number of RNA copies and virions
-  RNA_load <- prm_conta$RNA_load ## in number of RNA copies per mL
+  ## Viral load in number of RNA copies per mL
+  RNA_load <- 1e11
+  #RNA_load <- prm_conta$RNA_dist[prm_conta$VoC] 
 
   VP <- RNA_load * prm_air$d_Vol # 4 classes
 
@@ -262,14 +263,15 @@ f_dailyContamination <- function(
                                size = 1,
                                prob = prm_workers$prev)
   
-  if (length(Infection_Regional[Infection_Regional == 1]) > 0) { # if there are workers getting infected due to regional epidemic situations
-    NewInfectedWorkers_Reg <- SusceptibleWorkers[Infection_Regional == 1] # looking for their corresponding IDs
-    writeLines(paste(">>> Newly infected workers due to regional epidemic situation : ID(s)", NewInfectedWorkers_Reg, " <<<"))
+  NewInfectedWorkers_Reg <- SusceptibleWorkers[Infection_Regional == 1] # looking for their corresponding IDs
+  
+  if (length(NewInfectedWorkers_Reg) > 0) { # if there are workers getting infected due to regional epidemic situations
+    writeLines(paste(">>> Newly infected workers due to regional epidemic situation : ID(s)", toString(NewInfectedWorkers_Reg), " <<<"))
     InfectedWorkers <- c(InfectedWorkers, NewInfectedWorkers_Reg) %>% unique # combine with the workers already infected
     
     # Update the infection log
-    inf_log$InfectedDay[inf_log$W_ID %in% NewInfectedWorkers_Air] <- day 
-    inf_log$InfectionSource[inf_log$W_ID %in% NewInfectedWorkers_Air] <- "epidemy"
+    inf_log$InfectedDay[inf_log$W_ID %in% NewInfectedWorkers_Reg] <- day 
+    inf_log$InfectionSource[inf_log$W_ID %in% NewInfectedWorkers_Reg] <- "epidemy"
     
   } else {writeLines(">>> Newly infected workers due to regional epidemic situation : 0 <<<")}
   
@@ -295,7 +297,7 @@ f_dailyContamination <- function(
 
     if (length(W_infected_source) > 0) { # if there is at least one infected worker within the community
       ## the worker wi has a risk to get infected
-      resp_wi <- rbinom(n=1, size=1, prob = prm_workers$conta_prob_withinCommunity)
+      resp_wi <- rbinom(n=1, size=1, prob = prm_workers$daily_SAR[prm_workers$SAR_sim]) ## check parameters_workers
 
       if (resp_wi > 0) { # if the worker wi actually gets infected, show infection information
         writeLines(paste("- Worker ", wi,

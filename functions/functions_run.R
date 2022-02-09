@@ -54,8 +54,10 @@ f_run_2M <- function(
   MyWorkers <- f_initStatusCounterDay1(W = MyWorkers, prm_workers = prm_workers, prm_time = prm_time, seed = seed)
   
   #### Inter-individuals variability in the viral load (RNA load), in log10 copies/ml
-  indi_viral_load <- f_individual_viral_load(prm_workers = Parms_Workers,
-                                             prm_conta = Parms_Conta)
+  indi_viral_load <- f_individual_viral_load(prm_workers = prm_workers,
+                                             prm_conta = prm_conta)
+  names(indi_viral_load) <- unique(MyWorkers$ID) %>% sort()
+  
   
   ### AEROSOL ###
   ## Initializing the agents (classes of droplets)
@@ -73,7 +75,7 @@ f_run_2M <- function(
   InfectionLog <- data.frame(W_ID = unique(MyWorkers$W_ID),
                              InfectedDay = rep(NA, prm_workers$NWorkers),
                              InfectionSource = rep(NA, prm_workers$NWorkers),
-                             seed = rep(seed, prm_workers))
+                             seed = rep(seed, prm_workers$NWorkers))
   
   Infected_init <- subset(MyWorkers, Day == 1 & W_status == "infected")$W_ID %>% unique()
   InfectionLog$InfectedDay[InfectionLog$W_ID %in% Infected_init] <- 1
