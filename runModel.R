@@ -33,12 +33,12 @@ source("parameters/parameters_conta.R") ## CONTAMINATION
 ##### SIMULATION #####
 ### one simulation, ex: seed 408
 ST1 <- Sys.time() ## simulation time checkpoint
-OUTPUT_seed408 <- f_run_2M(prm_plant = Parms_Plant,
+OUTPUT_seed204 <- f_run_2M(prm_plant = Parms_Plant,
                            prm_time = Parms_Time,
                            prm_workers = Parms_Workers,
                            prm_air = Parms_Air,
                            prm_conta = Parms_Conta,
-                           seed = 408)
+                           seed = 204)
 ST2 <- Sys.time() ## simulation time checkpoint
 
 ### several simulations
