@@ -229,7 +229,7 @@ for (Day in 1:57 ){
       }
 
 }
-plot(x = seq(1:length(N_contaminated)),y = N_contaminated)
+plot(x = seq(1:length(N_contaminated)),y = N_contaminated,ylim=c(0,100))
 
 
 # plot on same grid, each series colored differently -- 
@@ -250,17 +250,22 @@ MyAir[MyAir$AIR_ID=='Waste area',2:6]<-0
       facet_grid(AIR_ID ~ .)
  
  ggplot(subset(MyAir,AIR_ID=="Cutting Room")) + 
-   geom_point( mapping=aes(x=t_ind, y=d01), colour="red") +
-   geom_point( mapping=aes(x=t_ind, y=d02), colour="blue") + 
-   geom_point( mapping=aes(x=t_ind, y=d03), colour="green") + 
-   geom_point( mapping=aes(x=t_ind, y=d04), colour="orange") -> g1
+   geom_point( mapping=aes(x=t_ind, y=d01*0.00021), colour="red",) +
+   geom_point( mapping=aes(x=t_ind, y=d02*0.00244), colour="blue") + 
+   geom_point( mapping=aes(x=t_ind, y=d03*0.0179), colour="green") + 
+   geom_point( mapping=aes(x=t_ind, y=d04*0.0697), colour="orange") +
+   ylim(0, 10) -> g1
  
  ggplot(subset(MyAir,AIR_ID=="Cooling area")) + 
-   geom_point( mapping=aes(x=t_ind, y=d01), colour="red") +
-   geom_point( mapping=aes(x=t_ind, y=d02), colour="blue") + 
-   geom_point( mapping=aes(x=t_ind, y=d03), colour="green") + 
-   geom_point( mapping=aes(x=t_ind, y=d04), colour="orange") -> g2
- 
+   geom_point( mapping=aes(x=t_ind, y=d01*0.00021), colour="red",) +
+   geom_point( mapping=aes(x=t_ind, y=d02*0.00244), colour="blue") + 
+   geom_point( mapping=aes(x=t_ind, y=d03*0.0179), colour="green") + 
+   geom_point( mapping=aes(x=t_ind, y=d04*0.0697), colour="orange") -> g2
+ ggplot(subset(MyAir,AIR_ID=="Entry hall")) + 
+   geom_point( mapping=aes(x=t_ind, y=d01*0.00021), colour="red",) +
+   geom_point( mapping=aes(x=t_ind, y=d02*0.00244), colour="blue") + 
+   geom_point( mapping=aes(x=t_ind, y=d03*0.0179), colour="green") + 
+   geom_point( mapping=aes(x=t_ind, y=d04*0.0697), colour="orange") -> g2
  
 ggplotly(g1)
 ggplotly(g2)
