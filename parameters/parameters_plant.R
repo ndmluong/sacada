@@ -1,7 +1,7 @@
 ##### USER DEFINED PARAMETERS FOR THE PLANT #####
 Parms_Plant <- list(
   #### Plant
-  dim.X = 35, ## (numeric - m) length of the processing plants (meter)
+  dim.X = 30, ## (numeric - m) length of the processing plants (meter)
   dim.Y = 20, ## (numeric - m) width of the processing plants (meter)
   dim.Z = 5,  ## (numeric - m) height of the room 
   label = "Cutting Room",
@@ -49,7 +49,7 @@ Parms_Plant <- list(
       dim.Z = 3, # dimensions (meter)
       pos.X = 1, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
-      intdoor.side = "bottom",
+      intdoor.side = "left",
       extdoor.side = NA,
       Air_Cond_Type = "DEC", # Direct Expansion Coil
       Air_renewal = 120, # TO MODIFY !!!!!!! (m3/h)
@@ -130,7 +130,7 @@ Parms_Plant <- list(
       dim.X = 13, # dimensions
       dim.Y = 3, # dimensions
       pos.X = 0.15, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.30 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
     )
     ,
     ## New object
@@ -138,8 +138,8 @@ Parms_Plant <- list(
       label = "Conveyor2",
       dim.X = 18, # dimensions
       dim.Y = 3, # dimensions
-      pos.X = 0.45, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.5 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.X = 0.35, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.55 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
     )
     ,
     ## 'Eplucheuse'
@@ -148,7 +148,7 @@ Parms_Plant <- list(
       dim.X = 2, # dimensions
       dim.Y = 2, # dimensions
       pos.X = 0.85, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.75 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.8 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
     )
     
     ####### NOTE /!\ 

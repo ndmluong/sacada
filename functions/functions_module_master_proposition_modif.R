@@ -66,13 +66,16 @@ f_Who_is <- function(
 f_Module_Master <- function (
   MyAir, # /!\ MyAir (WHICH WILL BE USED/CHANGED FURTHER INSED THE FUNCTION) 
   # WAS ADDED HERE AS A FUNCTION INPUT BECAUSE IT SHOULD NOT BE A GLOBAL VARIABLE
+  MyWorkers, ## ADDED
+  indi_viral_load, # ADDED, numeric vector (log10 copies/ml) individual viral load for all workers if they are in the infectiousness period (status "infectious", "symptomatic", "asymptomatic")
   prm_plant,
   prm_air,
   prm_time,
   prm_workers,
   ind_min,
   ind_max,
-  seed = NULL ## added for simulation purposes
+  seed = NULL, ## added for simulation purposes
+  ...
 ) {
   if (!is.null(seed)) {set.seed(seed)} ## added for simulation purposes
   

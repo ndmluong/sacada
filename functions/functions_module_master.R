@@ -11,34 +11,32 @@ MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air
 AIR_ID <- c(prm_plant$label,
             unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$label)))))
 
-MyWorkers <- subset(MyWorkers,Week<2)
-MyWorkers <- dplyr::arrange(MyWorkers, t_ind, W_ID)
+# MyWorkers <- subset(MyWorkers,Week<2)
+# MyWorkers <- dplyr::arrange(MyWorkers, t_ind, W_ID)
 
-MyWorkers$W_location <- rep(sample(AIR_ID,
-                  size = prm_workers$NWorkers, replace = T,
-                  prob = c(0.7,0.05,0.05,0.05,0.05,0.05,0.05)),2016)
-# Pour le test, les opérateurs arrivent vers 6h, prennent une pause à 12h, travaillent jusqu' à 22h
-MyWorkers$W_location[MyWorkers$Hour<6]='Home'
-MyWorkers$W_location[MyWorkers$Hour>12 & MyWorkers$Hour<15]='Home'
-MyWorkers$W_location[MyWorkers$Hour>22]='Home'
-MyWorkers$W_location[MyWorkers$Day>5]='Home'
+# MyWorkers$W_location <- rep(sample(AIR_ID,
+#                   size = prm_workers$NWorkers, replace = T,
+#                   prob = c(0.7,0.05,0.05,0.05,0.05,0.05,0.05)),2016)
+# # Pour le test, les opérateurs arrivent vers 6h, prennent une pause à 12h, travaillent jusqu' à 22h
+# MyWorkers$W_location[MyWorkers$Hour<6]='Home'
+# MyWorkers$W_location[MyWorkers$Hour>12 & MyWorkers$Hour<15]='Home'
+# MyWorkers$W_location[MyWorkers$Hour>22]='Home'
+# MyWorkers$W_location[MyWorkers$Day>5]='Home'
+# 
+# MyWorkers$W_location[is.na(MyWorkers$W_location)]<-"Home"
 
-MyWorkers$W_location[is.na(MyWorkers$W_location)]<-"Home"
+# status<-c("contaminated","not contaminated")
+# MyWorkers$W_status <- rep(sample(status,
+#                                size = Parms_Workers$NWorkers, replace = T,
+#                                prob = c(0.05,0.95)) ,  2016*8+1)
+# status<-c("mask","no mask")
+# MyWorkers$W_mask<- rep(sample(status,
+#                              size = Parms_Workers$NWorkers, replace = T,
+#                              prob = c(0.5,0.05)), 2016)
 
-status<-c("contaminated","not contaminated")
-MyWorkers$W_status <- rep(sample(status,
-                               size = Parms_Workers$NWorkers, replace = T,
-                               prob = c(0.05,0.95)) ,  2016*8+1)
-status<-c("mask","no mask")
-MyWorkers$W_mask<- rep(sample(status,
-                             size = Parms_Workers$NWorkers, replace = T,
-                             prob = c(0.5,0.05)), 2016)
+Method_calc <<- f_Air_Criteria_Calc(Parms_Plant,Parms_Air) ## si les gouttelettes restent en aerosol ou pas
 
-Method_calc <<- f_Air_Criteria_Calc(Parms_Plant,Parms_Air)
-MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
-
-MyAir[MyAir$t_ind==0,2:(1+length(prm_air$Droplet_class))] = matrix(0,7,4)*(Method_calc)
- MyAir <- subset(MyAir,t_ind<1440)
+MyAir[MyAir$t_ind==0,2:(1+length(prm_air$Droplet_class))] = matrix(0,7,4)*(Method_calc) ## assigner les valeurs 0 pour 
 
 
 ind = 1
@@ -177,6 +175,7 @@ f_Module_Master <- function (prm_plant, prm_air, prm_time, prm_workers, ind_min,
  return(list(MyAir,W_droplet_Expos_cumul))
 ########## End of day time loop ######################
 }
+
   Dose_tot<-matrix(0,prm_workers$NWorkers,max(MyWorkers$Day))
 N_contaminated=0
 # for (Day in unique(MyWorkers$Day-1) ){
