@@ -88,6 +88,7 @@ f_run_2M <- function(
     CONTA <- f_dailyContamination(W = MyWorkers,
                                   MyAir = MyAir,
                                   day = day,
+                                  indi_viral_load = indi_viral_load,
                                   prm_plant = prm_plant,
                                   prm_workers = prm_workers,
                                   prm_time = prm_time,

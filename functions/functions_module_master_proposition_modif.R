@@ -126,7 +126,7 @@ f_Module_Master <- function (
     # 2.2 FROM AIR to WORKERS # !!!!ATTENTION, FAUTE ici le masque n'absorbe pas les gouttes :::)
     Resp_inh = ((W_Loc_N_mask[[1]]+W_Loc_N_mask[[3]])*0.1 + (W_Loc_N_mask[[2]]+W_Loc_N_mask[[4]]))*resp
     
-    # list[[7]] for each room, number of droplets inhaled in each droplet class per operators
+    # list[[7]] for each room, number of droplets inhaled in each droplet class per operators [d / min]
     W_droplet_Expos <- lapply(seq(1:N_rooms), 
                               function (x) return(Resp_inh[,x]*t(matrix(rep(as.matrix(Cd[x,]),prm_workers$NWorkers),ncol = prm_workers$NWorkers))))
     # total Number of droplet inhaled in each rooms for each droplet classes --> Air module balance equation
@@ -134,7 +134,8 @@ f_Module_Master <- function (
                                       function (x) return(colSums(W_droplet_Expos[[x]])))),ncol = N_rooms))
     
     # Cumulative (during the day) exposition of all workers to all classes --> dose response model at the end of the day
-    W_droplet_Expos_cumul = W_droplet_Expos_cumul+Reduce("+",W_droplet_Expos) 
+    W_droplet_Expos_cumul = W_droplet_Expos_cumul+Reduce("+",W_droplet_Expos)*prm_time$Step 
+
     #  ----------------------------------------------------------------------      
     # 2.3 FROM WORKERS to AIR #
 
@@ -162,7 +163,7 @@ f_Module_Master <- function (
     #  ----------------------------------------------------------------------
     # 2.5 Balance equation of emissions (sick workers) and absortion (sedimentation, inhalation, exhaust air)
     MyAir[MyAir$t_ind==ind+1,2:(1+length(prm_air$Droplet_class))] = Cd+
-      (dexhale*Method_calc -  dinhale-(V_renew + dsed)*Cd)*prm_time$Step/V_rooms
+      (dexhale*Method_calc -  dinhale-(V_renew + dsed)*Cd)*prm_time$Step/V_rooms # [d / m3]
     
     
     # MyAir[MyAir$t_ind==ind,2:(1+length(prm_air$Droplet_class))] <- MyAir[MyAir$t_ind==(ind-1),2:(1+length(prm_air$Droplet_class))] + 
