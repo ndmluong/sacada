@@ -192,8 +192,7 @@ f_dailyContamination <- function(
   Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
 
   # Total dose of infectious virus for every classes inhaled by each worker at the day day
-  Virion_dose = (Dose_per_class1 + Dose_per_class2 + 
-                   Dose_per_class3 + Dose_per_class4)/RNA_virion_ratio
+  Virion_dose = (Expocum[,1] + Expocum[,2] + Expocum[,3] + Expocum[,4])/RNA_virion_ratio
 
   ##### ASSUMTION 1 (END)
 
