@@ -174,33 +174,28 @@ f_dailyContamination <- function(
                             ind_max = subset(W, Day == day-1)$t_ind %>% max()) # OK
 
   MyAir <- MASTER[[1]] # Updating the cumulative number of droplets for every days OK
+  # Contaminated droplets ~=copie RNA
   Expocum <- MASTER[[2]] # sum inhaled OF THE GIVEN DAY day
 
   RNA_virion_ratio <- prm_conta$RNA_virion_ratio # the ratio between the number of RNA copies and virions
-  ## Viral load in number of RNA copies per mL
-  RNA_load <- 1e11
-  #RNA_load <- prm_conta$RNA_dist[prm_conta$VoC] 
 
-  VP <- RNA_load * prm_air$d_Vol # 4 classes
+  ##### ASSUMPTION 1 : 1 RNA copies per droplet !
+  # The percentage of droplets contaminated by RNA copies
+  Dose_per_class1 <- rep(0, prm_workers$NWorkers)
+  Dose_per_class2 <- rep(0, prm_workers$NWorkers)
+  Dose_per_class3 <- rep(0, prm_workers$NWorkers)
+  Dose_per_class4 <- rep(0, prm_workers$NWorkers)
 
-  # ##### ASSUMPTION 1 : 1 RNA copies per droplet !
-  # # The percentage of droplets contaminated by RNA copies
-  # P <- VP
-  # Dose_per_class1 <- rep(0, prm_workers$NWorkers)
-  # Dose_per_class2 <- rep(0, prm_workers$NWorkers)
-  # Dose_per_class3 <- rep(0, prm_workers$NWorkers)
-  # Dose_per_class4 <- rep(0, prm_workers$NWorkers)
-  # 
-  # Dose_per_class1[Expocum[,1]>0] <- rbinom(n = sum(Expocum[,1]>0),size= round(Expocum[Expocum[,1]>0,1]), prob = P[1])
-  # Dose_per_class2[Expocum[,2]>0] <- rbinom(n = sum(Expocum[,2]>0),size= round(Expocum[Expocum[,2]>0,2]), prob = P[2])
-  # Dose_per_class3[Expocum[,3]>0] <- rbinom(n = sum(Expocum[,3]>0),size= round(Expocum[Expocum[,3]>0,3]), prob = P[3])
-  # Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
-  # 
-  # # Total dose for every classes inhaled by each worker at the day day
-  # Dose_tot = Dose_per_class1 + Dose_per_class2 + Dose_per_class3 + Dose_per_class4
-  # 
-  # Virion_dose <- Dose_tot / RNA_virion_ratio
-  # ##### ASSUMTION 1 (END)
+  Dose_per_class1[Expocum[,1]>0] <- rbinom(n = sum(Expocum[,1]>0),size= round(Expocum[Expocum[,1]>0,1]), prob = P[1])
+  Dose_per_class2[Expocum[,2]>0] <- rbinom(n = sum(Expocum[,2]>0),size= round(Expocum[Expocum[,2]>0,2]), prob = P[2])
+  Dose_per_class3[Expocum[,3]>0] <- rbinom(n = sum(Expocum[,3]>0),size= round(Expocum[Expocum[,3]>0,3]), prob = P[3])
+  Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
+
+  # Total dose of infectious virus for every classes inhaled by each worker at the day day
+  Virion_dose = (Dose_per_class1 + Dose_per_class2 + 
+                   Dose_per_class3 + Dose_per_class4)/RNA_virion_ratio
+
+  ##### ASSUMTION 1 (END)
 
   # # ##### ASSUMPTION 2 : Calculate the number of RNA copies per droplet for each droplet class
   # # set.seed(seed+day)
@@ -217,14 +212,14 @@ f_dailyContamination <- function(
   # # Virion_dose <- RNA_tot / RNA_virion_ratio
   # # ##### ASSUMTION 2 (END)
 
-  ##### ASSUMPTION 3 : Calculate the number of virion per droplet for each droplet class
-  # by applying the RNA-Virion ratio from the beginning
-  VPR <- VP / RNA_virion_ratio
+  # ##### ASSUMPTION 3 : Calculate the number of virion per droplet for each droplet class
+  # # by applying the RNA-Virion ratio from the beginning
+  # VPR <- VP / RNA_virion_ratio
+  # 
+  # Ndr <- rpois(n = length(prm_air$Droplet_class),
+  #              lambda = VPR)
 
-  Ndr <- rpois(n = length(prm_air$Droplet_class),
-               lambda = VPR)
-
-  Virion_dose <- round(Expocum[,1]) * Ndr[1] + round(Expocum[,2]) * Ndr[2] + round(Expocum[,3]) * Ndr[3] + round(Expocum[,4]) * Ndr[4]
+  # Virion_dose <- round(Expocum[,1]) * Ndr[1] + round(Expocum[,2]) * Ndr[2] + round(Expocum[,3]) * Ndr[3] + round(Expocum[,4]) * Ndr[4]
   ##### ASSUMTION 3 (END)
 
   ##### DOSE-RESPONSE MODEL : WATANABE MODEL

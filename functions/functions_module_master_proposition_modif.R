@@ -99,6 +99,9 @@ f_Module_Master <- function (
   
   # Respiration rate of each employee ! Wrong assumption !!! the respiration rate is random evry time step (ce n'est pas grave Steven)
   resp <- runif(prm_workers$NWorkers,prm_air$RespRate[3],prm_air$RespRate[5]) #[m3/min]
+  # Droplet contamination probability as function as volume and individual viral load
+  # Can be moved out of this function !! 
+  P_drop_conta =  (10^indi_viral_load) %*% t(prm_air$d_Vol)
   
   ########## day time loop ######################
   for (ind in ind_min:ind_max)#max(MyAir$t_ind))### A modifier !!!!!! #### à mettre par jour
@@ -134,12 +137,16 @@ f_Module_Master <- function (
     W_droplet_Expos_cumul = W_droplet_Expos_cumul+Reduce("+",W_droplet_Expos) 
     #  ----------------------------------------------------------------------      
     # 2.3 FROM WORKERS to AIR #
-    # # probability talking , talking loud, just breathing, coughing at time ind 
-    # p_emission <- sample(c(1,2,3,4), size = prm_workers$NWorkers, prob= c(0.2,0.1,0.6,0.1), replace = T)
-    # Number of contaminated with mask in rooms
+
     # total number of droplets exhaled per employee (All employee)
-    dTot_exh <- prm_air$Cd_exp[p_emission,] * resp    # [d/min]
-    # number of drolets exhaled of all contaminated employees in each room per droplet classes 
+    dTot_exh_all_drops <- prm_air$Cd_exp[p_emission,] * resp  # [d/min]
+    # total number of contaminated droplets exhaled per employee (All employee)
+    # !!! calculus is done even for non infectious workers (it was just easier to do it this way)
+    dTot_exh <- dTot_exh_all_drops * P_drop_conta
+    
+    # number of contaminated drolets exhaled of all contaminated employees in each room per droplet classes 
+    # Only one copie ARN in each droplet
+    # Conversion fromt copie RNA to infectious viru is done in the daily_contamination.R
     # Employees with masks
     N_CMR = (1-prm_workers$Mask_Eff)*t(matrix(unlist(lapply(seq(1:N_rooms), 
                                                             function (x) return(colSums(W_Loc_N_mask[[1]][,x]*dTot_exh)))),nrow = length (prm_air$Droplet_class)))
@@ -147,13 +154,13 @@ f_Module_Master <- function (
     N_CNoMR = t(matrix(unlist(lapply(seq(1:N_rooms), 
                                      function (x) return(colSums(W_Loc_N_mask[[2]][,x]*dTot_exh)))),nrow = length (prm_air$Droplet_class)))
     
-    dexhale <-N_CMR+N_CNoMR # number of droplets exhaled and aerosolized  [d]
+    dexhale <-N_CMR+N_CNoMR # number of contaminated droplets exhaled and aerosolized  [d]
     #  ----------------------------------------------------------------------
     # 2.4 Airflow rate of air renewal m3/min
     V_renew <- c(prm_plant$Air_renewal,
                  unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$Air_renewal)))))/60
     #  ----------------------------------------------------------------------
-    
+    # 2.5 Balance equation of emissions (sick workers) and absortion (sedimentation, inhalation, exhaust air)
     MyAir[MyAir$t_ind==ind+1,2:(1+length(prm_air$Droplet_class))] = Cd+
       (dexhale*Method_calc -  dinhale-(V_renew + dsed)*Cd)*prm_time$Step/V_rooms
     

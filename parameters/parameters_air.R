@@ -6,10 +6,12 @@ Parms_Air <- list(
                     1.8,
                     3.5,
                     5.5),
-  d_Vol = 4/3*3.14159*(1e-06*c(0.8, # (ml3) Droplet Volume
+  d_Vol = 4/3*3.14159*(1e-06*c(0.8, # (ml) Droplet Volume
             1.8,
             3.5,
             5.5)/2)^3*1e6,
+  
+
   
   # Droplet_class = c(1, # (µm) Midpoint diameters of each droplet class (Buonanno et al. 2020) (respiration)
   #                   5,
