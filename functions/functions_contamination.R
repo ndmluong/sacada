@@ -181,18 +181,19 @@ f_dailyContamination <- function(
 
   ##### ASSUMPTION 1 : 1 RNA copies per droplet !
   # The percentage of droplets contaminated by RNA copies
-  Dose_per_class1 <- rep(0, prm_workers$NWorkers)
-  Dose_per_class2 <- rep(0, prm_workers$NWorkers)
-  Dose_per_class3 <- rep(0, prm_workers$NWorkers)
-  Dose_per_class4 <- rep(0, prm_workers$NWorkers)
-
-  Dose_per_class1[Expocum[,1]>0] <- rbinom(n = sum(Expocum[,1]>0),size= round(Expocum[Expocum[,1]>0,1]), prob = P[1])
-  Dose_per_class2[Expocum[,2]>0] <- rbinom(n = sum(Expocum[,2]>0),size= round(Expocum[Expocum[,2]>0,2]), prob = P[2])
-  Dose_per_class3[Expocum[,3]>0] <- rbinom(n = sum(Expocum[,3]>0),size= round(Expocum[Expocum[,3]>0,3]), prob = P[3])
-  Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
+  # Dose_per_class1 <- rep(0, prm_workers$NWorkers)
+  # Dose_per_class2 <- rep(0, prm_workers$NWorkers)
+  # Dose_per_class3 <- rep(0, prm_workers$NWorkers)
+  # Dose_per_class4 <- rep(0, prm_workers$NWorkers)
+  # 
+  # Dose_per_class1[Expocum[,1]>0] <- rbinom(n = sum(Expocum[,1]>0),size= round(Expocum[Expocum[,1]>0,1]), prob = P[1])
+  # Dose_per_class2[Expocum[,2]>0] <- rbinom(n = sum(Expocum[,2]>0),size= round(Expocum[Expocum[,2]>0,2]), prob = P[2])
+  # Dose_per_class3[Expocum[,3]>0] <- rbinom(n = sum(Expocum[,3]>0),size= round(Expocum[Expocum[,3]>0,3]), prob = P[3])
+  # Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
 
   # Total dose of infectious virus for every classes inhaled by each worker at the day day
-  Virion_dose = (Expocum[,1] + Expocum[,2] + Expocum[,3] + Expocum[,4])/RNA_virion_ratio
+  Virion_dose = (Expocum[,1]+ Expocum[,2]+ 
+                   Expocum[,3] + Expocum[,4])/RNA_virion_ratio
 
   ##### ASSUMTION 1 (END)
 
@@ -333,6 +334,6 @@ f_dailyContamination <- function(
   W <- f_updateStatusByCounter(W = W, day = day, prm_workers = prm_workers)
   
   
-  return(list(W = W, MyAir = MyAir, inf_log = inf_log))
+  return(list(W = W, MyAir = MyAir, inf_log = inf_log, Virion_dose = Virion_dose, Expocum = Expocum))
   ## END OF FUNCTION
 }

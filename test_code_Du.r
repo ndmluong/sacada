@@ -241,6 +241,8 @@ OUTPUT <- list(seed = seed,
 # 
 # save.image("simulation_output/OUTPUT_2022_02_01.RData")
 
+pal_fill <- viridis::viridis(10)
+
 ggplot(data=IS) +
   geom_line(aes(x = Day, y = Infected_cumul, group = seed, colour = seed), size = 0.5) +
   theme(axis.ticks=element_blank(),
@@ -265,16 +267,16 @@ g1
 
 ### 1 seed, without threshold
 ggplot(data=subset(IS, seed == 116)) +
-  geom_ribbon(aes(x = Day, ymax = Symptomatic, ymin = 0), fill = "chocolate4", alpha = 0.9) +
-  geom_ribbon(aes(x = Day, ymin = Symptomatic, ymax = Symptomatic+Asymptomatic), fill = "chocolate4", alpha = 0.7) +
-  geom_ribbon(aes(x = Day, ymin = Symptomatic+Asymptomatic, ymax = InfectiousPeriod), fill = "chocolate4", alpha = 0.5) +
-  geom_ribbon(aes(x = Day, ymin = InfectiousPeriod, ymax = InfectiousPeriod + NonInfectious), fill = "darkgray", colour = "darkgray", alpha = 0.95) +
-  geom_ribbon(aes(x = Day, ymin = InfectiousPeriod + NonInfectious, ymax = Positive), fill = "darkgray", colour = "darkgray", alpha = 0.65) +
-  geom_ribbon(aes(x = Day, ymin = Positive, ymax = Infected_cumul), fill = "darkgreen", colour = "darkgreen", alpha = 0.7) +
+  geom_ribbon(aes(x = Day, ymax = Symptomatic, ymin = 0), fill = pal_fill[1], alpha = 0.9) +
+  geom_ribbon(aes(x = Day, ymin = Symptomatic, ymax = Symptomatic+Asymptomatic), fill = pal_fill[2], alpha = 0.7) +
+  geom_ribbon(aes(x = Day, ymin = Symptomatic+Asymptomatic, ymax = InfectiousPeriod), fill = pal_fill[3], alpha = 0.5) +
+  geom_ribbon(aes(x = Day, ymin = InfectiousPeriod, ymax = InfectiousPeriod + NonInfectious), fill = pal_fill[4], colour = pal_fill[4], alpha = 0.95) +
+  geom_ribbon(aes(x = Day, ymin = InfectiousPeriod + NonInfectious, ymax = Positive), fill = pal_fill[5], colour = pal_fill[5], alpha = 0.65) +
+  # geom_ribbon(aes(x = Day, ymin = Positive, ymax = Infected_cumul), fill = pal_fill[10], colour = "white", alpha = 0.7) +
   geom_line(aes(x = Day, y = Infected_cumul), colour = "red", size = 3) +
-  geom_line(aes(x = Day, y = InfectiousPeriod), colour = "chocolate4", size = 1.5) +
-  geom_line(aes(x = Day, y = Positive), colour = "black", size = 2) +
-  #geom_hline(yintercept = 15, colour = "navyblue", linetype = "dashed") +
+  geom_line(aes(x = Day, y = InfectiousPeriod), colour = pal_fill[1], size = 1.5) +
+  geom_line(aes(x = Day, y = Positive), colour = pal_fill[4], size = 1.5) +
+  # geom_hline(yintercept = 15, colour = "navyblue", linetype = "dashed") +
   theme(axis.ticks=element_blank(),
         #legend.position = "none",
         panel.background=element_rect(fill="white"),
@@ -295,16 +297,16 @@ ggplot(data=subset(IS, seed == 116)) +
 
 ### 5 seeds, without / with threshold
 ggplot(data=subset(IS, seed %in% c(125, 216, 189, 311, 408))) +
-  geom_ribbon(aes(x = Day, ymax = Symptomatic, ymin = 0), fill = "chocolate4", alpha = 0.9) +
-  geom_ribbon(aes(x = Day, ymin = Symptomatic, ymax = Symptomatic+Asymptomatic), fill = "chocolate4", alpha = 0.7) +
-  geom_ribbon(aes(x = Day, ymin = Symptomatic+Asymptomatic, ymax = InfectiousPeriod), fill = "chocolate4", alpha = 0.5) +
-  geom_ribbon(aes(x = Day, ymin = InfectiousPeriod, ymax = InfectiousPeriod + NonInfectious), fill = "darkgray", colour = "darkgray", alpha = 0.95) +
-  geom_ribbon(aes(x = Day, ymin = InfectiousPeriod + NonInfectious, ymax = Positive), fill = "darkgray", colour = "darkgray", alpha = 0.65) +
-  geom_ribbon(aes(x = Day, ymin = Positive, ymax = Infected_cumul), fill = "darkgreen", colour = "darkgreen", alpha = 0.7) +
+  geom_ribbon(aes(x = Day, ymax = Symptomatic, ymin = 0), fill = pal_fill[1], alpha = 0.9) +
+  geom_ribbon(aes(x = Day, ymin = Symptomatic, ymax = Symptomatic+Asymptomatic), fill = pal_fill[2], alpha = 0.7) +
+  geom_ribbon(aes(x = Day, ymin = Symptomatic+Asymptomatic, ymax = InfectiousPeriod), fill = pal_fill[3], alpha = 0.5) +
+  geom_ribbon(aes(x = Day, ymin = InfectiousPeriod, ymax = InfectiousPeriod + NonInfectious), fill = pal_fill[4], colour = pal_fill[4], alpha = 0.95) +
+  geom_ribbon(aes(x = Day, ymin = InfectiousPeriod + NonInfectious, ymax = Positive), fill = pal_fill[5], colour = pal_fill[5], alpha = 0.65) +
+  # geom_ribbon(aes(x = Day, ymin = Positive, ymax = Infected_cumul), fill = pal_fill[10], colour = "white", alpha = 0.7) +
   geom_line(aes(x = Day, y = Infected_cumul), colour = "red", size = 3) +
-  geom_line(aes(x = Day, y = InfectiousPeriod), colour = "chocolate4", size = 1.5) +
-  geom_line(aes(x = Day, y = Positive), colour = "black", size = 2) +
-  geom_hline(yintercept = 15, colour = "navyblue", linetype = "dashed") +
+  geom_line(aes(x = Day, y = InfectiousPeriod), colour = pal_fill[1], size = 1.5) +
+  geom_line(aes(x = Day, y = Positive), colour = pal_fill[4], size = 1.5) +
+  # geom_hline(yintercept = 15, colour = "black", linetype = "dashed") +
   theme(axis.ticks=element_blank(),
         #legend.position = "none",
         panel.background=element_rect(fill="white"),

@@ -133,7 +133,7 @@ InfectionLog$InfectionSource[InfectionLog$W_ID %in% Infected_init] <- "initialis
 
 
 ### RUN CONTAMINATION ###
-for (day in 2:(max(MyWorkers$Day)-1)) {
+for (day in 2:5) {
   CONTA <- f_dailyContamination(W = MyWorkers,
                                 MyAir = MyAir,
                                 day = day,
@@ -148,6 +148,8 @@ for (day in 2:(max(MyWorkers$Day)-1)) {
   MyWorkers <- CONTA$W
   MyAir <- CONTA$MyAir
   InfectionLog <- CONTA$inf_log
+  Expocum <- CONTA$Expocum
+  Virion_dose <- CONTA$Virion_dose
 }
 
 
