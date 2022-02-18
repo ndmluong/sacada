@@ -416,3 +416,100 @@ f_summaryWorkersAtDay <- function(
   } else return(summary_text)
   
 }
+
+
+##### f_plotOutput() FUNCTION TO PLOT SIMULATION OUTPUT SUMMARY #####
+f_plotOutput <- function(
+  IL,
+  IS,
+  seed_select = NULL,
+  detailed_plot = F,
+  wrap.nrow = 1
+) {
+  
+  tapply(IL$InfectionSource, IL$seed, summary) %>%
+    sapply(as.vector) %>%
+    t() %>%
+    as.data.frame() -> ILF
+  colnames(ILF) <- c(levels(IL$InfectionSource), "not_infected")
+  ILF <- data.frame(seed = rownames(ILF),
+                    ILF)
+  rownames(ILF) <- 1:nrow(ILF)
+  
+  if (!is.null(seed_select)) {
+    ISsub <- subset(IS, seed %in% seed_select)
+    ILsub <- subset(IL, seed %in% seed_select)
+    ILFsub <- subset(ILF, seed %in% seed_select)
+  } else {
+    ISsub <- IS
+    ILsub <- IL
+    ILFsub <- ILF
+  }
+  
+
+  
+  if (detailed_plot == F) {
+    ggplot(data = ISsub) +
+      geom_line(aes(x = Day, y = Infected_cumul, group = seed, colour = seed), size = 0.5) +
+      theme(axis.ticks=element_blank(),
+            #legend.position = "none",
+            panel.background=element_rect(fill="white"),
+            plot.title = element_text(face="bold", size=15),
+            axis.title = element_text(face="bold", size=10),
+            axis.text = element_text(size=10),
+            panel.grid.major.y=element_line(colour="lightgrey"),
+            panel.grid.major.x=element_line(colour="lightgrey"),
+            panel.grid.minor.y=element_line(colour="white"),
+            panel.grid.minor.x=element_line(colour="lightgrey")) +
+      scale_x_continuous(breaks = seq(1, max(IS$Day)+1, by = 7)) +
+      scale_y_continuous(breaks = seq(0, max(IS$Infected_cumul)+5, by = 5)) +
+      coord_cartesian(ylim = c(0, max(IS$Infected_cumul)+5),
+                      xlim = c(0, max(IS$Day)+1)) +
+      stat_summary(data = IS, aes(x=Day, y=Infected_cumul), fun = mean, geom="line", size = 2, colour = "black") + 
+      labs(title = "Cumulative number of infected workers",
+           subtitle = paste(length(unique(ISsub$seed)), "individual curves and the average trend (across", length(unique(IS$seed)), "independent simulations)")) +
+      xlab("time (day)") + ylab("number of workers") -> g_Output
+  } 
+  else {
+    
+    pal_viridis <- viridis::viridis(10)
+    pal_turbo <- viridis::turbo(3, begin = 0.5, end = 0.9)
+    
+    ggplot(data = ISsub) +
+      geom_ribbon(aes(x = Day, ymax = Symptomatic, ymin = 0), fill = pal_viridis[1], alpha = 0.9) +
+      geom_ribbon(aes(x = Day, ymin = Symptomatic, ymax = Symptomatic+Asymptomatic), fill = pal_viridis[2], alpha = 0.7) +
+      geom_ribbon(aes(x = Day, ymin = Symptomatic+Asymptomatic, ymax = InfectiousPeriod), fill = pal_viridis[3], alpha = 0.5) +
+      geom_ribbon(aes(x = Day, ymin = InfectiousPeriod, ymax = InfectiousPeriod + NonInfectious), fill = pal_viridis[4], colour = pal_viridis[4], alpha = 0.95) +
+      geom_ribbon(aes(x = Day, ymin = InfectiousPeriod + NonInfectious, ymax = Positive), fill = pal_viridis[5], colour = pal_viridis[5], alpha = 0.65) +
+      # geom_ribbon(aes(x = Day, ymin = Positive, ymax = Infected_cumul), fill = pal_viridis[10], colour = "white", alpha = 0.7) +
+      geom_line(aes(x = Day, y = Infected_cumul), colour = "black", size = 2.5) +
+      geom_line(aes(x = Day, y = Positive), colour = pal_viridis[4], size = 1.5) +
+      geom_line(aes(x = Day, y = InfectiousPeriod), colour = pal_viridis[1], size = 1.2) +
+      # geom_hline(yintercept = 15, colour = "navyblue", linetype = "dashed") +
+      theme(axis.ticks=element_blank(),
+            panel.background=element_rect(fill="white"),
+            plot.title = element_text(face="bold", size=15),
+            axis.title = element_text(face="bold", size=10),
+            axis.text = element_text(size=10),
+            panel.grid.major.y=element_line(colour="lightgrey"),
+            panel.grid.major.x=element_line(colour="lightgrey"),
+            panel.grid.minor.y=element_line(colour="white"),
+            panel.grid.minor.x=element_line(colour="lightgrey")) +
+      geom_rect(data = ILFsub, aes(xmin = max(IS$Day)+0.2, xmax = max(IS$Day)+1.5, ymin = 0, ymax = initialised), fill = "gray30") + ## initially infected
+      geom_rect(data = ILFsub, aes(xmin = max(IS$Day)+0.2, xmax = max(IS$Day)+1.5, ymin = initialised, ymax = initialised+aerosol), fill = pal_turbo[1]) +
+      geom_rect(data = ILFsub, aes(xmin = max(IS$Day)+0.2, xmax = max(IS$Day)+1.5, ymin = initialised+aerosol, ymax = initialised+aerosol+epidemy), fill = pal_turbo[2]) +
+      geom_rect(data = ILFsub, aes(xmin = max(IS$Day)+0.2, xmax = max(IS$Day)+1.5, ymin = initialised+aerosol+epidemy, ymax = initialised+aerosol+epidemy+community), fill = pal_turbo[3]) +
+      facet_wrap(. ~ seed, nrow = wrap.nrow) +
+      scale_x_continuous(breaks = seq(1, max(IS$Day), by = 7)) +
+      scale_y_continuous(breaks = seq(0, max(IS$Infected_cumul), by = 2)) +
+      scale_fill_manual(name = "Infection sources",
+                        breaks = c("initialised", "aerosol", "epidemy", "community"),
+                        values = c("initialised"="gray30", "aerosol"=pal_turbo[1], "epidemy"=pal_turbo[2], "community"=pal_turbo[3])) +
+      coord_cartesian(ylim = c(0, max(IS$Infected_cumul))) +
+      labs(title = "Evolution of the number of infected workers",
+           subtitle = "Cumulative and daily number of workers depending on their sanitary status") +
+      xlab("time (day)") + ylab("number of workers") -> g_Output
+  }
+
+  return(g_Output)
+}

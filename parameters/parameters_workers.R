@@ -65,7 +65,7 @@ Parms_Workers <- list(
   ## Type of the mask worn by the workers in use for simulation by default: "Surgical mask"
   MaskType = "Surgical mask",
   ## Acceptability by the workers for the different types of mask (proportion of the workers wearing it)
-  pMaskAcceptability = c("Surgical mask" = 0,
+  pMaskAcceptability = c("Surgical mask" = 0.8,
                          "FFP2" = 0.60),
   ## Mask efficiency for different droplet size classes [0 -> 1]
   Mask_Eff = c(0.9,  
@@ -75,7 +75,7 @@ Parms_Workers <- list(
 
   #### EPIDEMIOLOGY SCENARIO ####
   ## The number of contaminated workers at the day 0
-  nContaminated_Init = 10,
+  nContaminated_Init = 5,
   ## Regional prevalence ##
   prev = 50/100000,
   
