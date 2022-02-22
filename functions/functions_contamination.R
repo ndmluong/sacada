@@ -334,6 +334,7 @@ f_dailyContamination <- function(
   W <- f_updateStatusByCounter(W = W, day = day, prm_workers = prm_workers)
   
   
-  return(list(W = W, MyAir = MyAir, inf_log = inf_log, Virion_dose = Virion_dose, Expocum = Expocum))
+  return(list(W = W, MyAir = MyAir, inf_log = inf_log, Virion_dose = Virion_dose, 
+              Expocum = Expocum))
   ## END OF FUNCTION
 }

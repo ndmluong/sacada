@@ -3,7 +3,7 @@ Parms_Plant <- list(
   #### Plant
   dim.X = 30, ## (numeric - m) length of the processing plants (meter)
   dim.Y = 20, ## (numeric - m) width of the processing plants (meter)
-  dim.Z = 0.25,  ## (numeric - m) height of the room 
+  dim.Z = 5,  ## (numeric - m) height of the room 
   label = "Cutting Room",
   Air_Cond_Type = "AHU", #Air Handing Unit
   Air_renewal = 0, # TO MODIFY !!!!!!! (m3/h)

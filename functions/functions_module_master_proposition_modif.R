@@ -134,7 +134,7 @@ f_Module_Master <- function (
                                       function (x) return(colSums(W_droplet_Expos[[x]])))),ncol = N_rooms))
     
     # Cumulative (during the day) exposition of all workers to all classes --> dose response model at the end of the day
-    W_droplet_Expos_cumul = W_droplet_Expos_cumul+Reduce("+",W_droplet_Expos)*prm_time$Step 
+    W_droplet_Expos_cumul = W_droplet_Expos_cumul+Reduce("+",W_droplet_Expos)*prm_time$Step
 
     #  ----------------------------------------------------------------------      
     # 2.3 FROM WORKERS to AIR #

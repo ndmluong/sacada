@@ -33,13 +33,15 @@ source("parameters/parameters_conta.R") ## CONTAMINATION
 ##### SIMULATION #####
 ### one simulation, ex: seed 408
 ST1 <- Sys.time() ## simulation time checkpoint
-OUTPUT_seed100 <- f_run_2M(prm_plant = Parms_Plant,
+OUTPUT_seed150 <- f_run_2M(prm_plant = Parms_Plant,
                            prm_time = Parms_Time,
                            prm_workers = Parms_Workers,
                            prm_air = Parms_Air,
                            prm_conta = Parms_Conta,
-                           seed = 100)
+                           seed = 150)
 ST2 <- Sys.time() ## simulation time checkpoint
+MyAir1 <- OUTPUT_seed150$MyAir
+OUTPUT_seed150$Expocum
 
 ### several simulations
 all_seed <- 121:130 ## change if needed
@@ -76,8 +78,8 @@ tapply(IL$InfectionSource, IL$seed, summary)
 save.image("simulation_output/...............RData")
 ## ex. save.image("simulation_output/2022_02_06_initiales_s121_s130.Rdata) ?
 
-IS = OUTPUT_seed100$InfectionSummary
-IL= OUTPUT_seed100$InfectionLog
+IS = OUTPUT_seed150$InfectionSummary
+IL= OUTPUT_seed150$InfectionLog
 ##### PLOT #####
 ggplot(data=IS) +
   geom_line(aes(x = Day, y = Infected_cumul, group = seed, colour = seed), size = 0.5) +
@@ -132,7 +134,7 @@ ggplot(data=subset(IS, seed %in% c(121, 122))) + ## change/add/remove the seed n
 g2
 
 ## evolution of the concentration of dropt
-ggplot(data = OUTPUT_seed100$MyAir) +  ## simulation seed
+ggplot(data = OUTPUT_seed150$MyAir) +  ## simulation seed
   geom_line(mapping=aes(x=t_ind, y=d01), colour="red") +
   geom_line(mapping=aes(x=t_ind, y=d02), colour="blue") + 
   geom_line(mapping=aes(x=t_ind, y=d03), colour="green") + 
@@ -142,10 +144,10 @@ ggplot(data = OUTPUT_seed100$MyAir) +  ## simulation seed
         plot.title = element_text(face="bold", size=15),
         axis.title = element_text(face="bold", size=10),
         axis.text = element_text(size=10)) + 
-  scale_x_continuous(breaks = seq(1, max(OUTPUT_seed100$MyAir$t_ind), by = 2016)) + ## scale (2016 time indices per week)
+  scale_x_continuous(breaks = seq(1, max(OUTPUT_seed150$MyAir$t_ind), by = 2016)) + ## scale (2016 time indices per week)
   facet_grid(AIR_ID ~ .) -> g3
 g3
-AIR <- subset(OUTPUT_seed100$MyAir,OUTPUT_seed100$MyAir$AIR_ID=="Cutting Room")
+AIR <- subset(OUTPUT_seed150$MyAir,OUTPUT_seed150$MyAir$AIR_ID=="Cutting Room")
 ## evolution of the concentration of dropt
 ggplot(data = AIR) +  ## simulation seed
   geom_line(mapping=aes(x=t_ind, y=d01), colour="red") +
@@ -153,11 +155,16 @@ ggplot(data = AIR) +  ## simulation seed
   geom_line(mapping=aes(x=t_ind, y=d03), colour="green") + 
   geom_line(mapping=aes(x=t_ind, y=d04), colour="orange") + 
   xlab("time index") + ylab("concentration of droplets in aerosol (number of droplets per m3)") +
-  theme(axis.ticks=element_blank(),
-        plot.title = element_text(face="bold", size=15),
-        axis.title = element_text(face="bold", size=10),
-        axis.text = element_text(size=10)) + 
+
+  scale_x_continuous(breaks = seq(1, max(OUTPUT_seed150$MyAir$t_ind), by = 2016)) -> g4
+g4
+ggplot(data = AIR) +  ## simulation seed
+  geom_line(mapping=aes(x=t_ind, y=d01), colour="red") +
+  geom_line(mapping=aes(x=t_ind, y=d02), colour="blue") + 
+  # geom_line(mapping=aes(x=t_ind, y=d03), colour="green") + 
+  # geom_line(mapping=aes(x=t_ind, y=d04), colour="orange") + 
+  xlab("time index") + ylab("concentration of droplets in aerosol (number of droplets per m3)") +
+  
   scale_x_continuous(breaks = seq(1, max(OUTPUT_seed100$MyAir$t_ind), by = 2016)) -> g4
 g4
-
 

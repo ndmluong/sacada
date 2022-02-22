@@ -82,6 +82,8 @@ f_run_2M <- function(
   InfectionLog$InfectionSource[InfectionLog$W_ID %in% Infected_init] <- "initialised"
   
   
+  Expocum <- list()
+  
   #### SIMULATING DAILY CONTAMINATIONS ####
   writeLines("================= Simulating daily contamination ====================================")
   for (day in 2:(max(MyWorkers$Day)-1)) {
@@ -99,6 +101,7 @@ f_run_2M <- function(
     MyWorkers <- CONTA$W
     MyAir <- CONTA$MyAir
     InfectionLog <- CONTA$inf_log
+    Expocum[[day]] <- CONTA$Expocum
   }
   
   #### SUMMARY FOR ALL INFECTIONS ####
@@ -134,7 +137,8 @@ f_run_2M <- function(
                  MyWorkers = MyWorkers,
                  MyAir = MyAir,
                  InfectionLog = InfectionLog,
-                 InfectionSummary = InfectionSummary)
+                 InfectionSummary = InfectionSummary,
+                 Expocum = Expocum)
   writeLines("=====================================================================================")
   writeLines(paste("Two-module model run - seed ", seed, " - successfully done !", sep = ""))
   writeLines("====================================== END ==========================================")
