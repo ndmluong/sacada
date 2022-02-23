@@ -1,0 +1,5 @@
+VoC;Min;Mode;Max;Shift compared to delta;Reference;justification
+delta;1.6;8.6;10.4;;[@Jones2021];
+original ;0.6;7.6;9.4;-1; [@Teyssou2021];"""the Delta variant presented a VL (median 7.83 log10 copies/ml [6.3–8.83]) ten time higher than the historical variants (median 6.77 [5.04–7.88]) """
+alpha;1.1;8.1;9.9;-0.5;"[@Luo2021;@Wang2021;@Teyssou2021]";A two-fold difference in the ORF1ab VL was also observed between the Delta variant and the Alpha and Beta variants
+omicron;1.6;8.6;10.4;0;[@Lyngse2021];Figure 3: Density of Ct value (No difference in Ct)

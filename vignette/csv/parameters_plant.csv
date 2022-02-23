@@ -1,0 +1,31 @@
+Parameters;name of the room;length of the room;width of the room;height of the room;Type of the air conditionning;Air renewal volume;Air flow Rate
+Label in ABM script;label;dim.X;dim.Y;dim.Z;Air_Cond_Type;Air_renewal;AirflowRate
+Unit;N/A;meter;meter;meter;;m3/h;m3/h
+Value;Cutting Room;50;30;5;AHU;1000;90000
+Uncertainty;;;;;;;
+Justification of parameter value;;;"""This is a test for justification.""";;;"""another test""";
+References;;;[@Zhao2021];;;[@Byrne2020];
+Value;Entry hall;3;3;3;CMV;90;90
+Uncertainty;;;;;;;
+Justification of parameter value;;;;"""another test""";;;"""This is a test for justification."""
+References;;;;[@Byrne2020];;;[@Zhao2021]
+Value;Waste area;2;3;3;DEC;120;200
+Uncertainty;;;;;;;
+Justification of parameter value;;"""This is a test for justification.""";"""another test""";;;;
+References;;[@Zhao2021];[@Byrne2020];;;;
+Value;W.C.;2;2;2.5;CMV;30;30
+Uncertainty;;;;;;;
+Justification of parameter value;;"""This is a test for justification.""";"""another test""";;;;
+References;;[@Zhao2021];[@Byrne2020];;;;
+Value;Cooling area;3;3;3;DEC;120;500
+Uncertainty;;;;;;;
+Justification of parameter value;;"""This is a test for justification.""";"""another test""";;;;
+References;;[@Zhao2021];[@Byrne2020];;;;
+Value;Office;4;3;3;CMV;60;60
+Uncertainty;;;;;;;
+Justification of parameter value;;"""This is a test for justification.""";"""another test""";;;;
+References;;[@Zhao2021];[@Byrne2020];;;;
+Value;Arrival gate;2;2;3;DEC;30;200
+Uncertainty;;;;;;;
+Justification of parameter value;;"""This is a test for justification.""";"""another test""";;;;
+References;;[@Zhao2021];[@Byrne2020];;;;
