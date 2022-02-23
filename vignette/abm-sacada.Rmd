@@ -19,7 +19,7 @@ citecolor: blue
 csl: "www/apa.csl"
 ---
 
-<style> div.main-container { max-width: 1600px; } </style>
+<style> div.main-container { max-width: 1400px; } </style>
 
 <img src="fig/logo/logo_anses.png" width="60px"/>
 <img src="fig/logo/logo_inrae.png" width="60px"/>
