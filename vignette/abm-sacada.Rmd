@@ -66,7 +66,7 @@ This document aims to identify the parameters of interest for building the Agent
 
 # **Agent-based model: Description**
 
-The ABM model is presented in this study according to the Overview-Design-Details (ODD) protocol as recommended by. 
+The ABM model is presented in this study according to the Overview-Design-Details (ODD) protocol as recommended by @Grimm2010. 
 
 ## **Overview**
 The general concept of the agent-based modelling workflow developed in this study is schematized in Figure \@ref(fig:FIG-abm-concept).
