@@ -53,7 +53,6 @@ seed = 408
 MyWorkers <- f_initWorkers(prm = Parms_Workers, prm_time = Parms_Time, seed = seed)
 MyWorkers <- f_setupSchedule(W = MyWorkers, prm = Parms_Workers, seed = seed)
 
-<<<<<<< HEAD
 # SCHEDULE VISUALISATION
 # Plot schedule for all workers during a given period
 f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
@@ -61,7 +60,6 @@ f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
 f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
 # Plot schedule with information at one given day
 f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
-=======
 # # SCHEDULE VISUALISATION
 # # Plot schedule for all workers during a given period
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 42)
@@ -69,7 +67,6 @@ f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
 # # Plot schedule with information at one given day
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
->>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 
 
 ### ASSIGN LOCATION BASED ON SCHEDULE ###
@@ -90,11 +87,9 @@ lapply(WorkingDays, FUN = function(x) {
   dplyr::arrange(t_ind, W_ID) -> MyWorkers
 gc() # free unused R memory
 
-<<<<<<< HEAD
 MyWorkers$W_location[is.na(MyWorkers$W_location)] <- "Home"
-=======
+
 MyWorkers$location[is.na(MyWorkers$location)] <- "Home"
->>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 
 ### WEARING MASK ###
 by(data = MyWorkers,
@@ -111,7 +106,6 @@ MyWorkers <- f_initStatusCounterDay1(W = MyWorkers, prm_workers = Parms_Workers,
 indi_viral_load <- f_individual_viral_load(prm_workers = Parms_Workers,
                                            prm_conta = Parms_Conta)
 
-<<<<<<< HEAD
 #### Save a checkpoint here if need to avoid re-simulating everytime
 save.image("test_checkpoint1.RData")
 
@@ -123,9 +117,8 @@ load("test_checkpoint1.RData")
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 
-=======
+
 ### AEROSOL ###
->>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
 AIR_ID <- c(Parms_Plant$label,
             unname(unlist(lapply(Parms_Plant$Spaces, function (x) return(x$label)))))
@@ -135,15 +128,11 @@ Method_calc <- f_Air_Criteria_Calc(Parms_Plant,Parms_Air) ## Check if the drople
 ## Assign 0 values for the first time index (required for the first run of f_Module_Master)
 MyAir[MyAir$t_ind==0, 2:(1+length(Parms_Air$Droplet_class))] = matrix(0,7,4) * Method_calc
 
-<<<<<<< HEAD
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 
 
-
-=======
->>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 
 ### INFECTION LOG ###
 InfectionLog <- data.frame(W_ID = unique(MyWorkers$W_ID),
@@ -155,8 +144,6 @@ InfectionLog$InfectedDay[InfectionLog$W_ID %in% Infected_init] <- 1
 InfectionLog$InfectionSource[InfectionLog$W_ID %in% Infected_init] <- "initialised"
 
 
-<<<<<<< HEAD
-=======
 #### Save a checkpoint here if need to avoid re-simulating everytime
 save.image("test_checkpoint1.RData")
 
@@ -175,7 +162,6 @@ MySurfaces <- f_initSurfaces(P = MyPlant$P,
 
 
 
->>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 ### RUN CONTAMINATION ###
 for (day in 2:(max(MyWorkers$Day)-1)) {
   CONTA <- f_dailyContamination(W = MyWorkers,
@@ -193,8 +179,6 @@ for (day in 2:(max(MyWorkers$Day)-1)) {
   MyAir <- CONTA$MyAir
   InfectionLog <- CONTA$inf_log
 }
-<<<<<<< HEAD
-
 
 InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
                                Infected_cumul = rep(NA,max(MyWorkers$Day-1)),
@@ -411,7 +395,6 @@ ggplot() +
         axis.text = element_text(size=10)) + 
   scale_x_continuous(breaks = seq(1, max(MyAir$t_ind), by = 2016)) +
   facet_grid(AIR_ID ~ .) -> g3
-=======
 # 
 # 
 # InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
@@ -436,7 +419,6 @@ ggplot() +
 #                MyWorkers = MyWorkers,
 #                MyAir = MyAir,
 #                InfectionSummary = InfectionSummary)
->>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 
 
 
@@ -476,7 +458,6 @@ score_df <- data.frame(seed = names(simulation_score),
 score_df <- arrange(score_df, simulation_score)
 score_df$seed <- factor(score_df$seed, levels = unique(score_df$seed))
 
-<<<<<<< HEAD
 ggplot(data = score_df) +
   theme(axis.ticks=element_blank(),
         legend.position = "none",
@@ -492,7 +473,7 @@ ggplot(data = score_df) +
   scale_color_manual(values = c("TRUE"="red","FALSE"="darkgreen")) +
   geom_point(aes(x=seed, y=simulation_score, colour = plant_stop), size=3) + 
   geom_segment(aes(x=seed, xend=seed, yend = 0, y=simulation_score, colour = plant_stop), size = 2)
-=======
+
 ############################### SCENARIO S02 ################################
 all_seed <- 201:210
 
@@ -636,4 +617,3 @@ expand.grid(str_pad(day, width = 2, pad = "0"),
     paste(id["day"], id["carcass"], id["portion"], sep = "_")}) %>%
   paste(str_sub(Parms_Food$meat, 1, 1) %>% str_to_upper(.), ., sep = "_") %>%
   sort(.) -> ID
->>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4

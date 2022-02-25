@@ -1,12 +1,9 @@
 ##### USER DEFINED PARAMETERS FOR FOOD PORTIONS #####
 Parms_Food <- list(
-<<<<<<< HEAD
   NPortions = 150,
   ## Initial proportion
   ContactProb = 0.15, ## possible contact. The portion without possible contact = 1 - possible contact
-  LossProb = 0.15 ## loss portion
-)
-=======
+  LossProb = 0.15, ## loss portion
   ## the meat type used for the simulation
   meat = "bovine", 
   
@@ -38,4 +35,3 @@ Parms_Food <- list(
   # ContactProb = 0.15, ## possible contact. The portion without possible contact = 1 - possible contact
   # LossProb = 0.15 ## loss portion
 )
->>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
