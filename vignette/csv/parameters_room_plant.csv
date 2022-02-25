@@ -1,0 +1,11 @@
+Parameters;name of the room;Position of regarding the X axis of the plant (0: left, 0.5: middle, 1:right);Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top);Position of the internal door in the plant;Position of the external door (outside the plant)
+Label in ABM script;label;dim.X;dim.Y;intdoor.side;extdoor.side
+Unit;N/A;0 to 1 (0: left, 0.5: middle, 1:right);0 to 1 (0: bottom, 0.5: middle, 1:top);Top, bottom, left, right;Top, bottom, left, right
+Value;Entry hall;0;0;top;left
+Value;Waste area;0.7;0;top;bottom
+Value;W.C.;1;0;left;N/A
+Value;Cooling area;1;1;bottom;N/A
+Value;Office;0;1;right;N/A
+Value;Arrival gate;0;0.5;right;left
+
+

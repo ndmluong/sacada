@@ -72,9 +72,9 @@ f_plotPlant <- function(
                  size=0.5, colour = "white")
   
   # ## Annotate location
-  # Annotate <- data.frame(label = names(tapply(MyPlant$L$coordY, MyPlant$L$Location, max)),
-  #                        annotateX = unname(tapply(MyPlant$L$coordX, MyPlant$L$Location, mean)),
-  #                        annotateY = unname(tapply(MyPlant$L$coordY, MyPlant$L$Location, max))
+  # Annotate <- data.frame(label = names(tapply(MyPlant$L$coordY, MyPlant$L$location, max)),
+  #                        annotateX = unname(tapply(MyPlant$L$coordX, MyPlant$L$location, mean)),
+  #                        annotateY = unname(tapply(MyPlant$L$coordY, MyPlant$L$location, max))
   # )
   # 
   # g_Plant <- g_Plant +
@@ -96,18 +96,18 @@ f_Border <- function(
   ## Border (data frame): coordinates of the borders (all spaces)
 ) {
   L <- subset(Plant$L, border == T)
-  L$Location <- as.factor(L$Location)
+  L$location <- as.factor(L$location)
   
   ## Border of the spaces (location)
-  tapply(L$coordX, INDEX = L$Location, FUN = min) %>% names -> Location
+  tapply(L$coordX, INDEX = L$location, FUN = min) %>% names -> location
   
-  tapply(L$coordX, INDEX = L$Location, FUN = min) %>% unname - 0.5 -> Xmin
-  tapply(L$coordX, INDEX = L$Location, FUN = max) %>% unname + 0.5 -> Xmax
+  tapply(L$coordX, INDEX = L$location, FUN = min) %>% unname - 0.5 -> Xmin
+  tapply(L$coordX, INDEX = L$location, FUN = max) %>% unname + 0.5 -> Xmax
   
-  tapply(L$coordY, INDEX = L$Location, FUN = min) %>% unname - 0.5 -> Ymin
-  tapply(L$coordY, INDEX = L$Location, FUN = max) %>% unname + 0.5 -> Ymax
+  tapply(L$coordY, INDEX = L$location, FUN = min) %>% unname - 0.5 -> Ymin
+  tapply(L$coordY, INDEX = L$location, FUN = max) %>% unname + 0.5 -> Ymax
   
-  Border <- data.frame(Location = Location,
+  Border <- data.frame(location = location,
                        Xmin = Xmin,
                        Xmax = Xmax,
                        Ymin = Ymin,
@@ -127,7 +127,7 @@ f_coordDoor <- function(
 ) {
   nbSpaces <- length(prm$Spaces) ## total number of the spaces
   
-  D <- data.frame(Location = rep(NA, nbSpaces),
+  D <- data.frame(location = rep(NA, nbSpaces),
                   intdoor.X0 = rep(NA, nbSpaces),
                   intdoor.X1 = rep(NA, nbSpaces),
                   intdoor.Y0 = rep(NA, nbSpaces),
@@ -142,9 +142,9 @@ f_coordDoor <- function(
   
   for (i in 1:nbSpaces) { ## for each space i inside the plant
     
-    D$Location[i] <- prm$Spaces[[i]]$label ## extract the label of the space i
+    D$location[i] <- prm$Spaces[[i]]$label ## extract the label of the space i
     
-    Lsub <- subset(L, Location == prm$Spaces[[i]]$label) ## extract the coordinates of the space i
+    Lsub <- subset(L, location == prm$Spaces[[i]]$label) ## extract the coordinates of the space i
     
     if (is.na(prm$Spaces[[i]]$intdoor.side) == F) { ## if information about the internal door is available
       D$intdoor.side[i] <- prm$Spaces[[i]]$intdoor.side
@@ -233,8 +233,8 @@ f_plotAgents <- function(
   W, ## (data.frame): information of the workers with at least these attributes
   FP = NULL,
   ##  - W_ID (character): worker ID
-  ##  - W_coordX (numeric): coordinates in the X axis of the worker
-  ##  - W_coordY (numeric): coordinates in the X axis of the worker
+  ##  - coordX (numeric): coordinates in the X axis of the worker
+  ##  - coordY (numeric): coordinates in the X axis of the worker
   ##  - W_state (character/factor): infected/not infected worker 
   ##  - W_mask (character/factor): mask/no mask
   ## time index
@@ -242,22 +242,22 @@ f_plotAgents <- function(
 ) {
   #### BEGIN OF FUNCTION
   ##
-  W$W_coordX <- as.numeric(W$W_coordX)
-  W$W_coordY <- as.numeric(W$W_coordY)
+  W$coordX <- as.numeric(W$coordX)
+  W$coordY <- as.numeric(W$coordY)
   
   W <- data.frame(W,
                   time_minutes = W$t_ind * 5)
   
   g_Plant <- g_emptyPlant +
     geom_point(data = W,
-               mapping = aes(x=W_coordX, y=W_coordY, colour=W_status, shape=W_mask,
+               mapping = aes(x=coordX, y=coordY, colour=W_status, shape=W_mask,
                              W_ID=W_ID, W_type=W_type, frame=time_minutes),
                size = 3, alpha = 0.5,
                position = position_jitter(width = 0.1, height = 0.1, seed=408))
   
   g_Plant <- g_Plant +
     geom_text(data = W,
-              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID, frame=time_minutes),
+              mapping = aes(x=coordX, y=coordY, label=W_ID, frame=time_minutes),
               size = 2,
               position = position_jitter(width = 0.1, height = 0.1, seed=408))
   
@@ -287,14 +287,14 @@ f_plotWorkers <- function(
 ) {
   #### BEGIN OF FUNCTION
   ##
-  W$W_coordX <- as.numeric(W$W_coordX)
-  W$W_coordY <- as.numeric(W$W_coordY)
+  W$coordX <- as.numeric(W$coordX)
+  W$coordY <- as.numeric(W$coordY)
   Wti <- subset(W, t_ind == ti)
   Wsub <- subset(Wti, W_active == "active")
   
   g_Plant <- g_emptyPlant +
     geom_point(data = Wsub,
-               mapping = aes(x = W_coordX, y = W_coordY,
+               mapping = aes(x = coordX, y = coordY,
                              colour = W_type,
                              shape = W_shift,
                              W_team = W_team, Week = Week, Weekday = Weekday),
@@ -307,7 +307,7 @@ f_plotWorkers <- function(
   ## workers ID as label
   g_Plant <- g_Plant +
     geom_text(data = Wsub,
-              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID),
+              mapping = aes(x=coordX, y=coordY, label=W_ID),
               size = 2.5,
               position = position_jitter(width = 0.1, height = 0.5, seed=408))
   

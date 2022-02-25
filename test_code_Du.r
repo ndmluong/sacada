@@ -1,6 +1,8 @@
 #test code Du
 ##### PACKAGES #####
+#library(tidyverse)
 library(ggplot2)
+library(tibble)
 library(reshape2)
 library(plotly)
 library(stringr)
@@ -13,13 +15,12 @@ source("functions/functions_actions.R")
 source("functions/functions_air.R")
 source("functions/functions_contamination.R")
 source("functions/functions_dailyWork.R")
-# source("functions/functions_food.R")
-# source("functions/functions_module_master.R")
+source("functions/functions_food.R")
 source("functions/functions_module_master_proposition_modif.R")
 source("functions/functions_plant.R")
 source("functions/functions_plot.R")
 source("functions/functions_run.R")
-# source("functions/functions_surfaces.R")
+source("functions/functions_surfaces.R")
 source("functions/functions_time.R")
 source("functions/functions_workers.R")
 
@@ -29,6 +30,7 @@ source("functions/functions_workers.R")
 source("parameters/parameters_plant.R") ## PLANT
 source("parameters/parameters_time.R") ## TIME
 source("parameters/parameters_workers.R") ## WORKERS
+source("parameters/parameters_food.R") ## FOOD PORTIONS
 source("parameters/parameters_air.R") ## AIR
 source("parameters/parameters_conta.R") ## CONTAMINATION
 
@@ -51,6 +53,7 @@ seed = 408
 MyWorkers <- f_initWorkers(prm = Parms_Workers, prm_time = Parms_Time, seed = seed)
 MyWorkers <- f_setupSchedule(W = MyWorkers, prm = Parms_Workers, seed = seed)
 
+<<<<<<< HEAD
 # SCHEDULE VISUALISATION
 # Plot schedule for all workers during a given period
 f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
@@ -58,6 +61,15 @@ f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
 f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
 # Plot schedule with information at one given day
 f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
+=======
+# # SCHEDULE VISUALISATION
+# # Plot schedule for all workers during a given period
+# f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 42)
+# # Plot schedule for some considered workers
+# f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
+# # Plot schedule with information at one given day
+# f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
+>>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 
 
 ### ASSIGN LOCATION BASED ON SCHEDULE ###
@@ -78,7 +90,11 @@ lapply(WorkingDays, FUN = function(x) {
   dplyr::arrange(t_ind, W_ID) -> MyWorkers
 gc() # free unused R memory
 
+<<<<<<< HEAD
 MyWorkers$W_location[is.na(MyWorkers$W_location)] <- "Home"
+=======
+MyWorkers$location[is.na(MyWorkers$location)] <- "Home"
+>>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 
 ### WEARING MASK ###
 by(data = MyWorkers,
@@ -95,6 +111,7 @@ MyWorkers <- f_initStatusCounterDay1(W = MyWorkers, prm_workers = Parms_Workers,
 indi_viral_load <- f_individual_viral_load(prm_workers = Parms_Workers,
                                            prm_conta = Parms_Conta)
 
+<<<<<<< HEAD
 #### Save a checkpoint here if need to avoid re-simulating everytime
 save.image("test_checkpoint1.RData")
 
@@ -106,6 +123,9 @@ load("test_checkpoint1.RData")
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 
+=======
+### AEROSOL ###
+>>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
 AIR_ID <- c(Parms_Plant$label,
             unname(unlist(lapply(Parms_Plant$Spaces, function (x) return(x$label)))))
@@ -115,12 +135,15 @@ Method_calc <- f_Air_Criteria_Calc(Parms_Plant,Parms_Air) ## Check if the drople
 ## Assign 0 values for the first time index (required for the first run of f_Module_Master)
 MyAir[MyAir$t_ind==0, 2:(1+length(Parms_Air$Droplet_class))] = matrix(0,7,4) * Method_calc
 
+<<<<<<< HEAD
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 ## --> Update f_Module_Master to take into account the individual variability in viral load
 
 
 
+=======
+>>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 
 ### INFECTION LOG ###
 InfectionLog <- data.frame(W_ID = unique(MyWorkers$W_ID),
@@ -132,6 +155,27 @@ InfectionLog$InfectedDay[InfectionLog$W_ID %in% Infected_init] <- 1
 InfectionLog$InfectionSource[InfectionLog$W_ID %in% Infected_init] <- "initialised"
 
 
+<<<<<<< HEAD
+=======
+#### Save a checkpoint here if need to avoid re-simulating everytime
+save.image("test_checkpoint1.RData")
+
+load("test_checkpoint1.RData")
+
+### INITIALIZATION OF THE AGENTS FOOD PORTIONS ###
+day <- 1
+MyFood <- f_initFood(prm_food = Parms_Food,
+                     prm_time = Parms_Time,
+                     day = day)
+
+### INITIALIZATION OF THE SURFACES AGENTS ###
+MySurfaces <- f_initSurfaces(P = MyPlant$P,
+                             prm_time = Parms_Time,
+                             day = day)
+
+
+
+>>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 ### RUN CONTAMINATION ###
 for (day in 2:(max(MyWorkers$Day)-1)) {
   CONTA <- f_dailyContamination(W = MyWorkers,
@@ -149,6 +193,7 @@ for (day in 2:(max(MyWorkers$Day)-1)) {
   MyAir <- CONTA$MyAir
   InfectionLog <- CONTA$inf_log
 }
+<<<<<<< HEAD
 
 
 InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
@@ -366,6 +411,32 @@ ggplot() +
         axis.text = element_text(size=10)) + 
   scale_x_continuous(breaks = seq(1, max(MyAir$t_ind), by = 2016)) +
   facet_grid(AIR_ID ~ .) -> g3
+=======
+# 
+# 
+# InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
+#                                Infected_cumul = rep(NA,max(MyWorkers$Day-1)),
+#                                Infectious = rep(NA, max(MyWorkers$Day-1)),
+#                                Symptomatic = rep(NA, max(MyWorkers$Day-1)),
+#                                Asymptomatic = rep(NA, max(MyWorkers$Day-1)),
+#                                Recovered_cumul = rep(NA, max(MyWorkers$Day-1)),
+#                                seed = rep(seed, max(MyWorkers$Day-1)))
+# 
+# for (day in 1:nrow(InfectionSummary)) {
+#   dW <- subset(W, Hour == 0 & Min == 0 & Day == day)
+#   InfectionSummary$Infected_cumul[day] <- length(dW$W_statusCounter[dW$W_statusCounter > 0])
+#   InfectionSummary$Infectious[day] <- length(dW$W_statusCounter[dW$W_status %in% c("infectious", "symptomatic", "asymptomatic")])
+#   InfectionSummary$Symptomatic[day] <- length(dW$W_status[dW$W_status == "symptomatic"])
+#   InfectionSummary$Asymptomatic[day] <- length(dW$W_status[dW$W_status == "asymptomatic"])
+#   InfectionSummary$Recovered_cumul[day] <- length(dW$W_statusCounter[dW$W_status == "recovered"])
+# }
+# 
+# OUTPUT <- list(seed = seed,
+#                MyPlant = MyPlant,
+#                MyWorkers = MyWorkers,
+#                MyAir = MyAir,
+#                InfectionSummary = InfectionSummary)
+>>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4
 
 
 
@@ -405,6 +476,7 @@ score_df <- data.frame(seed = names(simulation_score),
 score_df <- arrange(score_df, simulation_score)
 score_df$seed <- factor(score_df$seed, levels = unique(score_df$seed))
 
+<<<<<<< HEAD
 ggplot(data = score_df) +
   theme(axis.ticks=element_blank(),
         legend.position = "none",
@@ -420,3 +492,148 @@ ggplot(data = score_df) +
   scale_color_manual(values = c("TRUE"="red","FALSE"="darkgreen")) +
   geom_point(aes(x=seed, y=simulation_score, colour = plant_stop), size=3) + 
   geom_segment(aes(x=seed, xend=seed, yend = 0, y=simulation_score, colour = plant_stop), size = 2)
+=======
+############################### SCENARIO S02 ################################
+all_seed <- 201:210
+
+Parms_Workers$pMaskAcceptability[Parms_Workers$MaskType] <- 0 ## remove all masks
+Parms_Plant$Air_renewal <- 1000 ## remove air renewal of the cutting room
+
+ST_S02Begin <- Sys.time() ## simulation time checkpoint
+lapply(all_seed, FUN = function(x) {
+  OUTPUT_seedx <- tryCatch(f_run_2M(prm_plant = Parms_Plant,
+                                    prm_time = Parms_Time,
+                                    prm_workers = Parms_Workers,
+                                    prm_air = Parms_Air,
+                                    prm_conta = Parms_Conta,
+                                    seed = x),
+                           error = function(e) NULL)
+  return(OUTPUT_seedx)
+}) -> OUTPUT
+ST_S02End <- Sys.time() ## simulation time checkpoint
+
+### OUTPUT TREATMENT : Infection summary
+lapply(OUTPUT, function(x) {return(x$InfectionSummary)}) %>%
+  data.table::rbindlist() -> IS
+IS$seed <- as.factor(IS$seed)
+
+### OUTPUT TREATMENT : Infection source (for all workers and all simulations)
+lapply(OUTPUT, function(x) {return(x$InfectionLog)}) %>%
+  data.table::rbindlist() -> IL
+IL$seed <- as.factor(IL$seed)
+IL$InfectionSource <- as.factor(IL$InfectionSource)
+
+#### SAVE SIMULATION RESULTS
+save.image("simulation_output/OUTPUT_2022_02_16_NDL_S02.RData")
+
+
+
+
+############################### SCENARIO S03 ################################
+all_seed <- 301:310
+
+Parms_Workers$pMaskAcceptability[Parms_Workers$MaskType] <- 0.8 
+Parms_Plant$Air_renewal <- 0 ## remove air renewal of the cutting room
+
+ST_S03Begin <- Sys.time() ## simulation time checkpoint
+lapply(all_seed, FUN = function(x) {
+  OUTPUT_seedx <- tryCatch(f_run_2M(prm_plant = Parms_Plant,
+                                    prm_time = Parms_Time,
+                                    prm_workers = Parms_Workers,
+                                    prm_air = Parms_Air,
+                                    prm_conta = Parms_Conta,
+                                    seed = x),
+                           error = function(e) NULL)
+  return(OUTPUT_seedx)
+}) -> OUTPUT
+ST_S03End <- Sys.time() ## simulation time checkpoint
+
+### OUTPUT TREATMENT : Infection summary
+lapply(OUTPUT, function(x) {return(x$InfectionSummary)}) %>%
+  data.table::rbindlist() -> IS
+IS$seed <- as.factor(IS$seed)
+
+### OUTPUT TREATMENT : Infection source (for all workers and all simulations)
+lapply(OUTPUT, function(x) {return(x$InfectionLog)}) %>%
+  data.table::rbindlist() -> IL
+IL$seed <- as.factor(IL$seed)
+IL$InfectionSource <- as.factor(IL$InfectionSource)
+
+#### SAVE SIMULATION RESULTS
+save.image("simulation_output/OUTPUT_2022_02_16_NDL_S03.RData")
+rm(ST_S03Begin, ST_S03End, OUTPUT, IL, IS)
+gc()
+
+
+############################### SCENARIO S04 ################################
+all_seed <- 401:410
+
+Parms_Workers$pMaskAcceptability[Parms_Workers$MaskType] <- 0
+Parms_Plant$Air_renewal <- 0 ## remove air renewal of the cutting room
+
+ST_S04Begin <- Sys.time() ## simulation time checkpoint
+lapply(all_seed, FUN = function(x) {
+  OUTPUT_seedx <- tryCatch(f_run_2M(prm_plant = Parms_Plant,
+                                    prm_time = Parms_Time,
+                                    prm_workers = Parms_Workers,
+                                    prm_air = Parms_Air,
+                                    prm_conta = Parms_Conta,
+                                    seed = x),
+                           error = function(e) NULL)
+  return(OUTPUT_seedx)
+}) -> OUTPUT
+ST_S04End <- Sys.time() ## simulation time checkpoint
+
+### OUTPUT TREATMENT : Infection summary
+lapply(OUTPUT, function(x) {return(x$InfectionSummary)}) %>%
+  data.table::rbindlist() -> IS
+IS$seed <- as.factor(IS$seed)
+
+### OUTPUT TREATMENT : Infection source (for all workers and all simulations)
+lapply(OUTPUT, function(x) {return(x$InfectionLog)}) %>%
+  data.table::rbindlist() -> IL
+IL$seed <- as.factor(IL$seed)
+IL$InfectionSource <- as.factor(IL$InfectionSource)
+
+#### SAVE SIMULATION RESULTS
+save.image("simulation_output/OUTPUT_2022_02_16_NDL_S04.RData")
+rm(ST_S04Begin, ST_S04End, OUTPUT, IL, IS)
+gc()
+
+
+############################### PLOTTING OUTPUT ################################
+load("simulation_output/OUTPUT_2022_02_16_NDL_S01.RData")
+load("simulation_output/OUTPUT_2022_02_16_NDL_S02.RData")
+load("simulation_output/OUTPUT_2022_02_16_NDL_S03.RData")
+load("simulation_output/OUTPUT_2022_02_16_NDL_S04.RData")
+f_plotOutput(IL, IS)
+f_plotOutput(IL, IS, detailed_plot = T, wrap.nrow = 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+day <- 1
+NPortions_carcass <- Parms_Food$Ncarcass_daily[Parms_Food$meat] / Parms_Food$CSU[Parms_Food$meat]
+expand.grid(str_pad(day, width = 2, pad = "0"),
+            str_pad(1:Parms_Food$Ncarcass_daily[Parms_Food$meat], width = 3, pad = "0"),
+            str_pad(1:NPortions_carcass, width = 4, pad = "0")) %>%
+  as.data.frame(.) %>%
+  `colnames<-`(., c("day", "carcass", "portion")) %>%
+  apply(., 1, function(id) {
+    paste(id["day"], id["carcass"], id["portion"], sep = "_")}) %>%
+  paste(str_sub(Parms_Food$meat, 1, 1) %>% str_to_upper(.), ., sep = "_") %>%
+  sort(.) -> ID
+>>>>>>> 87584b9b7c80dda22efca7e50b059c5b9f940bd4

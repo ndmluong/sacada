@@ -20,7 +20,7 @@ f_createPlant <- function(
   ## ADD ALL SPACES AND THE CORRESPONDING LOCATIONS
   ## Save all coordinates of all locations with the data frame L
   L <- data.frame(
-    Location = character(),
+    location = character(),
     coordX = numeric(),
     coordY = numeric(),
     border = logical()
@@ -62,12 +62,12 @@ f_createPlant <- function(
   ## Around the Equipment 1 (ADD IF NEEDED)
   L <- rbind(L, f_equipmentWorkspace(P, eqm_name = "Equipment 1")) ## check the function f_equipmentWorkspace()
   
-  colnames(L) <- c("Location", "coordX", "coordY", "border")
-  # L$Location <- as.factor(L$Location)
+  colnames(L) <- c("location", "coordX", "coordY", "border")
+  # L$location <- as.factor(L$location)
   
   ## Update tile labels
   for (i in 1:nrow(L)) {
-    P[L$coordX[i], L$coordY[i]] <- L$Location[i]
+    P[L$coordX[i], L$coordY[i]] <- L$location[i]
   }
   
   Plant <- list(L = L, P = P)
@@ -113,7 +113,7 @@ f_addSpace <- function(
   y_vec <- space.Y0:space.Y1
   xy_tab <- expand.grid(x_vec, y_vec)
   L <- data.frame(
-    Location = rep(space.label, nrow(xy_tab)),
+    location = rep(space.label, nrow(xy_tab)),
     coordX = xy_tab$Var1,
     coordY = xy_tab$Var2,
     border = rep(T, nrow(xy_tab))
@@ -121,7 +121,7 @@ f_addSpace <- function(
   
   ## Update values on the matrix P with the label of the added spaces
   for (i in 1:nrow(L)) {
-    P[L$coordX[i], L$coordY[i]] <- L$Location[i]
+    P[L$coordX[i], L$coordY[i]] <- L$location[i]
   }
   
   Plant <- list(L = L, P = P)
@@ -174,7 +174,7 @@ f_addObject <- function(
   y_vec <- obj.Y0:obj.Y1
   xy_tab <- expand.grid(x_vec, y_vec)
   L <- data.frame(
-    Location = rep(label, nrow(xy_tab)),
+    location = rep(label, nrow(xy_tab)),
     coordX = xy_tab$Var1,
     coordY = xy_tab$Var2,
     border = rep(F, nrow(xy_tab))
@@ -230,9 +230,9 @@ f_cuttingWorkspace <- function(
                 rep(maxX+1, cvy_L)) 
   }
 
-  Location <- paste("WS-Cutting", cvytype, "-", stringr::str_pad(seq(1:N_WS), width=2, pad="0"), sep="")
+  location <- paste("WS-Cutting", cvytype, "-", stringr::str_pad(seq(1:N_WS), width=2, pad="0"), sep="")
   
-  OUTPUT <- data.frame(Location = Location,
+  OUTPUT <- data.frame(location = location,
                        coordX = coordX,
                        coordY = coordY,
                        border = rep(F, N_WS))
@@ -288,11 +288,11 @@ f_conveyorWorkspace <- function(
                 seq(minX-1, maxX+1)) ## coordinates Y +/- 1 : begin (tail) of the conveyor
   }
   
-  Location <- c(rep(paste("WS-Conveyor",cvytype,"-Head", sep=""), cvy_W+2),
+  location <- c(rep(paste("WS-Conveyor",cvytype,"-Head", sep=""), cvy_W+2),
                 rep(paste("WS-Conveyor",cvytype,"-Tail", sep=""), cvy_W+2))
   border <- rep(F, 2*(cvy_W+2))
   
-  OUTPUT <- data.frame(Location = Location,
+  OUTPUT <- data.frame(location = location,
                        coordX = coordX,
                        coordY = coordY,
                        border = border)
@@ -334,11 +334,11 @@ f_equipmentWorkspace <- function(
               seq(minY, maxY) ## right side
               )
   
-  Location <- rep(paste("WS-",eqm_name, sep=""), length(coordX))
+  location <- rep(paste("WS-",eqm_name, sep=""), length(coordX))
 
   border <- rep(F, length(coordX))
 
-  OUTPUT <- data.frame(Location = Location,
+  OUTPUT <- data.frame(location = location,
                        coordX = coordX,
                        coordY = coordY,
                        border = border)

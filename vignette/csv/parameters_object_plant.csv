@@ -1,0 +1,6 @@
+Parameters;name of the object;length of the object;width of the object;Position of regarding the X axis of the plant ;Position regarding the Y axis of the plant 
+Label in ABM script;label;dim.X;dim.Y;pos.X;pos.Y
+unit;;meter;meter;0 to 1 (0: left, 0.5: middle, 1:right);0 to 1 (0: bottom, 0.5: middle, 1:top)
+cvy;Conveyor1;13;3;0.2;0.5
+cvy2;Conveyor2;18;3;0.5;0.5
+epmA;Equipment 1;2;2;0.85;0.7

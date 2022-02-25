@@ -14,7 +14,7 @@ f_Who_is <- function(
   i=1
   
   ## Convert all workspace locations "WS..." into "Cutting room" (prm_plant$label)
-  Sub_MyWorkers$W_location[str_starts(Sub_MyWorkers$W_location,"WS")] <- prm_plant$label
+  Sub_MyWorkers$location[str_starts(Sub_MyWorkers$location,"WS")] <- prm_plant$label
   
   ### --> /!\ MODIFICATION PROPOSITION (automatised)
   # The total number of the room = nb of spaces declared in prm_plant + cutting room
@@ -27,30 +27,30 @@ f_Who_is <- function(
   ###
   
   Cont_mask[,1] <- Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-    Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
+    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
   
   Cont_nomask[,1]  =Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-    Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
+    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
   
   Non_Cont_mask[,1]  = Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-    Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
+    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
   
   Non_Cont_no_mask[,1]  = Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-    Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
+    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
   
   ### For the other rooms
   for (x in prm_plant$Spaces) {
     Cont_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-      Sub_MyWorkers$W_location==x$label & Sub_MyWorkers$W_mask=="mask"
+      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="mask"
     
     Cont_nomask[,i+1] =  Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-      Sub_MyWorkers$W_location==x$label & Sub_MyWorkers$W_mask=="no mask"
+      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="no mask"
     
     Non_Cont_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-      Sub_MyWorkers$W_location==x$label & Sub_MyWorkers$W_mask=="mask"
+      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="mask"
     
     Non_Cont_no_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-      Sub_MyWorkers$W_location==x$label & Sub_MyWorkers$W_mask=="no mask"
+      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="no mask"
     
     i=i+1
   }
