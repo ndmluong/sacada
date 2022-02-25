@@ -1,7 +1,8 @@
 f_initSurfaces <- function(
-  ## Function allowing to initialize (EVERY DAY) the agent surfaces at the beginning of the day
+  ## Function allowing to initialize (at the beginning of every day) the agent surfaces involving in the SARS-CoV-2 infection
   #### INPUT
   P, ## (matrix) the matrix corresponding to the details of each plant tile (output of the function f_createPlant())
+  prm_plant, ## (list) the parameters associated with the timetable (check the script "parameters_plant.R")
   prm_time, ## (list) the parameters associated with the timetable (check the script "parameters_time.R")
   day ## the considered day
   #### OUTPUT
@@ -13,16 +14,17 @@ f_initSurfaces <- function(
   ##  - $S_Nv (numeric): viral quantity (log CFU)
 ) {
   #### BEGIN OF FUNCTION
-  ## total number of surface Agents
-  NS <- nrow(P) * ncol(P)
+  ## The surfaces involving in the infection (objects)
+  sapply(prm_plant$Objects, function(x) return(x$label)) %>%
+    as.vector() -> S_selected
   
   ## unique ID of each surface tile
-  expand.grid(str_pad(1:nrow(P), width = 2, pad = "0"), ## X coordinates
+  expand.grid(str_pad(1:nrow(P), width = 2, pad = "0"), ## X coordinates crossed with the Y coordinates
               str_pad(1:ncol(P), width = 2, pad = "0") ## Y coordinates
               ) %>%
     as.data.frame(.) %>%
     `colnames<-`(., c("coordX", "coordY")) %>%
-    apply(., 1, function(id) {
+    apply(., 1, function(id) { ## create ID with the format S_xx_yy
       paste("S", id["coordX"], id["coordY"], sep = "_")}) %>%
     sort(.) -> unique_ID
   
@@ -45,10 +47,11 @@ f_initSurfaces <- function(
       }) -> location
   
   S %>%
-    tibble::add_column(.,
-                       location = location,
+    tibble::add_column(location = location,
                        viral_load = 0, ## the viral load (virion / infectious virus) present on the portion
-                       ) -> S
+                       ) %>%
+    ## retain only the surfaces involving in the SARS-CoV-2 transmission
+    dplyr::filter(., location %in% S_selected) -> S
   
   return(S)
   #### END OF FUNCTION

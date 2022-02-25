@@ -87,8 +87,6 @@ lapply(WorkingDays, FUN = function(x) {
   dplyr::arrange(t_ind, W_ID) -> MyWorkers
 gc() # free unused R memory
 
-MyWorkers$W_location[is.na(MyWorkers$W_location)] <- "Home"
-
 MyWorkers$location[is.na(MyWorkers$location)] <- "Home"
 
 ### WEARING MASK ###
@@ -157,10 +155,9 @@ MyFood <- f_initFood(prm_food = Parms_Food,
 
 ### INITIALIZATION OF THE SURFACES AGENTS ###
 MySurfaces <- f_initSurfaces(P = MyPlant$P,
+                             prm_plant = Parms_Plant,
                              prm_time = Parms_Time,
                              day = day)
-
-
 
 ### RUN CONTAMINATION ###
 for (day in 2:(max(MyWorkers$Day)-1)) {
