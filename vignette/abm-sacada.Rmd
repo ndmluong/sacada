@@ -45,6 +45,11 @@ library(survival)
 library(fitdistrplus)
 ```
 
+
+<!-- ################################################################################## -->
+<!-- ############################### INTRODUCTION ##################################### -->
+<!-- ################################################################################## -->
+
 # **Introduction**
 
 **(section to be re-written)**
@@ -59,10 +64,9 @@ The different waves of Sars-CoV2 outbreaks that have occurred show that each Var
 This document aims to identify the parameters of interest for building the Agent Based Model of the ANR Sacada project.
 
 
-
-
-
-
+<!-- ################################################################################## -->
+<!-- ########################## MODEL DESCRIPTION ##################################### -->
+<!-- ################################################################################## -->
 
 # **Agent-based model: Description**
 
@@ -94,6 +98,7 @@ knitr::include_graphics("fig/schema/abm-concept.png")
 **Prediction**
 <!-- **Sensing** -->
 <!-- **Interaction** -->
+
 **Stochasticity**
 <!-- **Collectives** -->
 <!-- **Observation** -->
@@ -319,7 +324,9 @@ knitr::include_graphics("fig/schema/abm-infection-air.png")
 
 ##### Characteristics
 
-*(associated R script : parameters_food.R) *
+<!-- *(associated R script : parameters_food.R) * -->
+
+
 
 + The type of meat
 + Ncarcass_daily
@@ -329,8 +336,9 @@ knitr::include_graphics("fig/schema/abm-infection-air.png")
 
 ##### Rules
 
+-	All characteristics of the agents "food portions" were initialized daily. The food portions came from different carcasses. The total number of carcasses (and agents) was calculated each day depending on the expected total meat quantity produced by the establishment (expressed as number of carcasses per day or per week). Each initialized agent had a unique ID (e.g: B_12_028_004 corresponds to the 4th portion of the 28th carcass of the 12th day, "B" stands for "bovine").
 
-
+- The duration (expressed in minutes) corresponding to different cutting steps for each carcass and for separating food portions at different locations in the plant were estimated/assumed based on information from industrial interviews. Hence, knowing this duration, the carcasses could arrive sequentially and/or simultaneously in the cutting room depending on the expected number of carcasses per day.
 
 
 

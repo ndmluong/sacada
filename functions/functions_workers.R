@@ -20,9 +20,9 @@ f_initWorkers <- function(
   ##  - $W_ID (character/string): the ID of each worker ("W001","W002",...)
   ##  - $W_state (character/string): infection state ("infected"/"not infected",...)
   ##  - $W_mask (character/string): behavior ("mask"/"no mask",...)
-  ##  - $W_coordX (numeric): coordinates in the plant, initialized as NA
-  ##  - $W_coordY (numeric): coordinates in the plant, initialized as NA
-  ##  - $W_location (character): location in the plant ("Entry hall", "W.C.",...), initialized as NA
+  ##  - $coordX (numeric): coordinates in the plant, initialized as NA
+  ##  - $coordY (numeric): coordinates in the plant, initialized as NA
+  ##  - $location (character): location in the plant ("Entry hall", "W.C.",...), initialized as NA
 ) {
   #### BEGIN OF FUNCTION
   if (!is.null(seed)) {set.seed(seed)}
@@ -94,9 +94,9 @@ f_initWorkers <- function(
   W_shift <- rep(NA, prm$NWorkers * (NTime+1))
   
   ### Initialize coordinates and location of the workers (NA)
-  W_coordX <- rep(NA, prm$NWorkers*(NTime+1))
-  W_coordY <- rep(NA, prm$NWorkers*(NTime+1))
-  W_location <- rep(NA, prm$NWorkers*(NTime+1))
+  coordX <- rep(NA, prm$NWorkers*(NTime+1))
+  coordY <- rep(NA, prm$NWorkers*(NTime+1))
+  location <- rep(NA, prm$NWorkers*(NTime+1))
   
   ### Initialize the working (or not-working phase) of the workers (NA)
   W_active <- rep("active", prm$NWorkers*(NTime+1)) ## active by default
@@ -122,9 +122,9 @@ f_initWorkers <- function(
                   W_activeCounter = W_activeCounter,
                   W_communityActivity = W_communityActivity,
                   W_communes = W_communes,
-                  W_coordX = W_coordX,
-                  W_coordY = W_coordY,
-                  W_location = W_location,
+                  coordX = coordX,
+                  coordY = coordY,
+                  location = location,
                   t_ind = t_ind,
                   Week = Week,
                   Weekday = Weekday,

@@ -38,7 +38,7 @@ f_run_2M <- function(
     dplyr::arrange(t_ind, W_ID) -> MyWorkers
   gc() # free unused R memory
   
-  MyWorkers$W_location[is.na(MyWorkers$W_location)] <- "Home"
+  MyWorkers$location[is.na(MyWorkers$location)] <- "Home"
   
   ### WEARING MASK ###
   writeLines("================ Processing 'Mask wearing' status ===================================")
