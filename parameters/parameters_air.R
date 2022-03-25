@@ -22,10 +22,17 @@ Parms_Air <- list(
   #                   
   # (m-3) - Concentration of droplets of each class during respiratory activiies Morawska et al., 2009, kenedy et al.2020 teble2
                           #d0.8  d1.8   d3.5    d5.5
+  # Cd_exp =  1e6*rbind( c(0.236, 0.068, 0.007, 0.011), # Voiced counting
+  #                       c(0.751, 0.139, 0.139, 0.059), # Unmodulated Vocalization
+  #                       c(0.084, 0.009, 0.003, 0.002), # Breathing (insp noze, exp mouth) details in Morawska
+  #                       c(0.567, 0.093, 0.012, 0.006)), # Cough
+  
+  # (m-3) - Concentration of droplets of each class during respiratory activiies Morawska et al., 2009, kenedy et al.2020 teble2
+  #d0.8  d1.8   d3.5    d5.5   d 5.5-20   d 20
   Cd_exp =  1e6*rbind( c(0.236, 0.068, 0.007, 0.011), # Voiced counting
-                        c(0.751, 0.139, 0.139, 0.059), # Unmodulated Vocalization
-                        c(0.084, 0.009, 0.003, 0.002), # Breathing (insp noze, exp mouth) details in Morawska
-                        c(0.567, 0.093, 0.012, 0.006)), # Cough
+                       c(0.751, 0.139, 0.139, 0.059), # Unmodulated Vocalization
+                       c(0.084, 0.009, 0.003, 0.002), # Breathing (insp noze, exp mouth) details in Morawska
+                       c(0.567, 0.093, 0.012, 0.006)), # Cough
   
   # (m3/min) Respiration rate Adams (1993)
   RespRate = c(0.49,  # Resting

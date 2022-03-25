@@ -14,6 +14,8 @@ f_initSurfaces <- function(
   ##  - $S_Nv (numeric): viral quantity (log CFU)
 ) {
   #### BEGIN OF FUNCTION
+  writeLines("==================== Initializing Surfaces ================================")
+  
   ## The surfaces involving in the infection (objects)
   sapply(prm_plant$Objects, function(x) return(x$label)) %>%
     as.vector() -> S_selected
