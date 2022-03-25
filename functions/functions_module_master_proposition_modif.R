@@ -54,8 +54,10 @@ f_Who_is <- function(
     
     i=i+1
   }
+   symptomatic=Sub_MyWorkers$W_status =="symptomatic"
+  # 
   
-  return(list(Cont_mask, Cont_nomask, Non_Cont_mask, Non_Cont_no_mask))
+  return(list(Cont_mask, Cont_nomask, Non_Cont_mask, Non_Cont_no_mask, symptomatic))
   
 }
 
@@ -102,7 +104,7 @@ f_Module_Master <- function (
   # Droplet contamination probability as function as volume and individual viral load
   # Can be moved out of this function !! 
   P_drop_conta =  (10^indi_viral_load) %*% t(prm_air$d_Vol)
-  
+
   ########## day time loop ######################
   for (ind in ind_min:ind_max)#max(MyAir$t_ind))### A modifier !!!!!! #### à mettre par jour
   {
@@ -113,11 +115,20 @@ f_Module_Master <- function (
     # The number of droplets in each class at the time index ind
     Cd = MyAir[MyAir$t_ind==(ind), 2:(1+length(prm_air$Droplet_class))] # OK (cf. output of f_initAir() if needed)
     
-    # probability talking , talking loud, just breathing, coughing at time ind 
-    p_emission <- sample(c(1,2,3,4), size = prm_workers$NWorkers, prob= c(0.25,0.25,0.25,0.25), replace = T)
-    
     # 1 - What is happening at time ind ? [[1]] cont_mask; [[2]] cont_no_mask; [[3]] no_cont_mask; [[4]] no_cont_no_mask
     W_Loc_N_mask <- f_Who_is(subset(MyWorkers,t_ind == ind), prm_plant, prm_workers$NWorkers)
+    
+    
+    # p_emission <- sample(c(1,2,3,4), size = prm_workers$NWorkers, prob= c(0.25,0.25,0.25,0.25), replace = T)
+    
+    # Respiration activity
+    # of non symtomatic  operators:  probability talking , talking loud, just breathing, coughing at time ind 
+    p_emission <- sample(c(1,2,3,4), size = prm_workers$NWorkers, prob= c(prm_air$p_other,prm_air$p_other,prm_air$p_other,prm_air$p_cough), replace = T)
+    
+    # of symtomatic  operators:  coughing all the time ind 
+    p_emission[W_Loc_N_mask[[5]]] <- 4
+    
+    
     
     # 2 - TRANSFERS ----------------------------------------------------------
     # 2.1 FROM AIR to SURFACES : Droplet sedimentation of the surfaces
