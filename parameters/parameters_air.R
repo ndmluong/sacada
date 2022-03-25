@@ -32,7 +32,13 @@ Parms_Air <- list(
                0.54,  # Standing
                1.38,  # Light excercise
                2.35,  # Moderate exercise
-               3.3)/60   # Heavy  exercise
+               3.3)/60,   # Heavy  exercise
+  # coughing probability (Birrong et al. 2006)
+  p_cough = 2/60,
+  # Other respiration activity  probiblity
+  p_other = (1-2/60)/3,
+  
+  p_cough_symp = 1
   
   )
 
