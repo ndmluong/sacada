@@ -51,13 +51,13 @@ seed = 408
 MyWorkers <- f_initWorkers(prm = Parms_Workers, prm_time = Parms_Time, seed = seed)
 MyWorkers <- f_setupSchedule(W = MyWorkers, prm = Parms_Workers, seed = seed)
 
-# SCHEDULE VISUALISATION
-# Plot schedule for all workers during a given period
-f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
-# Plot schedule for some considered workers
-f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
-# Plot schedule with information at one given day
-f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
+# # SCHEDULE VISUALISATION
+# # Plot schedule for all workers during a given period
+# f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
+# # Plot schedule for some considered workers
+# f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
+# # Plot schedule with information at one given day
+# f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
 
 
 ### ASSIGN LOCATION BASED ON SCHEDULE ###

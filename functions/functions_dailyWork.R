@@ -32,13 +32,13 @@ f_dailyWork_AM <- function(
   t_ind_begin <- f_convertTime("time2ind",D,5,5,dt=dt)
   t_ind_end <- f_convertTime("time2ind",D,12,55,dt=dt)
   
-  W <- f_replicateWorkerstime2time(W, AM_C1_ID, "W_location", c(5,5), c(12,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, AM_C1_ID, "W_coordX", c(5,5), c(12,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, AM_C1_ID, "W_coordY", c(5,5), c(12,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, AM_C1_ID, "location", c(5,5), c(12,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, AM_C1_ID, "coordX", c(5,5), c(12,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, AM_C1_ID, "coordY", c(5,5), c(12,55), D=D, dt=dt)
   
-  W <- f_replicateWorkerstime2time(W, AM_C2_ID, "W_location", c(5,5), c(12,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, AM_C2_ID, "W_coordX", c(5,5), c(12,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, AM_C2_ID, "W_coordY", c(5,5), c(12,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, AM_C2_ID, "location", c(5,5), c(12,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, AM_C2_ID, "coordX", c(5,5), c(12,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, AM_C2_ID, "coordY", c(5,5), c(12,55), D=D, dt=dt)
   
   # logistic1 workers - morning
   Wsub <- subset(W, t_ind >= t_ind_begin & t_ind <= t_ind_end & W_ID %in% AM_L1_ID)
@@ -96,7 +96,7 @@ f_dailyWork_T1 <- function(
   active <- subset(W, W_active == "active" & Day == D)
   
   T1_ID <- subset(active, W_type == "transverse1")$W_ID %>% unique()
-  T1_location <- unique(Plant$L$Location)
+  T1_location <- unique(Plant$L$location)
   T1_location <- T1_location[!T1_location %in% c("Entry hall", "W.C.", "Conveyor1", "Conveyor2", "Equipment 1", "Office")]
   
   # 9h
@@ -105,11 +105,11 @@ f_dailyWork_T1 <- function(
   # 9h05 - 11h55
   W <- f_moveWorkers(Plant, W, selectW = T1_ID, to = "Office", t_ind = f_convertTime("time2ind",dt=dt,D,9,5))
   
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "W_location",
+  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "location",
                                    time_begin = c(9,5), time_end=c(11,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "W_coordX",
+  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordX",
                                    time_begin = c(9,5), time_end=c(11,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "W_coordY",
+  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordY",
                                    time_begin = c(9,5), time_end=c(11,55), D=D, dt=dt)
   
   t_ind_begin <- f_convertTime("time2ind",dt=dt,D,9,5)
@@ -143,11 +143,11 @@ f_dailyWork_T1 <- function(
   # 12h50-16h55
   W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Office", t_ind=f_convertTime("time2ind",D,12,50,dt=dt))
   
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "W_location",
+  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "location",
                                    time_begin = c(12,50), time_end=c(16,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "W_coordX",
+  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordX",
                                    time_begin = c(12,50), time_end=c(16,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "W_coordY",
+  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordY",
                                    time_begin = c(12,50), time_end=c(16,55), D=D, dt=dt)
   
   t_ind_begin <- f_convertTime("time2ind",dt=dt,D,12,50)
@@ -212,13 +212,13 @@ f_dailyWork_PM <- function(
   t_ind_begin <- f_convertTime("time2ind",D,14,5,dt=dt)
   t_ind_end <- f_convertTime("time2ind",D,21,55,dt=dt)
   
-  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "W_location", c(14,5), c(21,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "W_coordX", c(14,5), c(21,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "W_coordY", c(14,5), c(21,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "location", c(14,5), c(21,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "coordX", c(14,5), c(21,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "coordY", c(14,5), c(21,55), D=D, dt=dt)
   
-  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "W_location", c(14,5), c(21,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "W_coordX", c(14,5), c(21,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "W_coordY", c(14,5), c(21,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "location", c(14,5), c(21,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "coordX", c(14,5), c(21,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "coordY", c(14,5), c(21,55), D=D, dt=dt)
   
   # logistic1 workers - afternoon - random moves in their workspace
   Wsub <- subset(W, t_ind >= t_ind_begin & t_ind <= t_ind_end & W_ID %in% PM_L1_ID)
@@ -278,7 +278,7 @@ f_dailyWork_T2 <- function(
   active <- subset(W, W_active == "active" & Day == D)
   
   T2_ID <- subset(active, W_type == "transverse2")$W_ID %>% unique()
-  T2_location <- unique(Plant$L$Location)
+  T2_location <- unique(Plant$L$location)
   T2_location <- T2_location[!T2_location %in% c("Conveyor1", "Conveyor2", "Equipment 1")]
   
   ## 22h

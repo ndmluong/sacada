@@ -14,7 +14,7 @@ f_Who_is <- function(
   i=1
   
   ## Convert all workspace locations "WS..." into "Cutting room" (prm_plant$label)
-  Sub_MyWorkers$W_location[str_starts(Sub_MyWorkers$W_location,"WS")] <- prm_plant$label
+  Sub_MyWorkers$location[str_starts(Sub_MyWorkers$location,"WS")] <- prm_plant$label
   
   ### --> /!\ MODIFICATION PROPOSITION (automatised)
   # The total number of the room = nb of spaces declared in prm_plant + cutting room
@@ -27,30 +27,30 @@ f_Who_is <- function(
   ###
   
   Cont_mask[,1] <- Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-    Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
+    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
   
   Cont_nomask[,1]  =Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-    Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
+    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
   
   Non_Cont_mask[,1]  = Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-    Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
+    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
   
   Non_Cont_no_mask[,1]  = Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-    Sub_MyWorkers$W_location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
+    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
   
   ### For the other rooms
   for (x in prm_plant$Spaces) {
     Cont_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-      Sub_MyWorkers$W_location==x$label & Sub_MyWorkers$W_mask=="mask"
+      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="mask"
     
     Cont_nomask[,i+1] =  Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-      Sub_MyWorkers$W_location==x$label & Sub_MyWorkers$W_mask=="no mask"
+      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="no mask"
     
     Non_Cont_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-      Sub_MyWorkers$W_location==x$label & Sub_MyWorkers$W_mask=="mask"
+      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="mask"
     
     Non_Cont_no_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-      Sub_MyWorkers$W_location==x$label & Sub_MyWorkers$W_mask=="no mask"
+      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="no mask"
     
     i=i+1
   }
@@ -145,7 +145,7 @@ f_Module_Master <- function (
                                       function (x) return(colSums(W_droplet_Expos[[x]])))),ncol = N_rooms))
     
     # Cumulative (during the day) exposition of all workers to all classes --> dose response model at the end of the day
-    W_droplet_Expos_cumul = W_droplet_Expos_cumul+Reduce("+",W_droplet_Expos)*prm_time$Step 
+    W_droplet_Expos_cumul = W_droplet_Expos_cumul+Reduce("+",W_droplet_Expos)*prm_time$Step
 
     #  ----------------------------------------------------------------------      
     # 2.3 FROM WORKERS to AIR #
@@ -186,4 +186,11 @@ f_Module_Master <- function (
   ########## End of day time loop ######################
   
   return(list(MyAir,W_droplet_Expos_cumul))
+}
+
+
+f_Which_is <- function(
+
+) {
+  
 }

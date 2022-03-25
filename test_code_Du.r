@@ -1,27 +1,26 @@
 #test code Du
 ##### PACKAGES #####
+#library(tidyverse)
 library(ggplot2)
+library(tibble)
 library(reshape2)
 library(plotly)
 library(stringr)
 library(data.table)
 library(dplyr)
 library(gridExtra)
-library(EnvStats)
-library(viridis)
 
 ##### FUNCTIONS #####
 source("functions/functions_actions.R")
 source("functions/functions_air.R")
 source("functions/functions_contamination.R")
 source("functions/functions_dailyWork.R")
-# source("functions/functions_food.R")
-# source("functions/functions_module_master.R")
-source("functions/functions_module_master_proposition_modif.R")
+source("functions/functions_food.R")
+source("functions/functions_master.R")
 source("functions/functions_plant.R")
 source("functions/functions_plot.R")
 source("functions/functions_run.R")
-# source("functions/functions_surfaces.R")
+source("functions/functions_surfaces.R")
 source("functions/functions_time.R")
 source("functions/functions_workers.R")
 
@@ -31,6 +30,7 @@ source("functions/functions_workers.R")
 source("parameters/parameters_plant.R") ## PLANT
 source("parameters/parameters_time.R") ## TIME
 source("parameters/parameters_workers.R") ## WORKERS
+source("parameters/parameters_food.R") ## FOOD PORTIONS
 source("parameters/parameters_air.R") ## AIR
 source("parameters/parameters_conta.R") ## CONTAMINATION
 
@@ -60,6 +60,13 @@ source("parameters/parameters_conta.R") ## CONTAMINATION
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
 # # Plot schedule with information at one given day
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
+# # # SCHEDULE VISUALISATION
+# # # Plot schedule for all workers during a given period
+# # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 42)
+# # # Plot schedule for some considered workers
+# # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
+# # # Plot schedule with information at one given day
+# # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
 # 
 # 
 # ### ASSIGN LOCATION BASED ON SCHEDULE ###
@@ -80,7 +87,7 @@ source("parameters/parameters_conta.R") ## CONTAMINATION
 #   dplyr::arrange(t_ind, W_ID) -> MyWorkers
 # gc() # free unused R memory
 # 
-# MyWorkers$W_location[is.na(MyWorkers$W_location)] <- "Home"
+# MyWorkers$location[is.na(MyWorkers$location)] <- "Home"
 # 
 # ### WEARING MASK ###
 # by(data = MyWorkers,
@@ -97,17 +104,7 @@ source("parameters/parameters_conta.R") ## CONTAMINATION
 # indi_viral_load <- f_individual_viral_load(prm_workers = Parms_Workers,
 #                                            prm_conta = Parms_Conta)
 # 
-# #### Save a checkpoint here if need to avoid re-simulating everytime
-# save.image("test_checkpoint1.RData")
-# 
-# load("test_checkpoint1.RData")
-# 
-# 
 # ### AEROSOL ###
-# ## --> Update f_Module_Master to take into account the individual variability in viral load
-# ## --> Update f_Module_Master to take into account the individual variability in viral load
-# ## --> Update f_Module_Master to take into account the individual variability in viral load
-# 
 # MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
 # AIR_ID <- c(Parms_Plant$label,
 #             unname(unlist(lapply(Parms_Plant$Spaces, function (x) return(x$label)))))
@@ -116,12 +113,6 @@ source("parameters/parameters_conta.R") ## CONTAMINATION
 # 
 # ## Assign 0 values for the first time index (required for the first run of f_Module_Master)
 # MyAir[MyAir$t_ind==0, 2:(1+length(Parms_Air$Droplet_class))] = matrix(0,7,4) * Method_calc
-# 
-# ## --> Update f_Module_Master to take into account the individual variability in viral load
-# ## --> Update f_Module_Master to take into account the individual variability in viral load
-# ## --> Update f_Module_Master to take into account the individual variability in viral load
-# 
-# 
 # 
 # 
 # ### INFECTION LOG ###
@@ -134,24 +125,96 @@ source("parameters/parameters_conta.R") ## CONTAMINATION
 # InfectionLog$InfectionSource[InfectionLog$W_ID %in% Infected_init] <- "initialised"
 # 
 # 
-# ### RUN CONTAMINATION ###
-# for (day in 2:(max(MyWorkers$Day)-1)) {
-#   CONTA <- f_dailyContamination(W = MyWorkers,
-#                                 MyAir = MyAir,
-#                                 day = day,
-#                                 indi_viral_load = indi_viral_load,
-#                                 prm_plant = Parms_Plant,
-#                                 prm_workers = Parms_Workers,
-#                                 prm_time = Parms_Time,
-#                                 prm_air = Parms_Air,
-#                                 prm_conta = Parms_Conta,
-#                                 inf_log = InfectionLog,
-#                                 seed = seed)
-#   MyWorkers <- CONTA$W
-#   MyAir <- CONTA$MyAir
-#   InfectionLog <- CONTA$inf_log
-# }
-# 
+# #### Save a checkpoint here if need to avoid re-simulating everytime
+# save.image("test_checkpoint1.RData")
+
+load("test_checkpoint1.RData")
+
+### INITIALIZATION OF THE AGENTS FOOD PORTIONS ###
+# f_allocateCarcassTimeIndex(Parms_Food, Parms_Workers, Parms_Time, W=MyWorkers, day=1)
+
+FoodInitStruct <- f_initFood(prm_food = Parms_Food,
+                             prm_workers = Parms_Workers,
+                             prm_time = Parms_Time,
+                             W = MyWorkers,
+                             day = 1) ## first day
+MyFood <- FoodInitStruct$FP
+MyCarcasses <- FoodInitStruct$c_alloc
+duration_ti <- FoodInitStruct$duration_ti
+rm(FoodInitStruct)
+
+### CIRCULATION OF ONE GIVEN CARCASS INSIDE THE PLANT
+# f_circulateCarcass(Plant = MyPlant, FPcarc = subset(MyFood, carcass_ID == "0001"), carcass_ID = "0001", t_ind = 60, prm_food = Parms_Food, prm_time = Parms_Time) -> aa
+## test OK
+
+ST1 <- Sys.time()
+lapply(unique(MyFood$carcass_ID)[1:15], ## test sur 15 carcasses
+       FUN = function(x) {
+  writeLines(paste("Circulating the carcass ", x, sep=""))
+  FPcarc0 <- filter(MyFood, carcass_ID == x)
+  ti <- min(FPcarc0$t_ind)
+  MF0 <- f_circulateCarcass(Plant = MyPlant, FPcarc = FPcarc0, carcass_ID = x, 
+                            t_ind = ti,
+                            prm_food = Parms_Food, prm_time = Parms_Time)
+  return(MF0)
+}) %>%
+  rbindlist(.) -> MF15
+ST2 <- Sys.time()
+
+## checkpoint
+save.image("test_checkpoint2.RData")
+
+
+### INITIALIZATION OF THE SURFACES AGENTS ###
+MySurfaces <- f_initSurfaces(P = MyPlant$P,
+                             prm_plant = Parms_Plant,
+                             prm_time = Parms_Time,
+                             day = 1)
+
+
+### RUN CONTAMINATION ###
+for (day in 2:(max(MyWorkers$Day)-1)) {
+  CONTA <- f_dailyContamination(W = MyWorkers,
+                                MyAir = MyAir,
+                                day = day,
+                                indi_viral_load = indi_viral_load,
+                                prm_plant = Parms_Plant,
+                                prm_workers = Parms_Workers,
+                                prm_time = Parms_Time,
+                                prm_air = Parms_Air,
+                                prm_conta = Parms_Conta,
+                                inf_log = InfectionLog,
+                                seed = seed)
+  MyWorkers <- CONTA$W
+  MyAir <- CONTA$MyAir
+  InfectionLog <- CONTA$inf_log
+}
+
+InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
+                               Infected_cumul = rep(NA,max(MyWorkers$Day-1)),
+                               Infectious = rep(NA, max(MyWorkers$Day-1)),
+                               Symptomatic = rep(NA, max(MyWorkers$Day-1)),
+                               Asymptomatic = rep(NA, max(MyWorkers$Day-1)),
+                               Recovered_cumul = rep(NA, max(MyWorkers$Day-1)),
+                               seed = rep(seed, max(MyWorkers$Day-1)))
+
+for (day in 1:nrow(InfectionSummary)) {
+  dW <- subset(W, Hour == 0 & Min == 0 & Day == day)
+  InfectionSummary$Infected_cumul[day] <- length(dW$W_statusCounter[dW$W_statusCounter > 0])
+  InfectionSummary$Infectious[day] <- length(dW$W_statusCounter[dW$W_status %in% c("infectious", "symptomatic", "asymptomatic")])
+  InfectionSummary$Symptomatic[day] <- length(dW$W_status[dW$W_status == "symptomatic"])
+  InfectionSummary$Asymptomatic[day] <- length(dW$W_status[dW$W_status == "asymptomatic"])
+  InfectionSummary$Recovered_cumul[day] <- length(dW$W_statusCounter[dW$W_status == "recovered"])
+}
+
+OUTPUT <- list(seed = seed,
+               MyPlant = MyPlant,
+               MyWorkers = MyWorkers,
+               MyAir = MyAir,
+               InfectionSummary = InfectionSummary)
+
+
+
 # 
 # InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
 #                                Infected_cumul = rep(NA,max(MyWorkers$Day-1)),
@@ -175,45 +238,36 @@ source("parameters/parameters_conta.R") ## CONTAMINATION
 #                MyWorkers = MyWorkers,
 #                MyAir = MyAir,
 #                InfectionSummary = InfectionSummary)
-
-
-
-
-
-############################### SCENARIO S01 ################################
-all_seed <- 101:110
-
-Parms_Workers$pMaskAcceptability[Parms_Workers$MaskType] <- 0.8 ## remove all masks
-Parms_Plant$Air_renewal <- 1000 ## remove air renewal of the cutting room
-
-ST_S01Begin <- Sys.time() ## simulation time checkpoint
-lapply(all_seed, FUN = function(x) {
-  OUTPUT_seedx <- tryCatch(f_run_2M(prm_plant = Parms_Plant,
-                                    prm_time = Parms_Time,
-                                    prm_workers = Parms_Workers,
-                                    prm_air = Parms_Air,
-                                    prm_conta = Parms_Conta,
-                                    seed = x),
-                           error = function(e) NULL)
-  return(OUTPUT_seedx)
-}) -> OUTPUT
-ST_S01End <- Sys.time() ## simulation time checkpoint
-
-### OUTPUT TREATMENT : Infection summary
-lapply(OUTPUT, function(x) {return(x$InfectionSummary)}) %>%
-  data.table::rbindlist() -> IS
-IS$seed <- as.factor(IS$seed)
-
-### OUTPUT TREATMENT : Infection source (for all workers and all simulations)
-lapply(OUTPUT, function(x) {return(x$InfectionLog)}) %>%
-  data.table::rbindlist() -> IL
-IL$seed <- as.factor(IL$seed)
-IL$InfectionSource <- as.factor(IL$InfectionSource)
-
-#### SAVE SIMULATION RESULTS
-save.image("simulation_output/OUTPUT_2022_02_16_NDL_S01.RData")
-
-
+# 
+# 
+# 
+# 
+# ##### Covariate: Number of individual-days
+# IS <- data.frame(IS,
+#                  NID = (100 - IS$Infected_cumul) * IS$Day,
+#                  log10NID = log10((100 - IS$Infected_cumul) * IS$Day),
+#                  Infectious_interday = rep(NA, nrow(IS)))
+# 
+# all_seed <- unique(IS$seed) %>% as.character
+# for (i in all_seed) {
+#   for (j in 2:max(IS$Day)) {
+#     IS$Infectious_interday[IS$seed == i & IS$Day == j] <- abs(IS$InfectiousPeriod[IS$seed == i & IS$Day == j] - IS$InfectiousPeriod[IS$seed == i & IS$Day == j-1])
+#   }
+# }
+# 
+# ISEnd <- subset(IS, Day == max(IS$Day))
+# 
+# tapply(ISEnd$log10NID, ISEnd$seed, max)
+# 
+# tapply(IS$InfectiousPeriod, IS$seed, FUN = function(x) {
+#   if (max(x)-15 >= 0) {return(-1)} else return(0)
+# }) -> alpha1
+# 
+# tapply(IS$InfectiousPeriod, IS$seed, FUN = function(x) {
+#   if (max(x)-15 >= 0) {return(0)} else return(1)
+# }) -> alpha2
+# 
+# simulation_score <- alpha1 / tapply(ISEnd$log10NID, ISEnd$seed, max) + alpha2 * tapply(ISEnd$log10NID, ISEnd$seed, max)
 
 
 ############################### SCENARIO S02 ################################
@@ -332,3 +386,30 @@ load("simulation_output/OUTPUT_2022_02_16_NDL_S04.RData")
 f_plotOutput(IL, IS)
 f_plotOutput(IL, IS, detailed_plot = T, wrap.nrow = 2)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+day <- 1
+NPortions_carcass <- Parms_Food$Ncarcass_daily[Parms_Food$meat] / Parms_Food$CSU[Parms_Food$meat]
+expand.grid(str_pad(day, width = 2, pad = "0"),
+            str_pad(1:Parms_Food$Ncarcass_daily[Parms_Food$meat], width = 3, pad = "0"),
+            str_pad(1:NPortions_carcass, width = 4, pad = "0")) %>%
+  as.data.frame(.) %>%
+  `colnames<-`(., c("day", "carcass", "portion")) %>%
+  apply(., 1, function(id) {
+    paste(id["day"], id["carcass"], id["portion"], sep = "_")}) %>%
+  paste(str_sub(Parms_Food$meat, 1, 1) %>% str_to_upper(.), ., sep = "_") %>%
+  sort(.) -> ID

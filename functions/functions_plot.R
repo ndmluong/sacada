@@ -72,9 +72,9 @@ f_plotPlant <- function(
                  size=0.5, colour = "white")
   
   # ## Annotate location
-  # Annotate <- data.frame(label = names(tapply(MyPlant$L$coordY, MyPlant$L$Location, max)),
-  #                        annotateX = unname(tapply(MyPlant$L$coordX, MyPlant$L$Location, mean)),
-  #                        annotateY = unname(tapply(MyPlant$L$coordY, MyPlant$L$Location, max))
+  # Annotate <- data.frame(label = names(tapply(MyPlant$L$coordY, MyPlant$L$location, max)),
+  #                        annotateX = unname(tapply(MyPlant$L$coordX, MyPlant$L$location, mean)),
+  #                        annotateY = unname(tapply(MyPlant$L$coordY, MyPlant$L$location, max))
   # )
   # 
   # g_Plant <- g_Plant +
@@ -96,18 +96,18 @@ f_Border <- function(
   ## Border (data frame): coordinates of the borders (all spaces)
 ) {
   L <- subset(Plant$L, border == T)
-  L$Location <- as.factor(L$Location)
+  L$location <- as.factor(L$location)
   
   ## Border of the spaces (location)
-  tapply(L$coordX, INDEX = L$Location, FUN = min) %>% names -> Location
+  tapply(L$coordX, INDEX = L$location, FUN = min) %>% names -> location
   
-  tapply(L$coordX, INDEX = L$Location, FUN = min) %>% unname - 0.5 -> Xmin
-  tapply(L$coordX, INDEX = L$Location, FUN = max) %>% unname + 0.5 -> Xmax
+  tapply(L$coordX, INDEX = L$location, FUN = min) %>% unname - 0.5 -> Xmin
+  tapply(L$coordX, INDEX = L$location, FUN = max) %>% unname + 0.5 -> Xmax
   
-  tapply(L$coordY, INDEX = L$Location, FUN = min) %>% unname - 0.5 -> Ymin
-  tapply(L$coordY, INDEX = L$Location, FUN = max) %>% unname + 0.5 -> Ymax
+  tapply(L$coordY, INDEX = L$location, FUN = min) %>% unname - 0.5 -> Ymin
+  tapply(L$coordY, INDEX = L$location, FUN = max) %>% unname + 0.5 -> Ymax
   
-  Border <- data.frame(Location = Location,
+  Border <- data.frame(location = location,
                        Xmin = Xmin,
                        Xmax = Xmax,
                        Ymin = Ymin,
@@ -127,7 +127,7 @@ f_coordDoor <- function(
 ) {
   nbSpaces <- length(prm$Spaces) ## total number of the spaces
   
-  D <- data.frame(Location = rep(NA, nbSpaces),
+  D <- data.frame(location = rep(NA, nbSpaces),
                   intdoor.X0 = rep(NA, nbSpaces),
                   intdoor.X1 = rep(NA, nbSpaces),
                   intdoor.Y0 = rep(NA, nbSpaces),
@@ -142,9 +142,9 @@ f_coordDoor <- function(
   
   for (i in 1:nbSpaces) { ## for each space i inside the plant
     
-    D$Location[i] <- prm$Spaces[[i]]$label ## extract the label of the space i
+    D$location[i] <- prm$Spaces[[i]]$label ## extract the label of the space i
     
-    Lsub <- subset(L, Location == prm$Spaces[[i]]$label) ## extract the coordinates of the space i
+    Lsub <- subset(L, location == prm$Spaces[[i]]$label) ## extract the coordinates of the space i
     
     if (is.na(prm$Spaces[[i]]$intdoor.side) == F) { ## if information about the internal door is available
       D$intdoor.side[i] <- prm$Spaces[[i]]$intdoor.side
@@ -233,8 +233,8 @@ f_plotAgents <- function(
   W, ## (data.frame): information of the workers with at least these attributes
   FP = NULL,
   ##  - W_ID (character): worker ID
-  ##  - W_coordX (numeric): coordinates in the X axis of the worker
-  ##  - W_coordY (numeric): coordinates in the X axis of the worker
+  ##  - coordX (numeric): coordinates in the X axis of the worker
+  ##  - coordY (numeric): coordinates in the X axis of the worker
   ##  - W_state (character/factor): infected/not infected worker 
   ##  - W_mask (character/factor): mask/no mask
   ## time index
@@ -242,22 +242,22 @@ f_plotAgents <- function(
 ) {
   #### BEGIN OF FUNCTION
   ##
-  W$W_coordX <- as.numeric(W$W_coordX)
-  W$W_coordY <- as.numeric(W$W_coordY)
+  W$coordX <- as.numeric(W$coordX)
+  W$coordY <- as.numeric(W$coordY)
   
   W <- data.frame(W,
                   time_minutes = W$t_ind * 5)
   
   g_Plant <- g_emptyPlant +
     geom_point(data = W,
-               mapping = aes(x=W_coordX, y=W_coordY, colour=W_status, shape=W_mask,
+               mapping = aes(x=coordX, y=coordY, colour=W_status, shape=W_mask,
                              W_ID=W_ID, W_type=W_type, frame=time_minutes),
                size = 3, alpha = 0.5,
                position = position_jitter(width = 0.1, height = 0.1, seed=408))
   
   g_Plant <- g_Plant +
     geom_text(data = W,
-              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID, frame=time_minutes),
+              mapping = aes(x=coordX, y=coordY, label=W_ID, frame=time_minutes),
               size = 2,
               position = position_jitter(width = 0.1, height = 0.1, seed=408))
   
@@ -287,14 +287,14 @@ f_plotWorkers <- function(
 ) {
   #### BEGIN OF FUNCTION
   ##
-  W$W_coordX <- as.numeric(W$W_coordX)
-  W$W_coordY <- as.numeric(W$W_coordY)
+  W$coordX <- as.numeric(W$coordX)
+  W$coordY <- as.numeric(W$coordY)
   Wti <- subset(W, t_ind == ti)
   Wsub <- subset(Wti, W_active == "active")
   
   g_Plant <- g_emptyPlant +
     geom_point(data = Wsub,
-               mapping = aes(x = W_coordX, y = W_coordY,
+               mapping = aes(x = coordX, y = coordY,
                              colour = W_type,
                              shape = W_shift,
                              W_team = W_team, Week = Week, Weekday = Weekday),
@@ -307,7 +307,7 @@ f_plotWorkers <- function(
   ## workers ID as label
   g_Plant <- g_Plant +
     geom_text(data = Wsub,
-              mapping = aes(x=W_coordX, y=W_coordY, label=W_ID),
+              mapping = aes(x=coordX, y=coordY, label=W_ID),
               size = 2.5,
               position = position_jitter(width = 0.1, height = 0.5, seed=408))
   
@@ -415,101 +415,4 @@ f_summaryWorkersAtDay <- function(
     cat(summary_text)
   } else return(summary_text)
   
-}
-
-
-##### f_plotOutput() FUNCTION TO PLOT SIMULATION OUTPUT SUMMARY #####
-f_plotOutput <- function(
-  IL,
-  IS,
-  seed_select = NULL,
-  detailed_plot = F,
-  wrap.nrow = 1
-) {
-  
-  tapply(IL$InfectionSource, IL$seed, summary) %>%
-    sapply(as.vector) %>%
-    t() %>%
-    as.data.frame() -> ILF
-  colnames(ILF) <- c(levels(IL$InfectionSource), "not_infected")
-  ILF <- data.frame(seed = rownames(ILF),
-                    ILF)
-  rownames(ILF) <- 1:nrow(ILF)
-  
-  if (!is.null(seed_select)) {
-    ISsub <- subset(IS, seed %in% seed_select)
-    ILsub <- subset(IL, seed %in% seed_select)
-    ILFsub <- subset(ILF, seed %in% seed_select)
-  } else {
-    ISsub <- IS
-    ILsub <- IL
-    ILFsub <- ILF
-  }
-  
-
-  
-  if (detailed_plot == F) {
-    ggplot(data = ISsub) +
-      geom_line(aes(x = Day, y = Infected_cumul, group = seed, colour = seed), size = 0.5) +
-      theme(axis.ticks=element_blank(),
-            #legend.position = "none",
-            panel.background=element_rect(fill="white"),
-            plot.title = element_text(face="bold", size=15),
-            axis.title = element_text(face="bold", size=10),
-            axis.text = element_text(size=10),
-            panel.grid.major.y=element_line(colour="lightgrey"),
-            panel.grid.major.x=element_line(colour="lightgrey"),
-            panel.grid.minor.y=element_line(colour="white"),
-            panel.grid.minor.x=element_line(colour="lightgrey")) +
-      scale_x_continuous(breaks = seq(1, max(IS$Day)+1, by = 7)) +
-      scale_y_continuous(breaks = seq(0, max(IS$Infected_cumul)+5, by = 5)) +
-      coord_cartesian(ylim = c(0, max(IS$Infected_cumul)+5),
-                      xlim = c(0, max(IS$Day)+1)) +
-      stat_summary(data = IS, aes(x=Day, y=Infected_cumul), fun = mean, geom="line", size = 2, colour = "black") + 
-      labs(title = "Cumulative number of infected workers",
-           subtitle = paste(length(unique(ISsub$seed)), "individual curves and the average trend (across", length(unique(IS$seed)), "independent simulations)")) +
-      xlab("time (day)") + ylab("number of workers") -> g_Output
-  } 
-  else {
-    
-    pal_viridis <- viridis::viridis(10)
-    pal_turbo <- viridis::turbo(3, begin = 0.5, end = 0.9)
-    
-    ggplot(data = ISsub) +
-      geom_ribbon(aes(x = Day, ymax = Symptomatic, ymin = 0), fill = pal_viridis[1], alpha = 0.9) +
-      geom_ribbon(aes(x = Day, ymin = Symptomatic, ymax = Symptomatic+Asymptomatic), fill = pal_viridis[2], alpha = 0.7) +
-      geom_ribbon(aes(x = Day, ymin = Symptomatic+Asymptomatic, ymax = InfectiousPeriod), fill = pal_viridis[3], alpha = 0.5) +
-      geom_ribbon(aes(x = Day, ymin = InfectiousPeriod, ymax = InfectiousPeriod + NonInfectious), fill = pal_viridis[4], colour = pal_viridis[4], alpha = 0.95) +
-      geom_ribbon(aes(x = Day, ymin = InfectiousPeriod + NonInfectious, ymax = Positive), fill = pal_viridis[5], colour = pal_viridis[5], alpha = 0.65) +
-      # geom_ribbon(aes(x = Day, ymin = Positive, ymax = Infected_cumul), fill = pal_viridis[10], colour = "white", alpha = 0.7) +
-      geom_line(aes(x = Day, y = Infected_cumul), colour = "black", size = 2.5) +
-      geom_line(aes(x = Day, y = Positive), colour = pal_viridis[4], size = 1.5) +
-      geom_line(aes(x = Day, y = InfectiousPeriod), colour = pal_viridis[1], size = 1.2) +
-      # geom_hline(yintercept = 15, colour = "navyblue", linetype = "dashed") +
-      theme(axis.ticks=element_blank(),
-            panel.background=element_rect(fill="white"),
-            plot.title = element_text(face="bold", size=15),
-            axis.title = element_text(face="bold", size=10),
-            axis.text = element_text(size=10),
-            panel.grid.major.y=element_line(colour="lightgrey"),
-            panel.grid.major.x=element_line(colour="lightgrey"),
-            panel.grid.minor.y=element_line(colour="white"),
-            panel.grid.minor.x=element_line(colour="lightgrey")) +
-      geom_rect(data = ILFsub, aes(xmin = max(IS$Day)+0.2, xmax = max(IS$Day)+1.5, ymin = 0, ymax = initialised), fill = "gray30") + ## initially infected
-      geom_rect(data = ILFsub, aes(xmin = max(IS$Day)+0.2, xmax = max(IS$Day)+1.5, ymin = initialised, ymax = initialised+aerosol), fill = pal_turbo[1]) +
-      geom_rect(data = ILFsub, aes(xmin = max(IS$Day)+0.2, xmax = max(IS$Day)+1.5, ymin = initialised+aerosol, ymax = initialised+aerosol+epidemy), fill = pal_turbo[2]) +
-      geom_rect(data = ILFsub, aes(xmin = max(IS$Day)+0.2, xmax = max(IS$Day)+1.5, ymin = initialised+aerosol+epidemy, ymax = initialised+aerosol+epidemy+community), fill = pal_turbo[3]) +
-      facet_wrap(. ~ seed, nrow = wrap.nrow) +
-      scale_x_continuous(breaks = seq(1, max(IS$Day), by = 7)) +
-      scale_y_continuous(breaks = seq(0, max(IS$Infected_cumul), by = 2)) +
-      scale_fill_manual(name = "Infection sources",
-                        breaks = c("initialised", "aerosol", "epidemy", "community"),
-                        values = c("initialised"="gray30", "aerosol"=pal_turbo[1], "epidemy"=pal_turbo[2], "community"=pal_turbo[3])) +
-      coord_cartesian(ylim = c(0, max(IS$Infected_cumul))) +
-      labs(title = "Evolution of the number of infected workers",
-           subtitle = "Cumulative and daily number of workers depending on their sanitary status") +
-      xlab("time (day)") + ylab("number of workers") -> g_Output
-  }
-
-  return(g_Output)
 }
