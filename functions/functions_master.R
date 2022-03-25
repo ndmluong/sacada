@@ -16,12 +16,14 @@ f_Who_is <- function(
   ## Convert all workspace locations "WS..." into "Cutting room" (prm_plant$label)
   Sub_MyWorkers$location[str_starts(Sub_MyWorkers$location,"WS")] <- prm_plant$label
   
+  Rooms_label <- c(prm_plant$label)
+  
   ### --> /!\ MODIFICATION PROPOSITION (automatised)
   # The total number of the room = nb of spaces declared in prm_plant + cutting room
   NRooms <- length(prm_plant$Spaces) + 1 
   # Define the matrices showing the presence/absence (T/F) of every workers inside every rooms
   Cont_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
-  Cont_nomask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
+  Cont_no_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
   Non_Cont_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
   Non_Cont_no_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
   ###
@@ -29,7 +31,7 @@ f_Who_is <- function(
   Cont_mask[,1] <- Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
     Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
   
-  Cont_nomask[,1]  =Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
+  Cont_no_mask[,1]  =Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
     Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
   
   Non_Cont_mask[,1]  = Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
@@ -37,13 +39,13 @@ f_Who_is <- function(
   
   Non_Cont_no_mask[,1]  = Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
     Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
-  
+
   ### For the other rooms
   for (x in prm_plant$Spaces) {
     Cont_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
       Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="mask"
     
-    Cont_nomask[,i+1] =  Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
+    Cont_no_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
       Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="no mask"
     
     Non_Cont_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
@@ -53,13 +55,122 @@ f_Who_is <- function(
       Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="no mask"
     
     i=i+1
+    
+    Rooms_label <- c(Rooms_label, x$label)
   }
    symptomatic=Sub_MyWorkers$W_status =="symptomatic"
   # 
   
-  return(list(Cont_mask, Cont_nomask, Non_Cont_mask, Non_Cont_no_mask, symptomatic))
+  Rooms <- vector("list", length = NRooms)
+  
+  for (i in 1:NRooms) {
+    if (length(which(Cont_mask[,i])) > 0) {
+      Cont_mask_ID <- paste("W", str_pad(which(Cont_mask[,i]), width = 3, pad = 0), sep="")
+    } else Cont_mask_ID <- NA
+    
+    if (length(which(Cont_no_mask[,i])) > 0) {
+      Cont_no_mask_ID <- paste("W", str_pad(which(Cont_no_mask[,i]), width = 3, pad = 0), sep="")
+    } else Cont_no_mask_ID <- NA
+    
+    if (length(which(Non_Cont_mask[,i])) > 0) {
+      Non_Cont_mask_ID <- paste("W", str_pad(which(Non_Cont_mask[,i]), width = 3, pad = 0), sep="")
+    } else Non_Cont_mask_ID <- NA
+    
+    if (length(which(Non_Cont_no_mask[,i])) > 0) {
+      Non_Cont_no_mask_ID <- paste("W", str_pad(which(Non_Cont_no_mask[,i]), width = 3, pad = 0), sep="")
+    } else Non_Cont_no_mask_ID <- NA
+    
+    Rooms[[i]] <- list(Cont_mask_ID, Cont_no_mask_ID, Non_Cont_mask_ID, Non_Cont_no_mask_ID)
+  }
+
+  return(list(Cont_mask = Cont_mask,
+              Cont_no_mask = Cont_no_mask,
+              Non_Cont_mask = Non_Cont_mask,
+              Non_Cont_no_mask = Non_Cont_no_mask,
+              Rooms = Rooms,
+              symptomatic = symptomatic))
   
 }
+
+
+f_Sneeze <- function(
+  ## INTPUT
+  Rooms, ## one of the output of the function f_Who_is
+  MyWorkers,
+  Rooms_label,
+  t_ind,
+  prm_air,
+  prm_time,
+  ## OUTPUT
+  ## 1. nb droplet from sneeze to aerosol
+  ## 2. nb droplet from the sneezing worker to the other agents (workers, surfaces, meat)
+) {
+  
+  W <- subset(MyWorkers, t_ind == t_ind)
+  
+  for (i in length(Rooms)) { ## for each Rooms 
+    
+    ## extract the infectious masked workers (Cont_mask) ...[[1]]
+    Cont_mask_ID <- Rooms[[i]][[1]]
+    
+    ## their corresponding status
+    status <- W$W_status[W$w_ID %in% Cont_mask_ID]
+    
+    ## sneeze: indicates if each worker prensent in the room and infectious sneezes or not (value 1/0)
+    sapply(status, FUN = function(x) {
+      prob <- Parms_Air$p_sneeze[x] * prm_time$Step
+      sneeze <- rbinom(1, 1, prob = prob)
+      return(sneeze)
+    }) -> sneeze
+    
+    #aerosols droplet nuclei
+    To_aerosol[i] = sum(sneeze) * prm_air$Cd_sneeze * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+  
+    ##Falling droplets (number emitted when sneezing)
+    nd_Source = prm_air$Cd_sneeze * (Method_calc[i,]==F) * prm_air$Vol_sneeze
+        # ID of the sneezing worker(s)
+    Source_ID <- Cont_mask_ID[sneeze == 1]
+
+    # Surfaces_ID
+    
+    ## their corresponding X, Y coordinates
+    Source_X <- W$coordX[W$W_ID %in% Source_ID]
+    Source_Y <- W$coordY[W$W_ID %in% Source_ID]
+    
+    W_susceptible <- subset(W, location == Rooms_label[i] & W_status == "susceptible")
+    
+    d_expo <- matrix(0, nrow = nrow(W_susceptible),
+                     ncol = ncol(Method_calc))
+    
+    for (S in 1:length(Source_ID)){
+      DX = abs(Source_X[S]-W_susceptible$coordX)
+      DY = abs(Source_Y[S]-W_susceptible$coordY)
+      # if (max(c(DX,DY)<=1) {}
+      
+      p_zone_air = (DY <= 1 & DX <= 1) * 0.11 + 
+      ((DX==2 & DY<=1)|(DY==2 & DX<=1)) * 0.035 + 
+      ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * 0.015
+      
+      resp <- runif(nrow(W_susceptible),prm_air$RespRate[3],prm_air$RespRate[5]) #[m3/min]
+      
+      tsed = 2/Vsed/60 # [minutes] # man_height = 2 [m]  hypothesis (source of droplet emission )
+      tsed[tsed >= 5] <- 5
+      
+      d_expo = d_expo +
+        (p_zone_air * resp / 2) %*% (nd_Source * tsed)  # 2 corresponds to 2m3, the air volume around the worker
+      
+    }
+    # 
+    # (DY <= 1 & DX <= 1) * 0.05 + 
+    #   ((DX=2 & DY<=1)|(DY=2 & DX<=1)) * 0.03 + 
+    #   ((DY=3 & DX=0)|(DX=3 & DY=0)|(DY=2 & DX=2)) * 0.015
+    
+    
+    }
+   ## output: d_expo, 
+  return(d_expo)
+}
+
 
 ##### MASTER f_Module_Master() aims at dealing with the different modules Air, Surface, Transfers ... ##### 
 # 1 - Determination of what is happening at time ind, who is doing what at this moment, e.g. who is in the cutting room without mask, who is touching a surface, who is talking,... 
@@ -128,7 +239,7 @@ f_Module_Master <- function (
     # of symtomatic  operators:  coughing all the time ind 
     p_emission[W_Loc_N_mask[[5]]] <- 4
     
-    
+    ###### identify who ? 
     
     # 2 - TRANSFERS ----------------------------------------------------------
     # 2.1 FROM AIR to SURFACES : Droplet sedimentation of the surfaces

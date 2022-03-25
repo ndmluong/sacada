@@ -147,7 +147,51 @@ rm(FoodInitStruct)
 # f_circulateCarcass(Plant = MyPlant, FPcarc = subset(MyFood, carcass_ID == "0001"), carcass_ID = "0001", t_ind = 60, prm_food = Parms_Food, prm_time = Parms_Time) -> aa
 ## test OK
 
-ST1 <- Sys.time()
+# MF15_42 <- list()
+# 
+# for (day in 1:42) {
+#   FoodInitStruct <- f_initFood(prm_food = Parms_Food,
+#                                prm_workers = Parms_Workers,
+#                                prm_time = Parms_Time,
+#                                W = MyWorkers,
+#                                day = day) ## first day
+#   MyFood <- FoodInitStruct$FP
+#   MyCarcasses <- FoodInitStruct$c_alloc
+#   duration_ti <- FoodInitStruct$duration_ti
+#   lapply(unique(MyFood$carcass_ID)[1:15], ## test sur 15 carcasses
+#          FUN = function(x) {
+#            writeLines(paste("Circulating the carcass ", x, sep=""))
+#            FPcarc0 <- filter(MyFood, carcass_ID == x)
+#            ti <- min(FPcarc0$t_ind)
+#            MF0 <- f_circulateCarcass(Plant = MyPlant, FPcarc = FPcarc0, carcass_ID = x, 
+#                                      t_ind = ti,
+#                                      prm_food = Parms_Food, prm_time = Parms_Time)
+#            return(MF0)
+#          }) %>%
+#     rbindlist(.) -> MF15
+#   
+#   MF15_42 <- list(MF15_42, MF15)
+# }
+
+Cont_mask_ID <- c("W003", "W006", "W012", "W017", "W028")
+status <- c("infectious", "asymptomatic", "symptomatic", "symptomatic", "symptomatic")
+
+sapply(status, FUN = function(x) {
+  prob <- Parms_Air$p_sneeze[x] * 5
+  sneeze <- rbinom(1, 1, prob = prob)
+  return(sneeze)
+}) -> sneeze
+
+
+
+
+# test Who_is pour l'indice 60
+W <- subset(MyWorkers, t_ind == 60)
+
+WhoIs60 <- f_Who_is(SMW, prm_plant = Parms_Plant, 100, ind = 60)
+
+
+
 lapply(unique(MyFood$carcass_ID)[1:15], ## test sur 15 carcasses
        FUN = function(x) {
   writeLines(paste("Circulating the carcass ", x, sep=""))
