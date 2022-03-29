@@ -173,8 +173,111 @@ rm(FoodInitStruct)
 #   MF15_42 <- list(MF15_42, MF15)
 # }
 
+save.image("test_checkpoint2.RData")
+
+
+
+SubW <- subset(MyWorkers, t_ind == 60)
+
+f_Who_is(Sub_MyWorkers = subset(MyWorkers, t_ind == 60), prm_plant = Parms_Workers, NWorkers = 100, ind = 60)
+
+
+
 Cont_mask_ID <- c("W003", "W006", "W012", "W017", "W028")
 status <- c("infectious", "asymptomatic", "symptomatic", "symptomatic", "symptomatic")
+
+W <- MyWorkers
+
+ti <- 65
+W$W_status[W$W_ID %in% c("W003", "W006", "W012", "W017", "W028", "W032", "W056", "W087", "W080") & W$t_ind == ti] <- c("infectious", "asymptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic")
+
+f_Who_is(SubW = subset(W, t_ind==ti),
+         prm_plant = Parms_Plant, ind = ti) -> bb 
+
+
+output_sneeze <- f_Sneeze(SubW = subset(W, t_ind == ti), SubS = subset(MySurfaces, t_ind == ti), Rooms_label = Spaces_label, t_ind = ti, Rooms = bb$Who,prm_air = Parms_Air,prm_time = Parms_Time,P_drop_conta = P_drop_conta)
+
+
+
+SubW <- subset(W, t_ind == 60)
+mask <- SubW$W_mask
+
+eff <- (mask == "mask") * 0.1 + (mask == "no mask") 
+eff[is.na(eff)] <- 0
+
+names(eff) <- unique(SubW$W_ID)
+eff[c("W020", "W021")]
+
+# Spaces_label <- lapply(Parms_Plant$Spaces, FUN = function(x) return(x$label)) %>% unlist() %>% as.vector() 
+# 
+# W <- MyWorkers
+# SubW <- subset(MyWorkers, t_ind == 60)
+# 
+# NWorkers <- length(unique(SubW$W_ID))
+# NSpaces <- length(Spaces_label)
+# 
+# Cont_mask <- matrix(FALSE, nrow = NWorkers, ncol = NSpaces,
+#                     dimnames = list(unique(SubW$W_ID), Spaces_label))
+# Cont_no_mask <- matrix(FALSE, nrow = NWorkers, ncol = NSpaces,
+#                     dimnames = list(unique(SubW$W_ID), Spaces_label))
+# Non_Cont_mask <- matrix(FALSE, nrow = NWorkers, ncol = NSpaces,
+#                     dimnames = list(unique(SubW$W_ID), Spaces_label))
+# Non_Cont_no_mask <- matrix(FALSE, nrow = NWorkers, ncol = NSpaces,
+#                     dimnames = list(unique(SubW$W_ID), Spaces_label))
+# 
+# ## Update the presences/absences matrices for every spaces 
+# # Contaminated - mask
+# sapply(Spaces_label, FUN = function(x) {
+#   Cont_mask[,x] <- SubW$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
+#     SubW$location == x & SubW$W_mask=="mask"
+# }) %>% `rownames<-`(.,unique(SubW$W_ID)) -> Cont_mask
+# 
+# # Contaminated - no mask
+# sapply(Spaces_label, FUN = function(x) { ## for each space
+#   Cont_no_mask[,x] <- SubW$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
+#     SubW$location == x & SubW$W_mask=="no mask"
+# }) %>% `rownames<-`(.,unique(SubW$W_ID)) -> Cont_no_mask
+# 
+# # Non contaminated - mask
+# Non_Cont_mask <- sapply(Spaces_label, FUN = function(x) { ## for each space
+#   Non_Cont_mask[,x] <- SubW$W_status %in% c("susceptible", "infected", "non-infectious") &
+#     SubW$location == x & SubW$W_mask=="mask"
+# }) %>% `rownames<-`(.,unique(SubW$W_ID)) -> Non_Cont_mask
+# 
+# # Non contaminated - no mask
+# Non_Cont_no_mask <- sapply(Spaces_label, FUN = function(x) { ## for each space
+#   Non_Cont_no_mask[,x] <- SubW$W_status %in% c("susceptible", "infected", "non-infectious") &
+#     SubW$location == x & SubW$W_mask=="no mask"
+# }) %>% `rownames<-`(.,unique(SubW$W_ID)) -> Non_Cont_no_mask
+# 
+# 
+# 
+# 
+# f_Who_is2(SubW = subset(W, t_ind == 60), prm_plant = Parms_Plant, ind = 60)
+# 
+# apply(Cont_mask, 2, FUN = function(x) {
+#   if (length(which(x==T)) > 0) return(names(which(x==T))) else return(NA)
+# }) -> Cont_mask_ID
+# 
+# apply(Cont_no_mask, 2, FUN = function(x) {
+#   if (length(which(x==T)) > 0) return(names(which(x==T))) else return(NA)
+# }) -> Cont_no_mask_ID
+# 
+# apply(Non_Cont_mask, 2, FUN = function(x) {
+#   if (length(which(x==T)) > 0) return(names(which(x==T))) else return(NA)
+# }) -> Non_Cont_mask_ID
+# 
+# apply(Non_Cont_no_mask, 2, FUN = function(x) {
+#   if (length(which(x==T)) > 0) return(names(which(x==T))) else return(NA)
+# }) -> Non_Cont_no_mask_ID
+# 
+# Spaces <- list(Cont_mask_ID = Cont_mask_ID,
+#                Cont_no_mask_ID = Cont_no_mask_ID,
+#                Non_cont_mask_ID = Non_cont_no_mask_ID,
+#                Non_cont_no_mask_ID = Non_cont_no_mask_ID)
+
+f_Who_is(SubW = subset(MyWorkers, t_ind == 60),prm_plant = Parms_Plant, ind = 60) -> aa
+
 
 sapply(status, FUN = function(x) {
   prob <- Parms_Air$p_sneeze[x] * 5
@@ -429,6 +532,11 @@ load("simulation_output/OUTPUT_2022_02_16_NDL_S03.RData")
 load("simulation_output/OUTPUT_2022_02_16_NDL_S04.RData")
 f_plotOutput(IL, IS)
 f_plotOutput(IL, IS, detailed_plot = T, wrap.nrow = 2)
+
+
+
+
+
 
 
 

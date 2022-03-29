@@ -1,174 +1,268 @@
-##### f_Who_is() to sum up who is where, how is he and is he wearing a mask at A GIVEN TIME INDEX #####
+##### OPTIMIZED f_Who_is() to sum up who is where, how is he and is he wearing a mask at A GIVEN TIME INDEX #####
 f_Who_is <- function(
+  ## INPUT
   # To sum up who is where, how is he and is he wearing a mask at A GIVEN TIME INDEX
-  Sub_MyWorkers, ## THE WORKERS ASSOCIATED WITH ONLY THE GIVEN TIME INDEX
+  SubW, ## (subset of MyWorkers) THE WORKERS ASSOCIATED WITH ONLY THE GIVEN TIME INDEX
   prm_plant,
-  NWorkers,
   ind ## the given time index
+  ## OUTPUT
+  
+  
 ){
-  # For the test
-  # ind=536
-  # Sub_MyWorkers <- subset(MyWorkers,t_ind == ind)
-  # NWorkers = prm_workers$NWorkers
-  # Number of contaminated and non contaminated workers in the rooms
-  i=1
+  ## Total number of workers
+  NWorkers <- length(unique(SubW$W_ID))
   
+  #### Spaces 
   ## Convert all workspace locations "WS..." into "Cutting room" (prm_plant$label)
-  Sub_MyWorkers$location[str_starts(Sub_MyWorkers$location,"WS")] <- prm_plant$label
+  SubW$location[str_starts(SubW$location,"WS")] <- prm_plant$label
   
-  Rooms_label <- c(prm_plant$label)
+  ## Extract the name of every spaces including the cutting room
+  Spaces_label <<- c(prm_plant$label,
+                    as.vector(unlist(lapply(Parms_Plant$Spaces, FUN = function(x) return(x$label)))))
   
-  ### --> /!\ MODIFICATION PROPOSITION (automatised)
-  # The total number of the room = nb of spaces declared in prm_plant + cutting room
-  NRooms <- length(prm_plant$Spaces) + 1 
-  # Define the matrices showing the presence/absence (T/F) of every workers inside every rooms
-  Cont_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
-  Cont_no_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
-  Non_Cont_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
-  Non_Cont_no_mask <- matrix(FALSE, NWorkers, NRooms) # size = NWORKER,NROOMS, TRUE/FALSE
-  ###
+  ## Total number of spaces including the cutting room
+  NSpaces <- length(Spaces_label)
   
-  Cont_mask[,1] <- Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
+  ## Define the matrices showing the presence/absence (T/F) of every workers inside every rooms
+  Cont_mask <- matrix(FALSE, nrow = NWorkers, ncol = NSpaces) %>% `colnames<-`(., Spaces_label)
+  Cont_no_mask <- matrix(FALSE, nrow = NWorkers, ncol = NSpaces) %>% `colnames<-`(., Spaces_label)
+  Non_Cont_mask <- matrix(FALSE, nrow = NWorkers, ncol = NSpaces) %>% `colnames<-`(., Spaces_label)
+  Non_Cont_no_mask <- matrix(FALSE, nrow = NWorkers, ncol = NSpaces) %>% `colnames<-`(., Spaces_label)
   
-  Cont_no_mask[,1]  =Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
   
-  Non_Cont_mask[,1]  = Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="mask"
+  ## Update the presences/absences matrices for every spaces 
+  # Contaminated - mask
+  sapply(Spaces_label, FUN = function(x) {
+    Cont_mask[,x] <- SubW$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
+      SubW$location == x & SubW$W_mask=="mask"
+  }) %>% `rownames<-`(.,unique(SubW$W_ID)) -> Cont_mask
   
-  Non_Cont_no_mask[,1]  = Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-    Sub_MyWorkers$location == prm_plant$label & Sub_MyWorkers$W_mask=="no mask"
+  # Contaminated - no mask
+  sapply(Spaces_label, FUN = function(x) { ## for each space
+    Cont_no_mask[,x] <- SubW$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
+      SubW$location == x & SubW$W_mask=="no mask"
+  }) %>% `rownames<-`(.,unique(SubW$W_ID)) -> Cont_no_mask
+  
+  # Non contaminated - mask
+  Non_Cont_mask <- sapply(Spaces_label, FUN = function(x) { ## for each space
+    Non_Cont_mask[,x] <- SubW$W_status %in% c("susceptible", "infected", "non-infectious") &
+      SubW$location == x & SubW$W_mask=="mask"
+  }) %>% `rownames<-`(.,unique(SubW$W_ID)) -> Non_Cont_mask
+  
+  # Non contaminated - no mask
+  Non_Cont_no_mask <- sapply(Spaces_label, FUN = function(x) { ## for each space
+    Non_Cont_no_mask[,x] <- SubW$W_status %in% c("susceptible", "infected", "non-infectious") &
+      SubW$location == x & SubW$W_mask=="no mask"
+  }) %>% `rownames<-`(.,unique(SubW$W_ID)) -> Non_Cont_no_mask
+  
+  ## ID of the workers in each room depending on their contamination and mask wearing status
+  apply(Cont_mask, 2, FUN = function(x) {
+    if (length(which(x==T)) > 0) return(names(which(x==T))) else return(NA)
+  }) -> C_M_ID
+  
+  apply(Cont_no_mask, 2, FUN = function(x) {
+    if (length(which(x==T)) > 0) return(names(which(x==T))) else return(NA)
+  }) -> C_NM_ID
+  
+  apply(Non_Cont_mask, 2, FUN = function(x) {
+    if (length(which(x==T)) > 0) return(names(which(x==T))) else return(NA)
+  }) -> NC_M_ID
+  
+  apply(Non_Cont_no_mask, 2, FUN = function(x) {
+    if (length(which(x==T)) > 0) return(names(which(x==T))) else return(NA)
+  }) -> NC_NM_ID
+  
+  lapply(Spaces_label, FUN = function(x) {
+    return(list(C_M_ID[[x]], C_NM_ID[[x]], NC_M_ID[[x]], NC_NM_ID[[x]]))
+  }) %>% `names<-`(.,unique(Spaces_label))-> Who
 
-  ### For the other rooms
-  for (x in prm_plant$Spaces) {
-    Cont_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="mask"
-    
-    Cont_no_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("infectious", "symptomatic", "asymptomatic") &
-      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="no mask"
-    
-    Non_Cont_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="mask"
-    
-    Non_Cont_no_mask[,i+1] =  Sub_MyWorkers$W_status %in% c("susceptible", "infected", "non-infectious") &
-      Sub_MyWorkers$location==x$label & Sub_MyWorkers$W_mask=="no mask"
-    
-    i=i+1
-    
-    Rooms_label <- c(Rooms_label, x$label)
-  }
-   symptomatic=Sub_MyWorkers$W_status =="symptomatic"
-  # 
-  
-  Rooms <- vector("list", length = NRooms)
-  
-  for (i in 1:NRooms) {
-    if (length(which(Cont_mask[,i])) > 0) {
-      Cont_mask_ID <- paste("W", str_pad(which(Cont_mask[,i]), width = 3, pad = 0), sep="")
-    } else Cont_mask_ID <- NA
-    
-    if (length(which(Cont_no_mask[,i])) > 0) {
-      Cont_no_mask_ID <- paste("W", str_pad(which(Cont_no_mask[,i]), width = 3, pad = 0), sep="")
-    } else Cont_no_mask_ID <- NA
-    
-    if (length(which(Non_Cont_mask[,i])) > 0) {
-      Non_Cont_mask_ID <- paste("W", str_pad(which(Non_Cont_mask[,i]), width = 3, pad = 0), sep="")
-    } else Non_Cont_mask_ID <- NA
-    
-    if (length(which(Non_Cont_no_mask[,i])) > 0) {
-      Non_Cont_no_mask_ID <- paste("W", str_pad(which(Non_Cont_no_mask[,i]), width = 3, pad = 0), sep="")
-    } else Non_Cont_no_mask_ID <- NA
-    
-    Rooms[[i]] <- list(Cont_mask_ID, Cont_no_mask_ID, Non_Cont_mask_ID, Non_Cont_no_mask_ID)
-  }
+  symptomatic = SubW$W_status == "symptomatic"
 
   return(list(Cont_mask = Cont_mask,
               Cont_no_mask = Cont_no_mask,
               Non_Cont_mask = Non_Cont_mask,
               Non_Cont_no_mask = Non_Cont_no_mask,
-              Rooms = Rooms,
+              Who = Who,
               symptomatic = symptomatic))
-  
+
 }
 
 
+##### f_Sneeze #####
 f_Sneeze <- function(
   ## INTPUT
-  Rooms, ## one of the output of the function f_Who_is
-  MyWorkers,
+  SubW, ## MyWorkers associated with ONE GIVEN TIME INDEX,
+  SubS, ## MySurfaces associated with ONE GIVEN TIME INDEX
   Rooms_label,
   t_ind,
+  Rooms, ## one of the output of the function f_Who_is
   prm_air,
   prm_time,
+  P_drop_conta
   ## OUTPUT
-  ## 1. nb droplet from sneeze to aerosol
-  ## 2. nb droplet from the sneezing worker to the other agents (workers, surfaces, meat)
+  ## 1. to_aeorosol: nb droplet from sneeze to aerosol
+  ## 2. d_expo_sneeze: nb droplet from the sneezing worker to the other agents (workers, surfaces, meat)
 ) {
   
-  W <- subset(MyWorkers, t_ind == t_ind)
+  SubW$location[str_starts(SubW$location,"WS")] <- "Cutting Room"
   
-  for (i in length(Rooms)) { ## for each Rooms 
-    
-    ## extract the infectious masked workers (Cont_mask) ...[[1]]
+  ## OUTPUT: initialisaiton d_expo_sneeze
+  d_expo <- matrix(0, nrow = nrow(SubW), ncol = ncol(Method_calc))
+  rownames(d_expo) <- sort(unique(SubW$W_ID))
+  
+  ## 3th - OUTPUT
+  m2_drop <- matrix(0, nrow = nrow(SubS), ncol = ncol(Method_calc))
+  
+  ## Efficacité du masque qui ne change pas au cours du temps
+  mask <- SubW$W_mask
+  
+  eff <- (mask == "mask") * (1-prm_air$Mask_Eff) + (mask == "no mask")
+  eff[is.na(eff)] <- 0
+  names(eff) <- unique(SubW$W_ID)
+  
+  To_aerosol <- matrix(0, nrow = length(Rooms_label), ncol = ncol(Method_calc))
+  
+  for (i in 1:length(Rooms)) { ## for each Rooms 
+    ## extract the contaminated masked workers (Cont_mask, including 3 status) ...[[1]]
     Cont_mask_ID <- Rooms[[i]][[1]]
-    
-    ## their corresponding status
-    status <- W$W_status[W$w_ID %in% Cont_mask_ID]
-    
-    ## sneeze: indicates if each worker prensent in the room and infectious sneezes or not (value 1/0)
-    sapply(status, FUN = function(x) {
-      prob <- Parms_Air$p_sneeze[x] * prm_time$Step
-      sneeze <- rbinom(1, 1, prob = prob)
-      return(sneeze)
-    }) -> sneeze
-    
-    #aerosols droplet nuclei
-    To_aerosol[i] = sum(sneeze) * prm_air$Cd_sneeze * (Method_calc[i,]==T) * prm_air$Vol_sneeze
-  
-    ##Falling droplets (number emitted when sneezing)
-    nd_Source = prm_air$Cd_sneeze * (Method_calc[i,]==F) * prm_air$Vol_sneeze
-        # ID of the sneezing worker(s)
-    Source_ID <- Cont_mask_ID[sneeze == 1]
+    Cont_no_mask_ID <- Rooms[[i]][[2]]
 
-    # Surfaces_ID
+    ## their corresponding status (asymptomatic, symptomatic, infectious)
+    status_mask <- SubW$W_status[SubW$W_ID %in% Cont_mask_ID] ########
+    status_no_mask <- SubW$W_status[SubW$W_ID %in% Cont_no_mask_ID]
+
+    ## sneeze: indicates if each worker prensent in the room and infectious sneezes or not (value 1/0)
+    if (length(status_mask) > 0) {
+      sapply(status_mask, FUN = function(x) {
+        prob <- prm_air$p_sneeze[[x]]
+        return(   min(rbinom(1, prm_time$Step, prob = prob), 1)   )
+      }) %>% as.vector() -> sneeze_mask
+    } else {sneeze_mask <- 0}
     
-    ## their corresponding X, Y coordinates
-    Source_X <- W$coordX[W$W_ID %in% Source_ID]
-    Source_Y <- W$coordY[W$W_ID %in% Source_ID]
+    if (length(status_no_mask)) {
+      sapply(status_no_mask, FUN = function(x) {
+        prob <- prm_air$p_sneeze[[x]] 
+        return( min(rbinom(1, prm_time$Step, prob = prob), 1))
+      }) %>% as.vector() ->  sneeze_no_mask
+    } else {sneeze_no_mask <- 0}
+
+    To_aerosol[i,] = sum(sneeze_mask) * (1 - prm_air$Mask_Eff) * prm_air$Cd_sneeze * (Method_calc[i,]==T) * prm_air$Vol_sneeze +
+      sum(sneeze_no_mask) * prm_air$Cd_sneeze * (Method_calc[i,]==T) * prm_air$Vol_sneeze
     
-    W_susceptible <- subset(W, location == Rooms_label[i] & W_status == "susceptible")
+
+    ## Falling droplets (number emitted when sneezing)
+    nd_Source = prm_air$Cd_sneeze * (Method_calc[i,]==F) * prm_air$Vol_sneeze
+
+    # ID of the sneezing worker(s) wearing a mask
+    if (sum(sneeze_mask)> 0) { #
+      Source_ID <- Cont_mask_ID[sneeze_mask == 1]
+      ## their corresponding X, Y coordinates
+      Source_X <- SubW$coordX[SubW$W_ID %in% Source_ID]
+      Source_Y <- SubW$coordY[SubW$W_ID %in% Source_ID]
     
-    d_expo <- matrix(0, nrow = nrow(W_susceptible),
-                     ncol = ncol(Method_calc))
+      W_susceptible <- subset(SubW, location == Spaces_label[i] & W_status == "susceptible")
     
-    for (S in 1:length(Source_ID)){
-      DX = abs(Source_X[S]-W_susceptible$coordX)
-      DY = abs(Source_Y[S]-W_susceptible$coordY)
-      # if (max(c(DX,DY)<=1) {}
+      p_zone <- numeric(nrow(SubS))
+
+      for (S in 1:length(Source_ID)){ ## for each source worker
+        ## distance between close workers
+        DX = abs(Source_X[S]-W_susceptible$coordX)
+        DY = abs(Source_Y[S]-W_susceptible$coordY)
+        # if (max(c(DX,DY)<=1) {}
+        
+        print("DX")
+        print(DX)
+        
+        print("DY")
+        print(DY)
+        
+        p_zone_air = (DY <= 1 & DX <= 1) * 0.11 +
+          ((DX==2 & DY<=1)|(DY==2 & DX<=1)) * 0.035 +
+          ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * 0.015
+        
+        print("p_zone_air_mask")
+        print(p_zone_air)
+        
+        resp <- runif(nrow(W_susceptible),prm_air$RespRate[3],prm_air$RespRate[5]) #[m3/min]
+        
+        tsed = 2/Vsed/60 # [minutes] # man_height = 2 [m]  hypothesis (source of droplet emission )
+        tsed[tsed >= 5] <- 5
+
+        ## number of droplets exposed to each susceptible worker (unit: # droplets)
+        d_expo[W_susceptible$W_ID, ] = d_expo[W_susceptible$W_ID,] +
+          eff[W_susceptible$W_ID] * (p_zone_air * resp / 2) %*% (P_drop_conta[Source_ID[S],] * nd_Source * (1-prm_air$Mask_Eff) * tsed)  # 2 corresponds to 2m3, the air volume around the worker
+        
+        if (names(Rooms[i]) == "Cutting Room") {
+          ## distance between close surfaces
+          DX = abs(Source_X[S] - SubS$coordX)
+          DY = abs(Source_Y[S] - SubS$coordY)
+          
+          p_zone <- numeric(nrow(SubS))
+          
+          p_zone = (DY <= 1 & DX <= 1) * 0.05 +
+            ((DX==2 & DY<=1)|(DY==2 & DX<=1)) * 0.03 +
+            ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * 0.015
+        
+          
+          m2_drop <- m2_drop + p_zone %*% t(P_drop_conta[Source_ID[S],] * nd_Source) * (1-prm_air$Mask_Eff)
+          
+        }
       
-      p_zone_air = (DY <= 1 & DX <= 1) * 0.11 + 
-      ((DX==2 & DY<=1)|(DY==2 & DX<=1)) * 0.035 + 
-      ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * 0.015
-      
-      resp <- runif(nrow(W_susceptible),prm_air$RespRate[3],prm_air$RespRate[5]) #[m3/min]
-      
-      tsed = 2/Vsed/60 # [minutes] # man_height = 2 [m]  hypothesis (source of droplet emission )
-      tsed[tsed >= 5] <- 5
-      
-      d_expo = d_expo +
-        (p_zone_air * resp / 2) %*% (nd_Source * tsed)  # 2 corresponds to 2m3, the air volume around the worker
-      
+      }
     }
-    # 
-    # (DY <= 1 & DX <= 1) * 0.05 + 
-    #   ((DX=2 & DY<=1)|(DY=2 & DX<=1)) * 0.03 + 
-    #   ((DY=3 & DX=0)|(DX=3 & DY=0)|(DY=2 & DX=2)) * 0.015
     
     
-    }
+    # ID of the sneezing worker(s) without mask
+    if (sum(sneeze_no_mask)> 0) { #
+      Source_ID <- Cont_no_mask_ID[sneeze_no_mask == 1]
+      ## their corresponding X, Y coordinates
+      Source_X <- SubW$coordX[SubW$W_ID %in% Source_ID]
+      Source_Y <- SubW$coordY[SubW$W_ID %in% Source_ID]
+      
+      W_susceptible <- subset(SubW, location == Spaces_label[i] & W_status == "susceptible")
+      
+      for (S in 1:length(Source_ID)){ ## for each source worker
+        DX = abs(Source_X[S]-W_susceptible$coordX)
+        DY = abs(Source_Y[S]-W_susceptible$coordY)
+      
+        
+        p_zone_air = (DY <= 1 & DX <= 1) * 0.11 +
+          ((DX==2 & DY<=1)|(DY==2 & DX<=1)) * 0.035 +
+          ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * 0.015
+        
+
+        
+        resp <- runif(nrow(W_susceptible),prm_air$RespRate[3],prm_air$RespRate[5]) #[m3/min]
+        
+        tsed = 2/Vsed/60 # [minutes] # man_height = 2 [m]  hypothesis (source of droplet emission )
+        tsed[tsed >= 5] <- 5
+        
+        ## number of droplets exposed to each susceptible worker (unit: # droplets)
+        d_expo[W_susceptible$W_ID, ] = d_expo[W_susceptible$W_ID,] +
+          eff[W_susceptible$W_ID] * (p_zone_air * resp / 2) %*% (P_drop_conta[Source_ID[S],] * nd_Source * tsed)  # 2 corresponds to 2m3, the air volume around the worker
+        
+        if (names(Rooms[i]) == "Cutting Room") {
+          ## distance between close surfaces
+          DX = abs(Source_X[S] - SubS$coordX)
+          DY = abs(Source_Y[S] - SubS$coordY)
+          
+          p_zone <- numeric(nrow(SubS))
+          
+          p_zone = (DY <= 1 & DX <= 1) * 0.05 +
+            ((DX==2 & DY<=1)|(DY==2 & DX<=1)) * 0.03 +
+            ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * 0.015
+          
+          m2_drop <- m2_drop + p_zone %*% t(P_drop_conta[Source_ID[S],] * nd_Source) * (1-prm_air$Mask_Eff)
+        }
+      } ## end boucle for source S
+    } # end if sum_sneeze
+  }
    ## output: d_expo, 
-  return(d_expo)
+  # return(list(To_aerosol = To_aerosol,
+  #             d_expo_sneeze = d_expo))
+  return(list(To_aerosol = To_aerosol,
+              d_expo_sneeze = d_expo,
+              m2_drop = m2_drop))
 }
 
 
@@ -215,6 +309,7 @@ f_Module_Master <- function (
   # Droplet contamination probability as function as volume and individual viral load
   # Can be moved out of this function !! 
   P_drop_conta =  (10^indi_viral_load) %*% t(prm_air$d_Vol)
+  rownames(P_drop_conta) <- unique(MyWorkers$W_ID)
 
   ########## day time loop ######################
   for (ind in ind_min:ind_max)#max(MyAir$t_ind))### A modifier !!!!!! #### à mettre par jour
@@ -226,18 +321,15 @@ f_Module_Master <- function (
     # The number of droplets in each class at the time index ind
     Cd = MyAir[MyAir$t_ind==(ind), 2:(1+length(prm_air$Droplet_class))] # OK (cf. output of f_initAir() if needed)
     
-    # 1 - What is happening at time ind ? [[1]] cont_mask; [[2]] cont_no_mask; [[3]] no_cont_mask; [[4]] no_cont_no_mask
+    # 1 - What is happening at time ind ? [[1]] cont_mask; [[2]] cont_no_mask; [[3]] no_cont_mask; [[4]] no_cont_no_mask, [[5]] Who, 
     W_Loc_N_mask <- f_Who_is(subset(MyWorkers,t_ind == ind), prm_plant, prm_workers$NWorkers)
     
     
     # p_emission <- sample(c(1,2,3,4), size = prm_workers$NWorkers, prob= c(0.25,0.25,0.25,0.25), replace = T)
     
     # Respiration activity
-    # of non symtomatic  operators:  probability talking , talking loud, just breathing, coughing at time ind 
-    p_emission <- sample(c(1,2,3,4), size = prm_workers$NWorkers, prob= c(prm_air$p_other,prm_air$p_other,prm_air$p_other,prm_air$p_cough), replace = T)
-    
-    # of symtomatic  operators:  coughing all the time ind 
-    p_emission[W_Loc_N_mask[[5]]] <- 4
+    # of non symtomatic  operators:  probability talking , talking loud, just breathing 
+    p_emission <- sample(c(1,2,3), size = prm_workers$NWorkers, prob= c(prm_air$p_other,prm_air$p_other,prm_air$p_other), replace = T)
     
     ###### identify who ? 
     
@@ -283,9 +375,18 @@ f_Module_Master <- function (
     V_renew <- c(prm_plant$Air_renewal,
                  unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$Air_renewal)))))/60
     #  ----------------------------------------------------------------------
+    
+    ## EVENTS : SNEEZE + COUGH
+    Out_sneeze <- f_Sneeze(SubW = subset(MyWorkers, t_ind == ind), Rooms_label = Spaces_label, t_ind = ind, Rooms = W_Loc_N_mask$Who, prm_air = prm_air, prm_time = prm_time)
+    # Out_cough ....
+    
+    
     # 2.5 Balance equation of emissions (sick workers) and absortion (sedimentation, inhalation, exhaust air)
     MyAir[MyAir$t_ind==ind+1,2:(1+length(prm_air$Droplet_class))] = Cd+
-      (dexhale*Method_calc -  dinhale-(V_renew + dsed)*Cd)*prm_time$Step/V_rooms # [d / m3]
+      (dexhale*Method_calc + Out_sneeze$To_aerosol  -  dinhale-(V_renew + dsed)*Cd)*prm_time$Step/V_rooms # [d / m3]
+    
+    ##### 
+    ###MySurfaces = dsed + fallindrop(sneenze) + fallingdrop(cough)
     
     
     # MyAir[MyAir$t_ind==ind,2:(1+length(prm_air$Droplet_class))] <- MyAir[MyAir$t_ind==(ind-1),2:(1+length(prm_air$Droplet_class))] + 
@@ -297,11 +398,4 @@ f_Module_Master <- function (
   ########## End of day time loop ######################
   
   return(list(MyAir,W_droplet_Expos_cumul))
-}
-
-
-f_Which_is <- function(
-
-) {
-  
 }

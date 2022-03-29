@@ -68,10 +68,6 @@ Parms_Workers <- list(
   pMaskAcceptability = c("Surgical mask" = 0,
                          "FFP2" = 0.60),
   ## Mask efficiency for different droplet size classes [0 -> 1]
-  Mask_Eff = c(0.9,  
-               0.9,
-               0.9, 
-               0.9),
 
   #### EPIDEMIOLOGY SCENARIO ####
   ## The number of contaminated workers at the day 0

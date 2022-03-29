@@ -16,7 +16,7 @@ Parms_Air <- list(
             100)/2)^3*1e6,
   
 
-  
+  Vol_sneeze = 0.002,
   # Droplet_class = c(1, # (µm) Midpoint diameters of each droplet class (Buonanno et al. 2020) (respiration)
   #                   5,
   #                   10,
@@ -38,7 +38,9 @@ Parms_Air <- list(
                        c(0.084, 0.009, 0.003, 0.002, 0, 0), # Breathing (insp noze, exp mouth) details in Morawska
                        c(0.567, 0.093, 0.012, 0.006, 0.1, 0.1)),# Cough
   
-  Cd_sneeze = 1e6* c(13,  80 , 175, 140, 48.5, 2.5), # sneeze 
+  Cd_sneeze = 1e6* c(13,  80 , 175, 140, 230, 489), # (m-3) sneeze ## Duguid 1946 / 2L air
+  
+  Mask_Eff = 0.9,
   
   # (m3/min) Respiration rate Adams (1993)
   RespRate = c(0.49,  # Resting
@@ -51,7 +53,10 @@ Parms_Air <- list(
   # Other respiration activity  probiblity
   p_other = (1-2/60)/3,
   
-  p_cough_symp = 1,
+  ## sneezing probability depending on status
+  p_cough = c("infectious" = 2/60, ## freq per minutes
+               "symptomatic" = 47/60,
+               "asymptomatic" = 2/60),
   
   ## sneezing probability depending on status
   p_sneeze = c("infectious" = 1/60, ## freq per minutes
