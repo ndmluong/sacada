@@ -1,4 +1,4 @@
-##### USER DEFINED PARAMETERS FOR THE WORKERS SET #####
+##### PARAMETERS ASSOCIATED WITH THE WORKERS SET #####
 Parms_Workers <- list(
   #### NUMBER OF WORKERS ####
   ## Total number of fixed workers (regular/temporary/subcontract)
@@ -98,3 +98,6 @@ Parms_Workers <- list(
   ## Proportion of asymptomatic
   pAsymptom = 0.335 ## [0.18-0.475] (Alene et al. 2021; Ma et al. 2021; Sah et al. 2021)
 )
+
+# (Optional) Parameters with unchanged values that can be saved in global environment 
+NWorkers <<- Parms_Workers$NWorkers

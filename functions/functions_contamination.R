@@ -123,6 +123,7 @@ f_DRM_Watanabe <- function(
 ##### f_individual_viral_load ####
 f_individual_viral_load <- function(
   prm_workers,
+  prm_air,
   prm_conta
 ) {
   RNA_dist_parms <- prm_conta$RNA_dist[[prm_conta$VoC]]
@@ -131,6 +132,10 @@ f_individual_viral_load <- function(
                                     min = RNA_dist_parms["min"],
                                     mode = RNA_dist_parms["mode"],
                                     max = RNA_dist_parms["max"])
+  
+  # Droplet contamination probability as function as volume and individual viral load
+  P_drop_conta <<- (10^indi_viral_load) %*% t(prm_air$d_Vol)
+  rownames(P_drop_conta) <<- paste("W", stringr::str_pad(seq(1:prm_workers$NWorkers), width=3, pad="0"), sep="")
   
   return(indi_viral_load)
 }

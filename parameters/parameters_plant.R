@@ -168,3 +168,8 @@ Parms_Plant <- list(
   )
   ######### OBJECTS (end)
 )
+
+# (Optional) Parameters with unchanged values that can be saved in global environment 
+# Names (labels) of all spaces including the cutting room
+Spaces_label <<- c(Parms_Plant$label,
+                   as.vector(unlist(lapply(Parms_Plant$Spaces, FUN = function(x) return(x$label)))))
