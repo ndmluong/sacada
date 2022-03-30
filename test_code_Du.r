@@ -190,6 +190,10 @@ MASTER <- f_Module_Master(MyAir = MyAir,W = MyWorkers, S = MySurfaces, prm_plant
 
 
 
+
+
+
+
 ### RUN CONTAMINATION ###
 for (day in 2:(max(MyWorkers$Day)-1)) {
   CONTA <- f_dailyContamination(W = MyWorkers,

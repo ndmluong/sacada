@@ -112,6 +112,7 @@ f_Sneeze <- function(
   tsed = 2/Vsed/60 # [minutes] # man_height = 2 [m]  hypothesis (source of droplet emission )
   tsed[tsed >= 5] <- 5
   
+  ## SNEEZING EVENTS IN EACH ROOM (LOOP) ---- 
   for (i in 1:length(Rooms)) { ## for each Rooms 
     ## extract the IDs of the contaminated masked and not-masked workers
     Cont_mask_ID <- Rooms[[i]][[1]] ## ([[1]]: Cont_mask_ID : check f_Who_is for details)
@@ -121,38 +122,43 @@ f_Sneeze <- function(
     status_mask <- SubW$W_status[SubW$W_ID %in% Cont_mask_ID] 
     status_no_mask <- SubW$W_status[SubW$W_ID %in% Cont_no_mask_ID]
     
-    ## Sneezing events by masked/non-masked contaminated worker(s)
-    if (length(status_mask) > 0) {  # if there is any contaminated worker (masked) present in the current room, 
-      sapply(status_mask, FUN = function(x) { # for each one,
-        prob <- prm_air$p_sneeze[[x]] # determine if the worker sneezes or not with a probability depending on their status
-        return(   min(rbinom(1, prm_time$Step, prob = prob), 1)   )
-      }) %>% as.vector() -> sneeze_mask # sneeze_mask : vector of values 0/1 (same length as the number of considering workers)
-    } else {sneeze_mask <- 0} # otherwise, if there is contaminated worker, assign 0 value
-    
-    if (length(status_no_mask)) {  # if there is any contaminated worker (non-masked) present in the current room,
-      sapply(status_no_mask, FUN = function(x) { # for each one,
-        prob <- prm_air$p_sneeze[[x]] # determine if the worker sneezes or not with a probability depending on their status
-        return( min(rbinom(1, prm_time$Step, prob = prob), 1))
-      }) %>% as.vector() ->  sneeze_no_mask # sneeze_no_mask : vector of values 0/1 (same length as the number of considering workers)
-    } else {sneeze_no_mask <- 0} # otherwise, if there is contaminated worker, assign 0 value
-    
-    print(paste("contaminated droplets by masked to aerosol, room ", i))
-    print(sneeze_mask * (1 - prm_air$Mask_Eff) )
-    # * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze * (Method_calc[i,]==T) * prm_air$Vol_sneeze
-    
-    # Cumulative number of contaminated droplets going to aerosol for each droplet size class depending on the mask wearing attribute of all above contaminated workers
-    # while taking into account the individual variability in the viral load emitted
-    To_aerosol[i,] = sum(sneeze_mask) * (1 - prm_air$Mask_Eff) * prm_air$Cd_sneeze * (Method_calc[i,]==T) * prm_air$Vol_sneeze +
-      sum(sneeze_no_mask) * prm_air$Cd_sneeze * (Method_calc[i,]==T) * prm_air$Vol_sneeze
-    
-    # The number of falling/settling droplets per worker depending on the droplet size class and air characteristics
+    # The number of falling/settling droplets per sneezing worker depending on the droplet size class and air characteristics
     nd_Source = prm_air$Cd_sneeze * (Method_calc[i,]==F) * prm_air$Vol_sneeze
     
     # Look for all other susceptible worker(s) in the same space (room) i
     W_susceptible <- subset(SubW, location == Spaces_label[i] & W_status == "susceptible")
     
+    ## TRANSFERT FROM SNEEZING WORKERS TO AEROSOL ----
+    ## Sneezing events by masked contaminated worker(s)
+    if (length(status_mask) > 0) {  # if there is any contaminated worker (masked) present in the current room, 
+      sapply(status_mask, FUN = function(x) { # for each one,
+        prob <- prm_air$p_sneeze[[x]] # determine if the worker sneezes or not with a probability depending on their status
+        return(   min(rbinom(1, prm_time$Step, prob = prob), 1)   )
+      }) %>% as.vector() -> sneeze_mask # sneeze_mask : vector of values 0/1 (same length as the number of considering workers)
+      
+      # Cumulative number of contaminated droplets going to aerosol for each droplet size class of the above masked sneezing workers
+      # while taking into account the individual variability in the viral load emitted
+      To_aerosol[i,] = To_aerosol[i,] + 
+        colSums(sneeze_mask * (1 - prm_air$Mask_Eff) * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+    } else {sneeze_mask <- 0} # otherwise, if there is contaminated worker, assign 0 value
+    
+    ## Sneezing events by masked contaminated worker(s)
+    if (length(status_no_mask)) {  # if there is any contaminated worker (non-masked) present in the current room,
+      sapply(status_no_mask, FUN = function(x) { # for each one,
+        prob <- prm_air$p_sneeze[[x]] # determine if the worker sneezes or not with a probability depending on their status
+        return( min(rbinom(1, prm_time$Step, prob = prob), 1))
+      }) %>% as.vector() ->  sneeze_no_mask # sneeze_no_mask : vector of values 0/1 (same length as the number of considering workers)
+      
+      # Cumulative number of contaminated droplets going to aerosol for each droplet size class of the above masked sneezing workers
+      # while taking into account the individual variability in the viral load emitted
+      To_aerosol[i,] = To_aerosol[i,] + 
+        colSums(sneeze_no_mask * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+      
+    } else {sneeze_no_mask <- 0} # otherwise, if there is contaminated worker, assign 0 value
+    
+    ## TRANSFERT FROM SNEEZING WORKERS TO OTHER NEARBY WORKERS ----
     ## Exposition of the near susceptible workers and locations due to sneezing events by (source) MASKED worker(s)
-    if (sum(sneeze_mask)> 0) { # if there is any sneezing masked worker
+    if (length(status_mask) > 0) { # if there is any sneezing masked worker
       # Extract their IDs and X,Y coordinates
       Source_ID <- Cont_mask_ID[sneeze_mask == 1] # IDs
       Source_X <- SubW$coordX[SubW$W_ID %in% Source_ID] # X coordinates
@@ -182,8 +188,6 @@ f_Sneeze <- function(
           DY = abs(Source_Y[S] - SubS$coordY)
           
           # Calculate the fraction of droplets settling on near coordinates depending on the distances with the source
-          p_zone <- numeric(nrow(SubS)) ## initialize
-          
           p_zone = (DY <= 1 & DX <= 1) * prm_air$p_zone[["adj1"]] + # 1st nearest cases (check parameters_air.R)
             ((DX==2 & DY<=1)|(DY==2 & DX<=1)) * prm_air$p_zone[["adj2"]] + # 2nd adjacent cases 
             ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * prm_air$p_zone[["adj3"]] # 3rd (farthest) adjacent cases
@@ -226,8 +230,6 @@ f_Sneeze <- function(
           DY = abs(Source_Y[S] - SubS$coordY)
           
           # Calculate the fraction of droplets settling on near coordinates depending on the distances with the source
-          p_zone <- numeric(nrow(SubS)) ## initialize
-          
           p_zone = (DY <= 1 & DX <= 1) * prm_air$p_zone[["adj1"]] + # 1st nearest cases (check parameters_air.R)
             ((DX==2 & DY<=1)|(DY==2 & DX<=1)) * prm_air$p_zone[["adj2"]] + # 2nd adjacent cases 
             ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * prm_air$p_zone[["adj3"]] # 3rd (farthest) adjacent cases
