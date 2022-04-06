@@ -140,10 +140,10 @@ f_Sneeze <- function(
       # while taking into account the individual variability in the viral load emitted
       if (length(sneeze_mask) > 1) {
         To_aerosol[i,] = To_aerosol[i,] + 
-          colSums(sneeze_mask * (1 - prm_air$Mask_Eff) * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+          colSums(sneeze_mask * (1 - prm_air$Mask_Eff) * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]) * prm_air$Vol_sneeze
       } else {
         To_aerosol[i,] = To_aerosol[i,] +
-          sneeze_mask * (1 - prm_air$Mask_Eff) * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze + (Method_calc[i,]==T) * prm_air$Vol_sneeze
+          sneeze_mask * (1 - prm_air$Mask_Eff) * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze + (Method_calc[i,]) * prm_air$Vol_sneeze
       }
       
     } else {sneeze_mask <- 0} # otherwise, if there is contaminated worker, assign 0 value
@@ -159,10 +159,10 @@ f_Sneeze <- function(
       # while taking into account the individual variability in the viral load emitted
       if (length(sneeze_no_mask) > 1) {
         To_aerosol[i,] = To_aerosol[i,] + 
-          colSums(sneeze_no_mask * P_drop_conta[Cont_no_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+          colSums(sneeze_no_mask * P_drop_conta[Cont_no_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]) * prm_air$Vol_sneeze
       } else {
         To_aerosol[i,] = To_aerosol[i,] + 
-          sneeze_no_mask * P_drop_conta[Cont_no_mask_ID,] * prm_air$Cd_sneeze * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+          sneeze_no_mask * P_drop_conta[Cont_no_mask_ID,] * prm_air$Cd_sneeze * (Method_calc[i,]) * prm_air$Vol_sneeze
       }
     } else {sneeze_no_mask <- 0} # otherwise, if there is contaminated worker, assign 0 value
     
@@ -392,22 +392,22 @@ f_Module_Master <- function (
     print(Sneeze$To_aerosol / V_rooms)
     
     # Cd = Cd + Sneeze$To_aerosol / V_rooms
-    Cd_withEvents <- as.matrix(Cd + Sneeze$To_aerosol/V_rooms) %>% `colnames<-`(.,AIR_dclass)
+    Cd_withEvents <- Cd + Sneeze$To_aerosol/V_rooms
     
     writeLines("Cd_withEvents")
     print(Cd_withEvents)
-    
-    AirBalance <- Cd_withEvents + 
-      (dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms
-    AirBalance[AirBalance < 0] <- 0
-    
-    MyAir[MyAir$t_ind == (ind+1), AIR_dclass] <- AirBalance
-    
-    # MyAir[MyAir$t_ind == (ind+1), AIR_dclass] = Cd_withEvents + 
+    # 
+    # AirBalance <- Cd_withEvents + 
     #   (dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms
+    # AirBalance[AirBalance < 0] <- 0
+    # 
+    # MyAir[MyAir$t_ind == (ind+1), AIR_dclass] <- AirBalance
     
-    writeLines("(dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms")
-    print((dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms)
+    MyAir[MyAir$t_ind == (ind+1), AIR_dclass] = Cd_withEvents +
+      (dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms
+    
+    # writeLines("(dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms")
+    # print((dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms)
     
     writeLines("MyAir (Cd) i+1") 
     print(MyAir[MyAir$t_ind == ind+1, AIR_dclass])
