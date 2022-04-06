@@ -236,20 +236,20 @@ f_dailyContamination <- function(
   P_infection <- f_DRM_Watanabe(dose = Virion_dose,
                                 r = prm_conta$DRM1_r)
 
-  print("check point P_infection")
-  print(P_infection)
+  # print("check point P_infection")
+  # print(P_infection)
   
   # The response of each worker (get contaminated or not) based on their respective infection probability
   resp <- rbinom(n = length(P_infection), size = 1, prob = P_infection)
   
-  print("checkpoint resp")
-  print(resp)
+  # print("checkpoint resp")
+  # print(resp)
   
   # ID of the new workers infected via aerosol (response = 1) if they were not infected previously
   NewInfectedWorkers_Air <- W_ID[resp == 1 & (! W_ID %in% InfectedWorkers)]
   
-  print("new infected workers air")
-  print(NewInfectedWorkers_Air)
+  # print("new infected workers air")
+  # print(NewInfectedWorkers_Air)
 
   if (length(NewInfectedWorkers_Air) > 0) { # if there are workers getting infected via the aerosol through infection probability
     writeLines(paste(">>> Newly infected workers via aerosol : ID(s)", NewInfectedWorkers_Air, " <<<"))

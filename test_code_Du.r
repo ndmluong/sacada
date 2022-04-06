@@ -215,7 +215,7 @@ InfectionLog <- CONTA$inf_log
 
 
 ### RUN CONTAMINATION ###
-for (day in 2:5) {
+for (day in 5:5) {
   MySurfaces <- rbind(MySurfaces,
                       f_initSurfaces(P = MyPlant$P,    
                                      prm_plant = Parms_Plant,

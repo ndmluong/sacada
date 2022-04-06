@@ -394,8 +394,8 @@ f_Module_Master <- function (
     # Cd = Cd + Sneeze$To_aerosol / V_rooms
     Cd_withEvents <- Cd + Sneeze$To_aerosol/V_rooms
     
-    writeLines("Cd_withEvents")
-    print(Cd_withEvents)
+    # writeLines("Cd_withEvents")
+    # print(Cd_withEvents)
     # 
     # AirBalance <- Cd_withEvents + 
     #   (dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms
@@ -409,7 +409,7 @@ f_Module_Master <- function (
     # writeLines("(dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms")
     # print((dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms)
     
-    writeLines("MyAir (Cd) i+1") 
+    writeLines("MyAir (Cd) i+1")
     print(MyAir[MyAir$t_ind == ind+1, AIR_dclass])
     
     # 2.6 SURFACES - BALANCE EQUATION ----
