@@ -6,7 +6,7 @@ Parms_Plant <- list(
   dim.Z = 5,  ## (numeric - m) height of the room 
   label = "Cutting Room",
   Air_Cond_Type = "AHU", #Air Handing Unit
-  Air_renewal = 0, # TO MODIFY !!!!!!! (m3/h)
+  Air_renewal = 1000, # TO MODIFY !!!!!!! (m3/h)
   AirflowRate = 90000, # 30Vol/h TO MODIFY !!!!!!! (m3/h)
   
   ######### SPACES (begin)
@@ -168,3 +168,8 @@ Parms_Plant <- list(
   )
   ######### OBJECTS (end)
 )
+
+# (Optional) Parameters with unchanged values that can be saved in global environment 
+# Names (labels) of all spaces including the cutting room
+Spaces_label <<- c(Parms_Plant$label,
+                   as.vector(unlist(lapply(Parms_Plant$Spaces, FUN = function(x) return(x$label)))))

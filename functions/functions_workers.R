@@ -26,17 +26,17 @@ f_initWorkers <- function(
 ) {
   #### BEGIN OF FUNCTION
   if (!is.null(seed)) {set.seed(seed)}
-  
+
   ### ID of the workers (value "W001","W002", ..)
   W_ID <- paste("W", stringr::str_pad(seq(1:prm$NWorkers), width=3, pad="0"), sep="")
-  
+
   ### Total number of the time indexes
   writeLines("=========== Initializing workers: Step 1/2 - Processing time indexes ===========")
   writeLines("Processing time indexes")
   NTime <- prm_time$NDays * 1440 / prm_time$Step ## amplitude Ndays in days, time step in minutes
   t_ind <- rep(0:NTime, each = prm$NWorkers)
   writeLines(paste("Time indexes going from 0 to", NTime))
-  
+
   ## Convert time indexes to D,H,M
   dt = prm_time$Step
   writeLines("Converting time indexes into D:H:M format")
@@ -49,8 +49,8 @@ f_initWorkers <- function(
   writeLines("Converting time into week numbers and weekdays format")
   Week <- Day %>% sapply(FUN = f_Day2Week)
   Weekday <- Day %>% sapply(FUN = f_Day2Weekday)
-  
-  
+
+
   ### States (infected/not infected) of the workers
   # Time index 0:
   # HYPOTHESE : ONE INDIVIDUAL CONTAMINATED AT DAY 0 ?
@@ -61,16 +61,16 @@ f_initWorkers <- function(
   W_status0[sample(1:prm$NWorkers, prm$nContaminated_Init)] <- "initialised as infected"
   # Initialization for the subsequent time indexes as NA
   W_status <- c(W_status0, rep(NA, prm$NWorkers * NTime))
-  
+
   ## Status counter
   W_statusCounter <- rep(NA, prm$NWorkers*(NTime+1))
-  
+
   ### Behavior (mask/no mask) of the workers
   # At the time index 0
   # The proportion of workers wearing a mask depending on the type of mask
   writeLines("Simulating mask acceptability")
   pMask <- prm$pMaskAcceptability[prm$MaskType] %>% unname
-  
+
   # Wearing mask or not for each worker
   set.seed(seed)
   W_mask0 <- sample(c("mask", "no mask"), replace = T,
@@ -78,38 +78,38 @@ f_initWorkers <- function(
                     prob = c(pMask,1-pMask))
   # Initialization for the subsequent time indexes as NA
   W_mask <- c(W_mask0, rep(NA, prm$NWorkers * NTime))
-  
+
   ### Assign the types and teams for all workers
   # at time 0
   writeLines("Assign workers types and teams")
   W_TT <- f_assignWorkersTypeTeam(prm = prm, seed=seed)  ## check the function f_assignWorkersTypeTeam
   W_type0 <- W_TT$W_type
   W_team0 <- W_TT$W_team
-  
+
   # Replicate the type of workers for all subsequent time indexes
   W_type <- as.factor(rep(W_type0, NTime+1)) ## + 1 (including the time index 0)
   W_team <- as.factor(c(W_team0, rep(NA, prm$NWorkers * NTime))) ## (including the time index 0)
-  
+
   ## Initialize the shift of all workers
   W_shift <- rep(NA, prm$NWorkers * (NTime+1))
-  
+
   ### Initialize coordinates and location of the workers (NA)
   coordX <- rep(NA, prm$NWorkers*(NTime+1))
   coordY <- rep(NA, prm$NWorkers*(NTime+1))
   location <- rep(NA, prm$NWorkers*(NTime+1))
-  
+
   ### Initialize the working (or not-working phase) of the workers (NA)
   W_active <- rep("active", prm$NWorkers*(NTime+1)) ## active by default
   W_activeCounter <- rep(NA, prm$NWorkers*(NTime+1))
-  
+
   ## Community activities
   ## Assign the workers to the different communes if applicable
   writeLines("Assign workers community")
   AssignedCommunity <- f_assignCommunes(prm, seed = seed) ## check the (sub)function f_assignCommunes()
-  
-  W_communityActivity <- AssignedCommunity$W_communityActivity0 %>% rep(NTime+1) 
+
+  W_communityActivity <- AssignedCommunity$W_communityActivity0 %>% rep(NTime+1)
   W_communes <- AssignedCommunity$W_communes0 %>% rep(NTime+1)
-  
+
   ### Output
   W <- data.frame(W_ID = rep(W_ID, NTime+1),
                   W_status = W_status,
@@ -132,6 +132,7 @@ f_initWorkers <- function(
                   Hour = Hour,
                   Min = Min
   )
+
   writeLines("============================ Workers initialized ============================")
 
   return(W)

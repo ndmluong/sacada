@@ -143,7 +143,7 @@ f_moveFood <- function(
   # - location: (character) current location of the food portions
   selectFP, ## (character, vector): IDs of the selected food portions to move
   to, ## (character/string) location (e.g. "Entry hall", "WC",...)
-  t_ind, ## time index
+  t_ind_vec, ## time index
   ...
   ## OUTPUT
 ) {
@@ -151,7 +151,7 @@ f_moveFood <- function(
   loc <- subset(Plant$L, location == to) ## all coordinates associated with the new location (destination)
   
   ## change location of the selected workers for the time index t
-  FP$location[which((FP$t_ind == t_ind) & (FP$FP_ID %in% selectFP))] <- to
+  FP$location[which((FP$t_ind %in% t_ind_vec) & (FP$FP_ID %in% selectFP))] <- to
   
   ############ /!\ Optimized code (begin)
   FPsub <- subset(FP, FP_ID %in% selectFP)
@@ -160,8 +160,8 @@ f_moveFood <- function(
   lapply(selectFP, FUN = function(x) {
     d1 <- subset(FPsub, FP_ID == x)
     randomcoord <- loc[sample(1:nrow(loc), size=1), ]
-    d1$coordX[which(d1$t_ind == t_ind)] <- randomcoord$coordX
-    d1$coordY[which(d1$t_ind == t_ind)] <- randomcoord$coordY
+    d1$coordX[which(d1$t_ind %in% t_ind_vec)] <- randomcoord$coordX
+    d1$coordY[which(d1$t_ind %in% t_ind_vec)] <- randomcoord$coordY
     return(d1)
   }) %>%
     data.table::rbindlist() %>%
@@ -174,19 +174,68 @@ f_moveFood <- function(
 }
 
 
-#####
+##### f_circulateCarcass FUNCTION TO CIRCULATE ONE GIVEN CARCASS INSIDE THE PLANT #####
 f_circulateCarcass <- function(
-  FP, ## object containing all attributes of all agents food portions
+  Plant, # 'Plant object': list of two objects
+  # L (data.frame): different locations of the plant ('entry hall', 'wc'...) and their coordinates X and Y
+  # P (numeric matrix) : food processing plant
+  FPcarc, ## object containing all attributes of all agents food portions of ONE GIVEN CARCASS
   carcass_ID, ## (numeric, integer): the number (ID) of the carcass to be processed
-  t_ind ## the time index corresponding to the beginning of the cutting process 
+  t_ind, ## the time index corresponding to the beginning of the cutting process (arrival gate)
+  # duration_ti,  # GLOBAL VARIABLE
+  prm_food,
+  prm_time
 ) {
-  
-  
-  
-  
+
+  ## IDs of the portion from the selected carcass to circulate
+  dplyr::filter(FPcarc, substr(FP_ID, 6, 9) == carcass_ID)$FP_ID %>%
+    unique() %>% as.vector() -> selectFP
+
+  ### TIME INDEX FOR EACH STEP OF THE CUTTING PROCESS
+  ti <- c("logistic1" = t_ind,
+          "cutter1" = t_ind + duration_ti[["logistic1"]],
+          "cutter2" = t_ind + sum(duration_ti[c("logistic1", "cutter1")]),
+          "logistic2" = t_ind + sum(duration_ti[c("logistic1", "cutter1", "cutter2")]),
+          "storage" = t_ind + sum(duration_ti[c("logistic1", "cutter1", "cutter2", "logistic2")]))
+
+  ### CUTTING PROCESS
+  ## logistic 1
+  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Arrival gate",
+                   t_ind_vec = ti[["logistic1"]]:(ti[["cutter1"]]-1))
+  ## cut 1:
+  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Conveyor1",
+                   t_ind_vec = ti[["cutter1"]]:(ti[["cutter2"]]-1))
+  ## cut 2:
+  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Conveyor2",
+                   t_ind_vec = ti[["cutter2"]]:(ti[["logistic2"]]-1))
+  ## logistic2:
+  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Equipment 1",
+                   t_ind_vec = ti[["logistic2"]]:(ti[["storage"]]-1))
+  ## storage:
+  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Cooling area",
+                   t_ind_vec = ti[["storage"]])
+
+  return(FPcarc)
+}
+
+
+##### f_dailyCut #####
+f_dailyCut <- function(
+  Plant, # 'Plant object': list of two objects
+  # L (data.frame): different locations of the plant ('entry hall', 'wc'...) and their coordinates X and Y
+  # P (numeric matrix) : food processing plant 
+  FP, ## object containing all attributes of all agents food portions
+  prm_food,
+  prm_time
+) {
   
   
   return(FP)
 }
+
+
+
+
+
 
 

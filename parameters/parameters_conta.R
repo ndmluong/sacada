@@ -1,4 +1,4 @@
-##### USER DEFINED PARAMETERS FOR THE WORKERS SET #####
+##### PARAMETERS ASSOCIATED WITH THE VIRAL CONTAMINATION #####
 Parms_Conta <- list(
   ## the Variants of Concern (original, alpha, delta, omicron)
   VoC = "delta", 

@@ -138,8 +138,19 @@ f_Sneeze <- function(
       
       # Cumulative number of contaminated droplets going to aerosol for each droplet size class of the above masked sneezing workers
       # while taking into account the individual variability in the viral load emitted
+<<<<<<< HEAD
       To_aerosol[i,] = To_aerosol[i,] + 
         colSums(sneeze_mask * (1 - prm_air$Mask_Eff) * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+=======
+      if (length(sneeze_mask) > 1) {
+        To_aerosol[i,] = To_aerosol[i,] + 
+          colSums(sneeze_mask * (1 - prm_air$Mask_Eff) * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+      } else {
+        To_aerosol[i,] = To_aerosol[i,] +
+          sneeze_mask * (1 - prm_air$Mask_Eff) * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze + (Method_calc[i,]==T) * prm_air$Vol_sneeze
+      }
+      
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
     } else {sneeze_mask <- 0} # otherwise, if there is contaminated worker, assign 0 value
     
     ## Sneezing events by masked contaminated worker(s)
@@ -151,13 +162,24 @@ f_Sneeze <- function(
       
       # Cumulative number of contaminated droplets going to aerosol for each droplet size class of the above masked sneezing workers
       # while taking into account the individual variability in the viral load emitted
+<<<<<<< HEAD
       To_aerosol[i,] = To_aerosol[i,] + 
         colSums(sneeze_no_mask * P_drop_conta[Cont_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]==T) * prm_air$Vol_sneeze
       
+=======
+      if (length(sneeze_no_mask) > 1) {
+        To_aerosol[i,] = To_aerosol[i,] + 
+          colSums(sneeze_no_mask * P_drop_conta[Cont_no_mask_ID,] * prm_air$Cd_sneeze) * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+      } else {
+        To_aerosol[i,] = To_aerosol[i,] + 
+          sneeze_no_mask * P_drop_conta[Cont_no_mask_ID,] * prm_air$Cd_sneeze * (Method_calc[i,]==T) * prm_air$Vol_sneeze
+      }
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
     } else {sneeze_no_mask <- 0} # otherwise, if there is contaminated worker, assign 0 value
     
     ## TRANSFERT FROM SNEEZING WORKERS TO OTHER NEARBY WORKERS ----
     ## Exposition of the near susceptible workers and locations due to sneezing events by (source) MASKED worker(s)
+<<<<<<< HEAD
     if (length(status_mask) > 0) { # if there is any sneezing masked worker
       # Extract their IDs and X,Y coordinates
       Source_ID <- Cont_mask_ID[sneeze_mask == 1] # IDs
@@ -168,6 +190,21 @@ f_Sneeze <- function(
         # Distance between the near susceptible workers and the source (sneezing worker) S
         DX = abs(Source_X[S]-W_susceptible$coordX)
         DY = abs(Source_Y[S]-W_susceptible$coordY)
+=======
+    Source_ID <- Cont_mask_ID[sneeze_mask == 1] # IDs
+    if (length(Source_ID) > 0) { # if there is any sneezing masked worker
+      # Extract their IDs and X,Y coordinates
+      Source_X <- SubW$coordX[SubW$W_ID %in% Source_ID] # X coordinates
+      Source_Y <- SubW$coordY[SubW$W_ID %in% Source_ID] # Y coordinates
+
+      for (s in 1:length(Source_ID)) { ## for each source (sneezing worker) s
+        # Distance between the near susceptible workers and the source (sneezing worker) s
+        DX = abs(Source_X[s]-W_susceptible$coordX)
+        DY = abs(Source_Y[s]-W_susceptible$coordY)
+        
+        print(paste("masked Source_ID[s]: s = ",s, sep=""))
+        print(Source_ID[s])
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
         
         # Calculate the fraction of droplets exposed to each susceptible worker depending on the distance between him and the source
         p_zone_air = (DY <= 1 & DX <= 1) * prm_air$p_zone_air[["adj1"]] + # 1st (nearest) adjacent cases (check parameters_air.R)
@@ -179,6 +216,7 @@ f_Sneeze <- function(
         
         ## The total number of droplets exposed to each susceptible worker (unit: # droplets) (# 2 corresponds to 2m3 of the air volume around the worker)
         d_expo[W_susceptible$W_ID, ] = d_expo[W_susceptible$W_ID,] +
+<<<<<<< HEAD
           eff[W_susceptible$W_ID] * (p_zone_air * resp / 2) %*% (P_drop_conta[Source_ID[S],] * nd_Source * (1-prm_air$Mask_Eff) * tsed) 
         
         ## Droplets settling events exclusively in the cutting room
@@ -186,6 +224,15 @@ f_Sneeze <- function(
           ## distance between the current source S and the near locations (coordinates)
           DX = abs(Source_X[S] - SubS$coordX)
           DY = abs(Source_Y[S] - SubS$coordY)
+=======
+          eff[W_susceptible$W_ID] * (p_zone_air * resp / 2) %*% (P_drop_conta[Source_ID[s],] * nd_Source * (1-prm_air$Mask_Eff) * tsed) 
+
+        ## Droplets settling events exclusively in the cutting room
+        if (names(Rooms[i]) == "Cutting Room") {
+          ## distance between the current source S and the near locations (coordinates)
+          DX = abs(Source_X[s] - SubS$coordX)
+          DY = abs(Source_Y[s] - SubS$coordY)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
           
           # Calculate the fraction of droplets settling on near coordinates depending on the distances with the source
           p_zone = (DY <= 1 & DX <= 1) * prm_air$p_zone[["adj1"]] + # 1st nearest cases (check parameters_air.R)
@@ -193,13 +240,18 @@ f_Sneeze <- function(
             ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * prm_air$p_zone[["adj3"]] # 3rd (farthest) adjacent cases
           
           ## The total number of droplets settling on the near locations with mask efficiency
+<<<<<<< HEAD
           m2_drop <- m2_drop + p_zone %*% t(P_drop_conta[Source_ID[S],] * nd_Source) * (1-prm_air$Mask_Eff)
+=======
+          m2_drop <- m2_drop + p_zone %*% t(P_drop_conta[Source_ID[s],] * nd_Source) * (1-prm_air$Mask_Eff)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
         } # end if "Droplet settling in Cutting Room
         
       } # end loop "each source worker"
     } # end MASKED sneezing workers
     
     ## Exposition of the near susceptible workers and locations due to sneezing events by (source) NON-MASKED worker(s)
+<<<<<<< HEAD
     if (sum(sneeze_no_mask)> 0) { # if there is any sneezing masked worker
       # Extract their IDs and X,Y coordinates
       Source_ID <- Cont_no_mask_ID[sneeze_no_mask == 1] # IDs
@@ -210,6 +262,18 @@ f_Sneeze <- function(
         # Distance between the near susceptible workers and the source (sneezing worker) S
         DX = abs(Source_X[S]-W_susceptible$coordX)
         DY = abs(Source_Y[S]-W_susceptible$coordY)
+=======
+    Source_ID <- Cont_no_mask_ID[sneeze_no_mask == 1] # IDs
+    if (length(Source_ID) > 0) { # if there is any sneezing masked worker
+      # Extract their IDs and X,Y coordinates
+      Source_X <- SubW$coordX[SubW$W_ID %in% Source_ID] # X coordinates
+      Source_Y <- SubW$coordY[SubW$W_ID %in% Source_ID] # Y coordinates
+      
+      for (s in 1:length(Source_ID)) { ## for each source (sneezing worker)  S
+        # Distance between the near susceptible workers and the source (sneezing worker) S
+        DX = abs(Source_X[s]-W_susceptible$coordX)
+        DY = abs(Source_Y[s]-W_susceptible$coordY)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
         
         # Calculate the fraction of droplets exposed to each susceptible worker depending on the distance between him and the source
         p_zone_air = (DY <= 1 & DX <= 1) * prm_air$p_zone_air[["adj1"]] + # 1st (nearest) adjacent cases (check parameters_air.R)
@@ -221,13 +285,22 @@ f_Sneeze <- function(
         
         ## The total number of droplets exposed to each susceptible worker (unit: # droplets) (# 2 corresponds to 2m3 of the air volume around the worker)
         d_expo[W_susceptible$W_ID, ] = d_expo[W_susceptible$W_ID,] +
+<<<<<<< HEAD
           eff[W_susceptible$W_ID] * (p_zone_air * resp / 2) %*% (P_drop_conta[Source_ID[S],] * nd_Source * tsed) 
+=======
+          eff[W_susceptible$W_ID] * (p_zone_air * resp / 2) %*% (P_drop_conta[Source_ID[s],] * nd_Source * tsed) 
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
         
         ## Droplets settling events exclusively in the cutting room
         if (names(Rooms[i]) == "Cutting Room") {
           ## distance between the current source S and the near locations (coordinates)
+<<<<<<< HEAD
           DX = abs(Source_X[S] - SubS$coordX)
           DY = abs(Source_Y[S] - SubS$coordY)
+=======
+          DX = abs(Source_X[s] - SubS$coordX)
+          DY = abs(Source_Y[s] - SubS$coordY)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
           
           # Calculate the fraction of droplets settling on near coordinates depending on the distances with the source
           p_zone = (DY <= 1 & DX <= 1) * prm_air$p_zone[["adj1"]] + # 1st nearest cases (check parameters_air.R)
@@ -235,14 +308,21 @@ f_Sneeze <- function(
             ((DY==3 & DX==0)|(DX==3 & DY==0)|(DY==2 & DX==2)) * prm_air$p_zone[["adj3"]] # 3rd (farthest) adjacent cases
           
           ## The total number of droplets settling on the near locations (droplets coming from non-masked sneezing workers)
+<<<<<<< HEAD
           m2_drop <- m2_drop + p_zone %*% t(P_drop_conta[Source_ID[S],] * nd_Source)
+=======
+          m2_drop <- m2_drop + p_zone %*% t(P_drop_conta[Source_ID[s],] * nd_Source)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
         } # end if "Droplet settling in Cutting Room
         
       } # end loop "each source workers"
     } # end NON-MASKED sneezing workers
     
   } # end loop Rooms 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
   return(list(To_aerosol = To_aerosol,
               d_expo = d_expo,
               m2_drop = m2_drop))
@@ -258,7 +338,11 @@ f_Sneeze <- function(
 f_Module_Master <- function (
   MyAir, ## (object MyAir)
   W, ## (object MyWorkers)
+<<<<<<< HEAD
   S, ## (bbject MySurfaces)
+=======
+  S, ## (object MySurfaces)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
   prm_plant,
   prm_air,
   prm_time,
@@ -278,10 +362,20 @@ f_Module_Master <- function (
   W_droplet_Expos_cumul <- matrix(0, nrow=NWorkers, ncol=length(prm_air$Droplet_class)) %>% `rownames<-`(.,sort(unique(W$W_ID)))
   
   ## Day loop - For each time step ----
+<<<<<<< HEAD
   for (ind in ind_min:ind_max) # for each time index of the day
   {
     # The number of droplets in each class at the time index ind
     Cd = MyAir[MyAir$t_ind==(ind), 2:(1+length(prm_air$Droplet_class))]
+=======
+  for (ind in ind_min:ind_max) { # for each time index of the day
+    # The number of droplets in each class at the time index ind
+    writeLines(paste("t_ind =", ind))
+    
+    Cd = MyAir[MyAir$t_ind==ind, AIR_dclass]
+    # writeLines("Cd (MyAir at t_ind)")
+    # print(Cd)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
     
     # 1. WHAT IS HAPPENING AT THIS TIME INDEX ? ----
     # 1.1 Who ? Where ? Masked ? -----
@@ -291,11 +385,23 @@ f_Module_Master <- function (
     # Respiration rate of each worker which is time step dependent (from light to heavy exercise) (cf. parameters_air.R)
     resp <- runif(NWorkers, prm_air$RespRate[3], prm_air$RespRate[5]) #[m3/min]
     
+<<<<<<< HEAD
     # Emission by workers due to other activities such as talking , talking loud or breathing 
+=======
+    # Emission by workers due to other activities such as talking (1), talking loud (2) or breathing (3) (cf. parameters_air.R)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
     p_emission <- sample(c(1,2,3), size = NWorkers, prob=c(prm_air$p_talk, prm_air$p_talk, prm_air$p_talk), replace = T)
     
     # 1.3 SNEEZES ----
     Sneeze <- f_Sneeze(SubW = subset(W, t_ind == ind), Rooms = WhoIs$Rooms, SubS = subset(S, t_ind == ind), prm_air = prm_air, prm_time = prm_time)
+<<<<<<< HEAD
+=======
+    # writeLines(paste("Sneeze$To_aerosol: t_ind =", ind))
+    # print(Sneeze$To_aerosol)
+    
+    # writeLines(paste("Sneeze$To_aerosol / V_rooms: t_ind =", ind))
+    # print(Sneeze$To_aerosol / V_rooms)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
     
     # 1.4 COUGHS ----
     # Out_cough ....
@@ -303,6 +409,7 @@ f_Module_Master <- function (
     # 2 - TRANSFERS ----------------------------------------------------------
     # 2. From air to surfaces (sedimentation) ----
     ## Droplet sedimentation of the surfaces 
+<<<<<<< HEAD
     dsed = S_rooms %*% Vsed * 60    # (m3/min)
 
     # 2.2 FROM AIR to WORKERS ---- 
@@ -320,6 +427,35 @@ f_Module_Master <- function (
     # Cumulative (during the day) exposition of all workers to all classes --> dose response model at the end of the day
     W_droplet_Expos_cumul = W_droplet_Expos_cumul + Reduce("+",W_droplet_Expos) * Step
 
+=======
+    dsed = S_rooms %*% Vsed * 60    # (dsed in m3/min)
+
+    # 2.2 FROM AIR to WORKERS ---- 
+    # [[1]] cont_mask; [[2]] cont_no_mask; [[3]] no_cont_mask; [[4]] no_cont_no_mask
+    Resp_inh = ((WhoIs$Cont_mask + WhoIs$Non_Cont_mask) * (1 - prm_air$Mask_Eff) + (WhoIs$Cont_no_mask + WhoIs$Non_Cont_no_mask)) * resp
+    
+    # list[[7]] for each room, number of droplets inhaled in each droplet class per workers [d / min]
+    W_droplet_Expos <- lapply(seq(1:N_rooms), 
+                              function(x) return(Resp_inh[,x] * t(matrix(rep(as.matrix(Cd[x,]), NWorkers), ncol = NWorkers)))
+                              )
+    # writeLines("W_droplet_Expos [1] (cutting room)")
+    # print(W_droplet_Expos[[1]])
+  
+    
+    # Total number of droplets inhaled in each rooms for each droplet classes --> Air module balance equation [d / min]
+    dinhale <- t(sapply(seq(1:N_rooms), 
+                        function (x) return(colSums(W_droplet_Expos[[x]]))))
+    
+    # writeLines("dinhale")
+    # print(dinhale)
+    
+    # Cumulative (during the day) exposition of all workers to all classes --> dose response model at the end of the day
+    W_droplet_Expos_cumul = W_droplet_Expos_cumul + Reduce("+", W_droplet_Expos) * Step 
+    
+    # writeLines("W_droplet_Expos_cumul")
+    # print(W_droplet_Expos_cumul)
+    
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
     # 2.3 FROM WORKERS to AIR ----
     # total number of droplets exhaled per employee (All employee)
     dTot_exh_all_drops <- prm_air$Cd_exp[p_emission,] * resp  # [d/min]
@@ -327,10 +463,16 @@ f_Module_Master <- function (
     # Total number of CONTAMINATED droplets exhaled per employee (All employees) (The calculation is done even for non infectious workers)
     # N.B.: P_drop_conta (global variable) : the number of RNA copies per droplets, already taking into account the individual variability (check the function f_indi_viral_load)
     dTot_exh <- dTot_exh_all_drops * P_drop_conta
+<<<<<<< HEAD
+=======
+    # writeLines("dTot_exh")
+    # print(dTot_exh)
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
     
     # Total number of contaminated droplets exhaled of all contaminated workers in each room for each droplet class 
     # (Conversion from #RNAcopies to #infectious virus is done in "daily_contamination.R")
     # Employees with masks
+<<<<<<< HEAD
     N_CMR = (1-prm_air$Mask_Eff) * t(matrix(unlist(lapply(seq(1:N_rooms), 
                                                               function (x) return(colSums(WhoIs[[1]][,x]*dTot_exh)))),nrow = length (prm_air$Droplet_class)))
     # Employees without masks
@@ -340,6 +482,23 @@ f_Module_Master <- function (
     # Total number of contaminated droplets exhaled and aerosolized  [d]
     dexhale <- N_CMR + N_CNoMR 
 
+=======
+    N_CMR = (1-prm_air$Mask_Eff) * t(sapply(seq(1:N_rooms), function(x) return(colSums(WhoIs$Cont_mask[,x] * dTot_exh))))
+    
+    # writeLines("N_CMR")
+    # print(N_CMR)
+    
+    # Employees without masks
+    N_CNoMR = t(sapply(seq(1:N_rooms), function(x) return(colSums(WhoIs$Cont_no_mask[,x]*dTot_exh))))
+    # writeLines("N_CNoMR")
+    # print(N_CNoMR)
+    
+    # Total number of contaminated droplets exhaled and aerosolized  [d/min]
+    dexhale <- N_CMR + N_CNoMR 
+    # writeLines("dexhale")
+    # print(dexhale)
+    
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
     # 2.4 AIR RENEWAL ----
     ## Volume of the renewal air (m3/min) (V_renew in global environment)
     # V_renew <- c(prm_plant$Air_renewal,
@@ -349,6 +508,7 @@ f_Module_Master <- function (
     
     
     # 2.5 AEROSOL - EMISSION/ABSORPTION BALANCE EQUATION ----
+<<<<<<< HEAD
     MyAir[MyAir$t_ind==ind+1, 2:(1+length(prm_air$Droplet_class))] = Cd +
       (dexhale*Method_calc + Sneeze$To_aerosol - dinhale - (V_renew + dsed) * Cd) * Step / V_rooms # [d / m3]
     
@@ -360,4 +520,43 @@ f_Module_Master <- function (
   
   return(list(MyAir = MyAir,
               Expocum = W_droplet_Expos_cumul))
+=======
+    # [d / m3]
+    writeLines(paste("Sneeze$To_aerosol / V_rooms: t_ind =", ind))
+    print(Sneeze$To_aerosol / V_rooms)
+    
+    # Cd = Cd + Sneeze$To_aerosol / V_rooms
+    Cd_withEvents <- as.matrix(Cd + Sneeze$To_aerosol/V_rooms) %>% `colnames<-`(.,AIR_dclass)
+    
+    writeLines("Cd_withEvents")
+    print(Cd_withEvents)
+    
+    AirBalance <- Cd_withEvents + 
+      (dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms
+    AirBalance[AirBalance < 0] <- 0
+    
+    MyAir[MyAir$t_ind == (ind+1), AIR_dclass] <- AirBalance
+    
+    # MyAir[MyAir$t_ind == (ind+1), AIR_dclass] = Cd_withEvents + 
+    #   (dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms
+    
+    writeLines("(dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms")
+    print((dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms)
+    
+    writeLines("MyAir (Cd) i+1") 
+    print(MyAir[MyAir$t_ind == ind+1, AIR_dclass])
+    
+    # 2.6 SURFACES - BALANCE EQUATION ----
+    # if (ind < ind_max) {
+    #   S$viral_RNA[S$t_ind == ind+1] = S$viral_RNA[S$t_ind == ind] +
+    #     ## unname(rowSums(Cough$m2_drop)) + ## number of droplets falling on each tile (m2) due to coughing events
+    #     unname(rowSums(Sneeze$m2_drop)) + ## number of droplets falling on each tile (m2) due to sneezing events
+    #     sum(dsed[1,] * Cd[1,] / S_rooms[1]) * Step ## average number of droplets settling from aerosol on each tile (m2) per time step (only in the cutting room [1,])
+    # }
+
+  }
+  return(list(MyAir = MyAir,
+              Expocum = W_droplet_Expos_cumul,
+              S = S))
+>>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
 }
