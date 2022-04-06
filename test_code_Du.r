@@ -52,8 +52,7 @@ seed = 408
 MyWorkers <- f_initWorkers(prm = Parms_Workers, prm_time = Parms_Time, seed = seed)
 MyWorkers <- f_setupSchedule(W = MyWorkers, prm = Parms_Workers, seed = seed)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 # SCHEDULE VISUALISATION
 # Plot schedule for all workers during a given period
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
@@ -61,10 +60,7 @@ MyWorkers <- f_setupSchedule(W = MyWorkers, prm = Parms_Workers, seed = seed)
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
 # Plot schedule with information at one given day
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
-=======
->>>>>>> 8ad822dfb98991deeda41d4962f0ca48f7e6cfc2
-=======
->>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
+
 # # SCHEDULE VISUALISATION
 # # Plot schedule for all workers during a given period
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
@@ -186,17 +182,17 @@ rm(FoodInitStruct)
 ## Test Updated Module Air
 W <- MyWorkers
 
-<<<<<<< HEAD
+
 ti <- 65
 SubS <- subset(MySurfaces, t_ind == ti)
 SubW <- subset(MyWorkers, t_ind == ti)
 SubW$W_status[SubW$W_ID %in% c("W003", "W006", "W012", "W017", "W028", "W032", "W056", "W087", "W080")] <- c("infectious", "asymptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic")
-=======
+
 ti <- 287
 SubS <- subset(MySurfaces, t_ind == ti)
 SubW <- subset(MyWorkers, t_ind == ti)
 # SubW$W_status[SubW$W_ID %in% c("W003", "W006", "W012", "W017", "W028", "W032", "W056", "W087", "W080")] <- c("infectious", "asymptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic")
->>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
+
 
 WhoIs <- f_Who_is(SubW = SubW, prm_plant = Parms_Plant)
 Sneeze <- f_Sneeze(SubW = SubW, SubS = SubS,Rooms = WhoIs$Rooms, prm_air = Parms_Air,prm_time = Parms_Time)
@@ -206,12 +202,7 @@ MASTER <- f_Module_Master(MyAir = MyAir,W = MyWorkers, S = MySurfaces, prm_plant
                           )
 
 
-<<<<<<< HEAD
 
-
-
-
-=======
 day <- 5
 
 MySurfaces <- rbind(MySurfaces,
@@ -236,7 +227,7 @@ MyWorkers <- CONTA$W
 MyAir <- CONTA$MyAir
 MySurfaces <- CONTA$S
 InfectionLog <- CONTA$inf_log
->>>>>>> 1b630f0e7bd8618b79f5052fa7192c1efa013cc1
+
 
 
 
