@@ -26,7 +26,7 @@ f_initAir <- function(
               unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$label)))))
   
   ### Names of the different droplet size classes (d01, d02,...)
-  AIR_dclass <- paste("d", stringr::str_pad(seq(1:length(prm_air$Droplet_class)), width=2, pad="0"), sep="")
+  AIR_dclass <<- paste("d", stringr::str_pad(seq(1:length(prm_air$Droplet_class)), width=2, pad="0"), sep="")
   
   ### Total number of the time indexes 
   NTime <- prm_time$NDays * 1440 / prm_time$Step ## amplitude Ndays in days, time step in minutes

@@ -173,10 +173,10 @@ rm(FoodInitStruct)
 ## Test Updated Module Air
 W <- MyWorkers
 
-ti <- 65
+ti <- 287
 SubS <- subset(MySurfaces, t_ind == ti)
 SubW <- subset(MyWorkers, t_ind == ti)
-SubW$W_status[SubW$W_ID %in% c("W003", "W006", "W012", "W017", "W028", "W032", "W056", "W087", "W080")] <- c("infectious", "asymptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic")
+# SubW$W_status[SubW$W_ID %in% c("W003", "W006", "W012", "W017", "W028", "W032", "W056", "W087", "W080")] <- c("infectious", "asymptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic")
 
 WhoIs <- f_Who_is(SubW = SubW, prm_plant = Parms_Plant)
 Sneeze <- f_Sneeze(SubW = SubW, SubS = SubS,Rooms = WhoIs$Rooms, prm_air = Parms_Air,prm_time = Parms_Time)
@@ -186,18 +186,44 @@ MASTER <- f_Module_Master(MyAir = MyAir,W = MyWorkers, S = MySurfaces, prm_plant
                           )
 
 
+day <- 5
 
+MySurfaces <- rbind(MySurfaces,
+                    f_initSurfaces(P = MyPlant$P,    
+                                   prm_plant = Parms_Plant,
+                                   prm_time = Parms_Time,
+                                   day = day))
 
-
-
+CONTA <- f_dailyContamination(MyAir = MyAir,
+                              W = MyWorkers,
+                              S = MySurfaces,
+                              day = day,
+                              indi_viral_load = indi_viral_load,
+                              prm_plant = Parms_Plant,
+                              prm_workers = Parms_Workers,
+                              prm_time = Parms_Time,
+                              prm_air = Parms_Air,
+                              prm_conta = Parms_Conta,
+                              inf_log = InfectionLog,
+                              seed = seed)
+MyWorkers <- CONTA$W
+MyAir <- CONTA$MyAir
+MySurfaces <- CONTA$S
+InfectionLog <- CONTA$inf_log
 
 
 
 
 ### RUN CONTAMINATION ###
-for (day in 2:(max(MyWorkers$Day)-1)) {
-  CONTA <- f_dailyContamination(W = MyWorkers,
-                                MyAir = MyAir,
+for (day in 2:5) {
+  MySurfaces <- rbind(MySurfaces,
+                      f_initSurfaces(P = MyPlant$P,    
+                                     prm_plant = Parms_Plant,
+                                     prm_time = Parms_Time,
+                                     day = day))
+  CONTA <- f_dailyContamination(MyAir = MyAir,
+                                W = MyWorkers,
+                                S = MySurfaces,
                                 day = day,
                                 indi_viral_load = indi_viral_load,
                                 prm_plant = Parms_Plant,
@@ -209,8 +235,13 @@ for (day in 2:(max(MyWorkers$Day)-1)) {
                                 seed = seed)
   MyWorkers <- CONTA$W
   MyAir <- CONTA$MyAir
+  MySurfaces <- CONTA$S
   InfectionLog <- CONTA$inf_log
 }
+
+ggplot(data = subset(MyAir, AIR_ID == "Cutting Room")) +
+  geom_line(aes(x=t_ind, ))
+
 
 InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
                                Infected_cumul = rep(NA,max(MyWorkers$Day-1)),

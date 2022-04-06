@@ -14,7 +14,7 @@ f_initSurfaces <- function(
   ##  - $S_Nv (numeric): viral quantity (log CFU)
 ) {
   #### BEGIN OF FUNCTION
-  writeLines("==================== Initializing Surfaces ================================")
+  writeLines(paste("\n >>>>>> Initializing Surfaces (from day ", day, " to day ", day+1, ")", sep=""))
   
   ## The surfaces involving in the infection (objects)
   sapply(prm_plant$Objects, function(x) return(x$label)) %>%
@@ -50,7 +50,7 @@ f_initSurfaces <- function(
   
   S %>%
     tibble::add_column(location = location,
-                       viral_load = 0, ## the viral load (virion / infectious virus) present on the portion
+                       viral_RNA = 0, ## the viral load (number of RNA copies) present on the surfaces
                        ) %>%
     ## retain only the surfaces involving in the SARS-CoV-2 transmission
     dplyr::filter(., location %in% S_selected) -> S

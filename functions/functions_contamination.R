@@ -142,8 +142,9 @@ f_individual_viral_load <- function(
 
 #### f_dailyContamination #####
 f_dailyContamination <- function(
-  W,
   MyAir,
+  W,
+  S,
   day,
   indi_viral_load,
   prm_plant,
@@ -159,7 +160,7 @@ f_dailyContamination <- function(
   
   if (!is.null(seed)) {set.seed(seed+day)}
   
-  writeLines(paste("\n ===================== Daily contamination : Day ", day, " ===========================", sep =""))
+  writeLines(paste("\n ===================== Daily contamination : begin of day ", day, " ===========================", sep =""))
   
   InfectedWorkers <- subset(W, Day == day-1 & W_statusCounter>0)$W_ID %>% unique() # already infected
   
@@ -169,8 +170,8 @@ f_dailyContamination <- function(
   # inhaled by each worker on the PREVIOUS day
   # writeLines("- Calculating the cumulative number of droplets inhaled by each worker")
   MASTER <- f_Module_Master(MyAir = MyAir,
-                            MyWorkers = W,
-                            indi_viral_load = indi_viral_load,
+                            W = W,
+                            S = S,
                             prm_plant = prm_plant,
                             prm_air = prm_air,
                             prm_time = prm_time,
@@ -178,11 +179,11 @@ f_dailyContamination <- function(
                             ind_min = subset(W, Day == day-1)$t_ind %>% min(),
                             ind_max = subset(W, Day == day-1)$t_ind %>% max()) # OK
 
-  MyAir <- MASTER[[1]] # Updating the cumulative number of droplets for every days OK
+  MyAir <- MASTER$MyAir # Updating the cumulative number of droplets for every days OK
   # Contaminated droplets ~=copie RNA
-  Expocum <- MASTER[[2]] # sum inhaled OF THE GIVEN DAY day
-
-  RNA_virion_ratio <- prm_conta$RNA_virion_ratio # the ratio between the number of RNA copies and virions
+  Expocum <- MASTER$Expocum # sum inhaled OF THE GIVEN DAY day
+  # Settling droplets on surfaces ~= copie RNA
+  S <- MASTER$S
 
   ##### ASSUMPTION 1 : 1 RNA copies per droplet !
   # The percentage of droplets contaminated by RNA copies
@@ -197,8 +198,10 @@ f_dailyContamination <- function(
   # Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
 
   # Total dose of infectious virus for every classes inhaled by each worker at the day day
-  Virion_dose = (Expocum[,1]+ Expocum[,2]+ 
-                   Expocum[,3] + Expocum[,4])/RNA_virion_ratio
+  Virion_dose = rowSums(Expocum) / prm_conta$RNA_virion_ratio
+  
+  print("checkpoint Virion_dose")
+  print(Virion_dose)
 
   ##### ASSUMTION 1 (END)
 
@@ -233,11 +236,20 @@ f_dailyContamination <- function(
   P_infection <- f_DRM_Watanabe(dose = Virion_dose,
                                 r = prm_conta$DRM1_r)
 
+  print("check point P_infection")
+  print(P_infection)
+  
   # The response of each worker (get contaminated or not) based on their respective infection probability
   resp <- rbinom(n = length(P_infection), size = 1, prob = P_infection)
-
+  
+  print("checkpoint resp")
+  print(resp)
+  
   # ID of the new workers infected via aerosol (response = 1) if they were not infected previously
   NewInfectedWorkers_Air <- W_ID[resp == 1 & (! W_ID %in% InfectedWorkers)]
+  
+  print("new infected workers air")
+  print(NewInfectedWorkers_Air)
 
   if (length(NewInfectedWorkers_Air) > 0) { # if there are workers getting infected via the aerosol through infection probability
     writeLines(paste(">>> Newly infected workers via aerosol : ID(s)", NewInfectedWorkers_Air, " <<<"))
@@ -339,7 +351,11 @@ f_dailyContamination <- function(
   W <- f_updateStatusByCounter(W = W, day = day, prm_workers = prm_workers)
   
   
-  return(list(W = W, MyAir = MyAir, inf_log = inf_log, Virion_dose = Virion_dose, 
+  return(list(MyAir = MyAir,
+              W = W,
+              S = S,
+              inf_log = inf_log,
+              Virion_dose = Virion_dose, 
               Expocum = Expocum))
   ## END OF FUNCTION
 }

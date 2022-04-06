@@ -71,7 +71,7 @@ Parms_Workers <- list(
 
   #### EPIDEMIOLOGY SCENARIO ####
   ## The number of contaminated workers at the day 0
-  nContaminated_Init = 10,
+  nContaminated_Init = 5,
   ## Regional prevalence ##
   prev = 50/100000,
   

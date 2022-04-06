@@ -9,7 +9,7 @@ runtime: shiny
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # load("2022_01_06_100Workers_56days_Step5_Schedule_Location_Mask_StatusCounter_SIRday0.RData")
-load("DATA_CheckPoint1.RData")
+load("CheckPoint0.RData")
 ```
 
 ```{r packages, include=FALSE}
