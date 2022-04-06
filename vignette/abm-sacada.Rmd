@@ -53,7 +53,7 @@ library(fitdistrplus)
 # **Introduction**
 
 **(section to be re-written)**
-This modelling study aimed to...
+This modelling study aimed to ....
 
 The Agent Based Model considered three sources of contaminations: the exposition to Sars-CoV2 througout working activities (aerosol and/or fomites), the contamination throught the exposition outside the factory and for employees leaving in community, the intra-group transmission during shared activities (transport, living). 
 
