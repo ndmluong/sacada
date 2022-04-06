@@ -55,11 +55,11 @@ MyWorkers <- f_setupSchedule(W = MyWorkers, prm = Parms_Workers, seed = seed)
 
 # SCHEDULE VISUALISATION
 # Plot schedule for all workers during a given period
-f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
+# f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 20)
 # Plot schedule for some considered workers
-f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
+# f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60)
 # Plot schedule with information at one given day
-f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
+# f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
 # # SCHEDULE VISUALISATION
 # # Plot schedule for all workers during a given period
 # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 42)
@@ -86,8 +86,6 @@ lapply(WorkingDays, FUN = function(x) {
   rbind(subset(MyWorkers, Day %in% OtherDays)) %>%
   dplyr::arrange(t_ind, W_ID) -> MyWorkers
 gc() # free unused R memory
-
-MyWorkers$W_location[is.na(MyWorkers$W_location)] <- "Home"
 
 MyWorkers$location[is.na(MyWorkers$location)] <- "Home"
 
