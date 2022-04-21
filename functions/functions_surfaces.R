@@ -14,7 +14,7 @@ f_initSurfaces <- function(
   ##  - $S_Nv (numeric): viral quantity (log CFU)
 ) {
   #### BEGIN OF FUNCTION
-  writeLines(paste("\n >>>>>> Initializing Surfaces (from day ", day, " to day ", day+1, ")", sep=""))
+  writeLines(paste("\n >>>>>> Initializing Surfaces (from day ", day-1, " to day ", day, ")", sep=""))
   
   ## The surfaces involving in the infection (objects)
   sapply(prm_plant$Objects, function(x) return(x$label)) %>%
@@ -55,6 +55,8 @@ f_initSurfaces <- function(
     ## retain only the surfaces involving in the SARS-CoV-2 transmission
     dplyr::filter(., location %in% S_selected) -> S
   
+  S_ID <<- sort(unique(S$S_ID))
+    
   return(S)
   #### END OF FUNCTION
 }

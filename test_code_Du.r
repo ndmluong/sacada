@@ -44,7 +44,7 @@ g_emptyPlant <- f_plotPlant(Plant = MyPlant,
 # g_emptyPlant
 # ggplotly(g_emptyPlant)
 
-seed = 408
+seed = 103
 
 ##### WORKERS #####
 ### SCHEDULE ###
@@ -170,52 +170,25 @@ rm(FoodInitStruct)
 # }
 
 
-## Test Updated Module Air
-W <- MyWorkers
-
-ti <- 287
-SubS <- subset(MySurfaces, t_ind == ti)
-SubW <- subset(MyWorkers, t_ind == ti)
-# SubW$W_status[SubW$W_ID %in% c("W003", "W006", "W012", "W017", "W028", "W032", "W056", "W087", "W080")] <- c("infectious", "asymptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic")
-
-WhoIs <- f_Who_is(SubW = SubW, prm_plant = Parms_Plant)
-Sneeze <- f_Sneeze(SubW = SubW, SubS = SubS,Rooms = WhoIs$Rooms, prm_air = Parms_Air,prm_time = Parms_Time)
-
-
-MASTER <- f_Module_Master(MyAir = MyAir,W = MyWorkers, S = MySurfaces, prm_plant = Parms_Plant,prm_air = Parms_Air,prm_time = Parms_Time,prm_workers = Parms_Workers,ind_min = 0, ind_max = 287, seed=408
-                          )
-
-
-day <- 5
-
-MySurfaces <- rbind(MySurfaces,
-                    f_initSurfaces(P = MyPlant$P,    
-                                   prm_plant = Parms_Plant,
-                                   prm_time = Parms_Time,
-                                   day = day))
-
-CONTA <- f_dailyContamination(MyAir = MyAir,
-                              W = MyWorkers,
-                              S = MySurfaces,
-                              day = day,
-                              indi_viral_load = indi_viral_load,
-                              prm_plant = Parms_Plant,
-                              prm_workers = Parms_Workers,
-                              prm_time = Parms_Time,
-                              prm_air = Parms_Air,
-                              prm_conta = Parms_Conta,
-                              inf_log = InfectionLog,
-                              seed = seed)
-MyWorkers <- CONTA$W
-MyAir <- CONTA$MyAir
-MySurfaces <- CONTA$S
-InfectionLog <- CONTA$inf_log
-
-
-
+# ## Test Updated Module Air
+# W <- MyWorkers
+# 
+# ti <- 287
+# SubS <- subset(MySurfaces, t_ind == ti)
+# SubW <- subset(MyWorkers, t_ind == ti)
+# # SubW$W_status[SubW$W_ID %in% c("W003", "W006", "W012", "W017", "W028", "W032", "W056", "W087", "W080")] <- c("infectious", "asymptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic", "symptomatic")
+# 
+# WhoIs <- f_Who_is(SubW = SubW, prm_plant = Parms_Plant)
+# Sneeze <- f_Sneeze(SubW = SubW, SubS = SubS,Rooms = WhoIs$Rooms, prm_air = Parms_Air,prm_time = Parms_Time)
+# 
+# 
+# MASTER <- f_Module_Master(MyAir = MyAir,W = MyWorkers, S = MySurfaces, prm_plant = Parms_Plant,prm_air = Parms_Air,prm_time = Parms_Time,prm_workers = Parms_Workers,ind_min = 0, ind_max = 287, seed=408
+#                           )
+# 
+# 
 
 ### RUN CONTAMINATION ###
-for (day in 2:5) {
+for (day in 2:28) {
   MySurfaces <- rbind(MySurfaces,
                       f_initSurfaces(P = MyPlant$P,    
                                      prm_plant = Parms_Plant,
@@ -239,8 +212,18 @@ for (day in 2:5) {
   InfectionLog <- CONTA$inf_log
 }
 
-ggplot(data = subset(MyAir, AIR_ID == "Cutting Room")) +
-  geom_line(aes(x=t_ind, ))
+ti <- 2197
+f_Who_is(SubW = subset(MyWorkers, t_ind == ti),prm_plant = Parms_Plant) -> WI
+f_Sneeze(SubW=subset(MyWorkers, t_ind == ti),SubS = subset(MySurfaces, t_ind == ti),Rooms = WI$Rooms,prm_air = Parms_Air, prm_time = Parms_Time)
+f_Cough(SubW=subset(MyWorkers, t_ind == ti),SubS = subset(MySurfaces, t_ind == ti),Rooms = WI$Rooms,prm_air = Parms_Air, prm_time = Parms_Time)
+
+MySurfaces <- OUTPUT[[2]]$MySurfaces
+ggplot() + 
+  geom_line(data=subset(MySurfaces, S_ID == "S_04_06"), aes(x=t_ind, y=viral_RNA), col="blue") +
+  geom_line(data=subset(MySurfaces, S_ID == "S_27_13"), aes(x=t_ind, y=viral_RNA), col="red") + 
+  geom_line(data=subset(MySurfaces, S_ID == "S_15_13"), aes(x=t_ind, y=viral_RNA), col="green") +
+  scale_x_continuous(breaks = seq(1,max(MySurfaces$t_ind), by=2016)) +
+  xlab("time index (2016 time index = 1 week)")
 
 
 InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
@@ -250,6 +233,15 @@ InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
                                Asymptomatic = rep(NA, max(MyWorkers$Day-1)),
                                Recovered_cumul = rep(NA, max(MyWorkers$Day-1)),
                                seed = rep(seed, max(MyWorkers$Day-1)))
+
+W <- MyWorkers
+InfectionSummary <- data.frame(Day = seq(1,27),
+                               Infected_cumul = rep(NA,27),
+                               Infectious = rep(NA, 27),
+                               Symptomatic = rep(NA, 27),
+                               Asymptomatic = rep(NA, 27),
+                               Recovered_cumul = rep(NA, 27),
+                               seed = rep(seed, 27))
 
 for (day in 1:nrow(InfectionSummary)) {
   dW <- subset(W, Hour == 0 & Min == 0 & Day == day)
@@ -266,6 +258,8 @@ OUTPUT <- list(seed = seed,
                MyAir = MyAir,
                InfectionSummary = InfectionSummary)
 
+InfectionLog <- data.frame(InfectionLog, seed = rep(seed, nrow(InfectionLog)))
+f_plotOutput(IL = InfectionLog, IS = InfectionSummary, seed_select = 408, detailed_plot = T )
 
 
 # 
@@ -296,6 +290,11 @@ OUTPUT <- list(seed = seed,
 # 
 # 
 
+
+
+OUTPUT103 <- OUTPUT[[1]]
+
+OUTPUT103$
 
 
 ############################### SCENARIO S02 ################################

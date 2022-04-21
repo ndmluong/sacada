@@ -160,7 +160,7 @@ f_dailyContamination <- function(
   
   if (!is.null(seed)) {set.seed(seed+day)}
   
-  writeLines(paste("\n ===================== Daily contamination : begin of day ", day, " ===========================", sep =""))
+  writeLines(paste("\n ================== Daily contamination : begin of day ", day, " ========================", sep =""))
   
   InfectedWorkers <- subset(W, Day == day-1 & W_statusCounter>0)$W_ID %>% unique() # already infected
   
@@ -199,9 +199,6 @@ f_dailyContamination <- function(
 
   # Total dose of infectious virus for every classes inhaled by each worker at the day day
   Virion_dose = rowSums(Expocum) / prm_conta$RNA_virion_ratio
-  
-  print("checkpoint Virion_dose")
-  print(Virion_dose)
 
   ##### ASSUMTION 1 (END)
 
@@ -236,20 +233,11 @@ f_dailyContamination <- function(
   P_infection <- f_DRM_Watanabe(dose = Virion_dose,
                                 r = prm_conta$DRM1_r)
 
-  print("check point P_infection")
-  print(P_infection)
-  
   # The response of each worker (get contaminated or not) based on their respective infection probability
   resp <- rbinom(n = length(P_infection), size = 1, prob = P_infection)
   
-  print("checkpoint resp")
-  print(resp)
-  
   # ID of the new workers infected via aerosol (response = 1) if they were not infected previously
   NewInfectedWorkers_Air <- W_ID[resp == 1 & (! W_ID %in% InfectedWorkers)]
-  
-  print("new infected workers air")
-  print(NewInfectedWorkers_Air)
 
   if (length(NewInfectedWorkers_Air) > 0) { # if there are workers getting infected via the aerosol through infection probability
     writeLines(paste(">>> Newly infected workers via aerosol : ID(s)", NewInfectedWorkers_Air, " <<<"))

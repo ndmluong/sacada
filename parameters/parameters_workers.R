@@ -66,9 +66,13 @@ Parms_Workers <- list(
   MaskType = "Surgical mask",
   ## Acceptability by the workers for the different types of mask (proportion of the workers wearing it)
   pMaskAcceptability = c("Surgical mask" = 0.8,
-                         "FFP2" = 0.60),
-  ## Mask efficiency for different droplet size classes [0 -> 1]
-
+                         "FFP2" = 0.6),
+  
+  ## Mask efficiency for different types of mask
+  Mask_Eff = c("Surgical mask" = 0.9,
+               "FFP2" = 0.95),
+  
+  
   #### EPIDEMIOLOGY SCENARIO ####
   ## The number of contaminated workers at the day 0
   nContaminated_Init = 5,
@@ -101,3 +105,4 @@ Parms_Workers <- list(
 
 # (Optional) Parameters with unchanged values that can be saved in global environment 
 NWorkers <<- Parms_Workers$NWorkers
+Mask_Eff <<- Parms_Workers$Mask_Eff[[Parms_Workers$MaskType]]

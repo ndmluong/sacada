@@ -16,18 +16,18 @@ Parms_Air <- list(
             100)/2)^3*1e6,
   
 
-  Vol_sneeze = 0.002,
+  Vol_sneeze = 0.002, ## (in L)
+  Vol_cough = 0.0004, ## (in L) 20-fold smaller than sneeze (assumption)
   
   # (m-3) - Concentration of droplets of each class during respiratory activiies Morawska et al., 2009, kenedy et al.2020 teble2
   #d0.8  d1.8   d3.5    d5.5   d 20   d 100
   Cd_exp =  1e6 * rbind(c(0.236, 0.068, 0.007, 0.011, 0, 0), # Voiced counting
                         c(0.751, 0.139, 0.139, 0.059, 0, 0), # Unmodulated Vocalization
                         c(0.084, 0.009, 0.003, 0.002, 0, 0), # Breathing (insp noze, exp mouth) details in Morawska
-                        c(0.567, 0.093, 0.012, 0.006, 0.1, 0.1)),# Cough
+                        c(0.567, 0.093, 0.012, 0.006, 0.1, 0.1)),# Cough (not used)
   
   Cd_sneeze = 1e6* c(13,  80 , 175, 140, 230, 489), # (m-3) sneeze ## Duguid 1946 / 2L air
-  
-  Mask_Eff = 0.9,
+  Cd_cough = 1e6* c(0.567, 0.093, 0.012, 0.006, 11.5, 24.45), # (m(3) for the first 4 classes : (Morawska 2009, Kennedy 2020), for class 5-6: cough ## 20-fold smaller than sneeze (assumption)
   
   # (m3/min) Respiration rate Adams (1993)
   RespRate = c(0.49,  # Resting
