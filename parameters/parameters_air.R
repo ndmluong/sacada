@@ -25,7 +25,9 @@ Parms_Air <- list(
                         c(0.084, 0.009, 0.003, 0.002, 0, 0), # Breathing (insp noze, exp mouth) details in Morawska
                         c(0.567, 0.093, 0.012, 0.006, 0.1, 0.1)),# Cough
   
-  Cd_sneeze = 1e6* c(13,  80 , 175, 140, 230, 489), # (m-3) sneeze ## Duguid 1946 / 2L air
+  # Cd_sneeze = 1e6* c(13,  80 , 175, 140, 230, 489), # (m-3) sneeze ## Duguid 1946 / 2L air
+  Cd_sneeze = 1e6* c(0, 13,  80 , 175, 230, 489), # (m-3) sneeze ## Duguid 1946 / 2L
+  Cd_cough = 1e6* c(0, 0.025, 0.145, 0.48, 2.51, 6.65),  # (m-3) sneeze ## Duguid 
   
   Mask_Eff = 0.9,
   
