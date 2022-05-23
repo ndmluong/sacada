@@ -31,22 +31,21 @@ f_initWorkers <- function(
   W_ID <- paste("W", stringr::str_pad(seq(1:prm$NWorkers), width=3, pad="0"), sep="")
 
   ### Total number of the time indexes
-  writeLines("=========== Initializing workers: Step 1/2 - Processing time indexes ===========")
-  writeLines("Processing time indexes")
+  writeLines("\n***** Processing time indexes *****")
   NTime <- prm_time$NDays * 1440 / prm_time$Step ## amplitude Ndays in days, time step in minutes
   t_ind <- rep(0:NTime, each = prm$NWorkers)
-  writeLines(paste("Time indexes going from 0 to", NTime))
+  # writeLines(paste("Time indexes going from 0 to", NTime))
 
   ## Convert time indexes to D,H,M
   dt = prm_time$Step
-  writeLines("Converting time indexes into D:H:M format")
+  writeLines(">>> Converting time indexes into D:H:M format")
   t_time <- t_ind %>% sapply(FUN = function(x) {
     f_convertTime("ind2time", dt=dt, t_ind = x)
     })
   Day <- t_time[1,]
   Hour <- t_time[2,]
   Min <- t_time[3,]
-  writeLines("Converting time into week numbers and weekdays format")
+  writeLines(">>> Converting time into week numbers and weekdays format")
   Week <- Day %>% sapply(FUN = f_Day2Week)
   Weekday <- Day %>% sapply(FUN = f_Day2Weekday)
 
@@ -54,8 +53,8 @@ f_initWorkers <- function(
   ### States (infected/not infected) of the workers
   # Time index 0:
   # HYPOTHESE : ONE INDIVIDUAL CONTAMINATED AT DAY 0 ?
-  writeLines("=========== Initializing workers: Step 2/2 - Workers attributes ===========")
-  writeLines("Assign the first random contaminated worker")
+  writeLines("\n***** Initializing workers *****")
+  writeLines(">>> Assign the first random contaminated worker(s)")
   W_status0 <- rep("susceptible", prm$NWorkers)
   set.seed(seed)
   W_status0[sample(1:prm$NWorkers, prm$nContaminated_Init)] <- "initialised as infected"
@@ -66,22 +65,23 @@ f_initWorkers <- function(
   W_statusCounter <- rep(NA, prm$NWorkers*(NTime+1))
 
   ### Behavior (mask/no mask) of the workers
-  # At the time index 0
-  # The proportion of workers wearing a mask depending on the type of mask
-  writeLines("Simulating mask acceptability")
-  pMask <- prm$pMaskAcceptability[prm$MaskType] %>% unname
+  # # At the time index 0
+  # # The proportion of workers wearing a mask depending on the type of mask
+  # writeLines(">>> Simulating mask acceptability")
+  # pMask <- prm$pMaskAcceptability[prm$MaskType] %>% unname
+  # 
+  # # Wearing mask or not for each worker
+  # set.seed(seed)
+  # W_mask0 <- sample(c("mask", "no mask"), replace = T,
+  #                   size = prm$NWorkers,
+  #                   prob = c(pMask,1-pMask))
+  # # Initialization for the subsequent time indexes as NA
+  # W_mask <- c(W_mask0, rep(NA, prm$NWorkers * NTime))
+  W_mask <- rep(NA, prm$NWorkers*(NTime+1))
 
-  # Wearing mask or not for each worker
-  set.seed(seed)
-  W_mask0 <- sample(c("mask", "no mask"), replace = T,
-                    size = prm$NWorkers,
-                    prob = c(pMask,1-pMask))
-  # Initialization for the subsequent time indexes as NA
-  W_mask <- c(W_mask0, rep(NA, prm$NWorkers * NTime))
-
-  ### Assign the types and teams for all workers
+  ## Assign the types and teams for all workers
   # at time 0
-  writeLines("Assign workers types and teams")
+  writeLines(">>> Assign workers types and teams")
   W_TT <- f_assignWorkersTypeTeam(prm = prm, seed=seed)  ## check the function f_assignWorkersTypeTeam
   W_type0 <- W_TT$W_type
   W_team0 <- W_TT$W_team
@@ -89,6 +89,7 @@ f_initWorkers <- function(
   # Replicate the type of workers for all subsequent time indexes
   W_type <- as.factor(rep(W_type0, NTime+1)) ## + 1 (including the time index 0)
   W_team <- as.factor(c(W_team0, rep(NA, prm$NWorkers * NTime))) ## (including the time index 0)
+  
 
   ## Initialize the shift of all workers
   W_shift <- rep(NA, prm$NWorkers * (NTime+1))
@@ -104,7 +105,7 @@ f_initWorkers <- function(
 
   ## Community activities
   ## Assign the workers to the different communes if applicable
-  writeLines("Assign workers community")
+  writeLines(">>> Assign workers community")
   AssignedCommunity <- f_assignCommunes(prm, seed = seed) ## check the (sub)function f_assignCommunes()
 
   W_communityActivity <- AssignedCommunity$W_communityActivity0 %>% rep(NTime+1)
@@ -132,8 +133,6 @@ f_initWorkers <- function(
                   Hour = Hour,
                   Min = Min
   )
-
-  writeLines("============================ Workers initialized ============================")
 
   return(W)
   #### END OF FUNCTION
@@ -429,7 +428,7 @@ f_calculateActiveCounter <- function(
   ## OUTPUT
   ## OUTPUT: data frame with calculated active counters for every workers
 ) {
-  writeLines("Processing active counter for all workers")
+  writeLines(">>> Processing active counters for all workers")
   ## data manipulation: row_ID added, necessary for matching values after calculation of active counters
   ## W <- data.frame(row_ID = 1:nrow(W), W) 
   ## Extract the data at the beginning of every day
@@ -456,23 +455,13 @@ f_calculateActiveCounter <- function(
   
   ## Replicate information for the resting (not filled) cases of every day
   ALL_ID <- unique(as.character(W$W_ID))
-  # # ## Replicate information individually for every workers, one by one
-  # # ## and combine in one data frame OUTPUT
-  # # 
-  # ########### /!\ Non-Optimized code (begin)
-  # # OUTPUT <- data.frame()
-  # # for (i in 1:length(ALL_ID)) {
-  # #   writeLines(paste("Worker",ALL_ID[i]))
-  # #   d1W <- subset(W, W_ID == ALL_ID[i])
-  # #   d1W <- f_replicateIndividualDaily(Agent = d1W,
-  # #                                     Invariant = c("W_activeCounter", "W_active"))
-  # #   OUTPUT <- rbind(OUTPUT, d1W)
-  # # }
-  # ############ /!\ Non-Optimized code (end)
 
   ############ /!\ Optimized code (begin)
+  pb = txtProgressBar(min = 1, max = length(ALL_ID), initial = 1,
+                      char = "-", width = 50, style = 3)
+  
   lapply(ALL_ID, FUN = function(x) {
-    writeLines(paste("Worker", x))
+    setTxtProgressBar(pb, value = which(ALL_ID == x))
     d1 <- subset(W, W_ID == x)
     d1 <- f_replicateIndividualDaily(Agent = d1,
                                      Invariant = "W_activeCounter")
@@ -482,8 +471,10 @@ f_calculateActiveCounter <- function(
   }) %>%
     data.table::rbindlist() %>%
     dplyr::arrange(t_ind, W_ID) -> OUTPUT
+  
+  close(pb)
   ############ /!\ Optimized code (end)
-  writeLines("======= Processing active counter for all workers: done ==========")
+
   return(OUTPUT)
 }
 
@@ -497,15 +488,20 @@ f_setupSchedule <- function(
     set.seed(seed)
   }
   ## Simulate the weekly team changes
+  writeLines(">>> Simulating weekly team changes")
+  pb = txtProgressBar(min = 1, max = max(W$Week)-1, initial = 1,
+                      char = "-", width = 50, style = 3)
+  
   for (i in 1:(max(W$Week)-1)) {
-    writeLines(paste("Simulating weekly team changes - Week", i))
+    setTxtProgressBar(pb, value = i)
     W <- f_changeTeamWeekly(W = W,
                             prob = prm$pChangeTeam,
                             week_from = i)
   }
+  close(pb)
   
   ## Assign working shift for all workers
-  writeLines("Assign working shifts for all workers")
+  writeLines(">>> Assign working shifts for all workers")
   W <- f_assignWorkersShift(W)
   
   ## Calculate the active counter of every workers and fill the case 0h00
@@ -515,4 +511,47 @@ f_setupSchedule <- function(
   
   return(W)
 }
+
+
+
+##### f_Absence() FUNCTION TO SET AN ABSENT WORKER FROM A GIVEN DAY #####
+f_setAbsence <- function(
+  W,
+  day,
+  prm_workers
+) {
+  ## ID of the symptomatic worker(s) at the beginning of the symptomatic phase at the given day
+  symp_ID <- subset(W, Day == day & Hour == 0 & Min == 0 &
+                      W_status == "symptomatic" &
+                      W_statusCounter == 6)$W_ID
+  
+  ## If there is any symptomatic worker(s) identified at this day
+  if (length(symp_ID) > 0) {
+    ## check if they will be absent or not
+    absence <- rbinom(length(symp_ID), 1, prob = 1 - prm_workers$pPresenceSymp)
+    
+    ## If there is any absent worker(s)
+    if (length(symp_ID[absence == 1]) > 0) {
+      writeLines(paste("/!\\ Absence of the following symptomatic worker(s): ",paste(symp_ID[absence == 1], collapse=", ")))
+      
+      ## for each absence worker
+      for (i in 1:length(symp_ID)) {
+        if (absence[i] == 1) {
+          ## change the status of the considered worker to "absence"
+          W$W_active[W$W_ID == symp_ID[i] & W$Day %in% day:(day+prm_workers$AbsenceDuration)] <- "absence"
+          
+          ## change coordinates and location to NAs and "Home"
+          W$location[W$W_ID == symp_ID[i] & W$Day %in% day:(day+prm_workers$AbsenceDuration)] <- "Home"
+          W$coordX[W$W_ID == symp_ID[i] & W$Day %in% day:(day+prm_workers$AbsenceDuration)] <- NA
+          W$coordY[W$W_ID == symp_ID[i] & W$Day %in% day:(day+prm_workers$AbsenceDuration)] <- NA
+          W$W_mask[W$W_ID == symp_ID[i] & W$Day %in% day:(day+prm_workers$AbsenceDuration)] <- NA
+        }
+      }
+    }
+    
+  }
+  
+  return(W)
+}
+
 

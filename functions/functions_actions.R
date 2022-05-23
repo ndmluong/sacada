@@ -130,7 +130,7 @@ f_assignCuttersPosition <- function(
 
 
 ##### f_moveFood () FUNCTION TO MOVE SOME FOOD PORTIONS INSIDE THE PLANT #####
-f_moveFood <- function(
+f_moveFoodPortion <- function(
   ## Move different types of agents from one location to another inside the pre-created plant
   ## INPUT
   Plant, # 'Plant object': list of two objects
@@ -157,14 +157,14 @@ f_moveFood <- function(
   FPsub <- subset(FP, FP_ID %in% selectFP)
   FPcomp <- subset(FP, !(FP_ID %in% selectFP))
   
-  lapply(selectFP, FUN = function(x) {
+  lapply(selectFP, FUN = function(x) { ## for each given portion
     d1 <- subset(FPsub, FP_ID == x)
-    randomcoord <- loc[sample(1:nrow(loc), size=1), ]
+    randomcoord <- loc[sample(1:nrow(loc), size=1), ] 
     d1$coordX[which(d1$t_ind %in% t_ind_vec)] <- randomcoord$coordX
     d1$coordY[which(d1$t_ind %in% t_ind_vec)] <- randomcoord$coordY
     return(d1)
   }) %>%
-    data.table::rbindlist() %>%
+    data.table::rbindlist(.) %>%
     rbind(., FPcomp) -> FP
   
   ############ /!\ Optimized code (end)
@@ -188,9 +188,8 @@ f_circulateCarcass <- function(
 ) {
 
   ## IDs of the portion from the selected carcass to circulate
-  dplyr::filter(FPcarc, substr(FP_ID, 6, 9) == carcass_ID)$FP_ID %>%
-    unique() %>% as.vector() -> selectFP
-
+  selectFP <- unique(FPcarc$FP_ID)
+  
   ### TIME INDEX FOR EACH STEP OF THE CUTTING PROCESS
   ti <- c("logistic1" = t_ind,
           "cutter1" = t_ind + duration_ti[["logistic1"]],
@@ -200,38 +199,25 @@ f_circulateCarcass <- function(
 
   ### CUTTING PROCESS
   ## logistic 1
-  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Arrival gate",
+  FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Arrival gate",
                    t_ind_vec = ti[["logistic1"]]:(ti[["cutter1"]]-1))
   ## cut 1:
-  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Conveyor1",
+  FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Conveyor1",
                    t_ind_vec = ti[["cutter1"]]:(ti[["cutter2"]]-1))
   ## cut 2:
-  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Conveyor2",
+  FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Conveyor2",
                    t_ind_vec = ti[["cutter2"]]:(ti[["logistic2"]]-1))
   ## logistic2:
-  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Equipment 1",
+  FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Equipment 1",
                    t_ind_vec = ti[["logistic2"]]:(ti[["storage"]]-1))
   ## storage:
-  FPcarc <- f_moveFood(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Cooling area",
+  FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Cooling area",
                    t_ind_vec = ti[["storage"]])
 
   return(FPcarc)
 }
 
 
-##### f_dailyCut #####
-f_dailyCut <- function(
-  Plant, # 'Plant object': list of two objects
-  # L (data.frame): different locations of the plant ('entry hall', 'wc'...) and their coordinates X and Y
-  # P (numeric matrix) : food processing plant 
-  FP, ## object containing all attributes of all agents food portions
-  prm_food,
-  prm_time
-) {
-  
-  
-  return(FP)
-}
 
 
 

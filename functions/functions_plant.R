@@ -14,6 +14,7 @@ f_createPlant <- function(
   ## P (character matrix) : food processing plant
 ) {
   #### BEGIN OF FUNCTION
+  writeLines(">>>>>>>>>>> Creating the food processing plant <<<<<<<<<<")
   # Initialize an empty space dim.X * dim.Y
   P <- matrix("empty", nrow = prm$dim.X, ncol = prm$dim.Y) 
 

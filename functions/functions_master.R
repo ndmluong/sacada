@@ -451,10 +451,12 @@ f_Module_Master <- function (
   MyAir, ## (object MyAir)
   W, ## (object MyWorkers)
   S, ## (object MySurfaces)
+  FP, ## (object MyFood)
   prm_plant,
   prm_air,
   prm_time,
   prm_workers,
+  prm_surfaces,
   ind_min,
   ind_max,
   seed = NULL, ## added for simulation purposes
@@ -469,8 +471,13 @@ f_Module_Master <- function (
   ## The cumulative number in different classes of droplets exposed to each worker
   W_droplet_Expos_cumul <- matrix(0, nrow=NWorkers, ncol=length(prm_air$Droplet_class)) %>% `rownames<-`(.,sort(unique(W$W_ID)))
   
+  
+  pb = txtProgressBar(min = ind_min, max = ind_max, initial = ind_min,
+                      char = "-", width = 50, style = 3) 
   ## Day loop - For each time step ----
   for (ind in ind_min:ind_max) { # for each time index of the day
+    setTxtProgressBar(pb, value = ind)
+    
     # The number of droplets in each class at the time index ind
     Cd = MyAir[MyAir$t_ind==ind, AIR_dclass]
     
@@ -487,11 +494,6 @@ f_Module_Master <- function (
     
     # 1.3 SNEEZES ----
     Sneeze <- f_Sneeze(SubW = subset(W, t_ind == ind), Rooms = WhoIs$Rooms, SubS = subset(S, t_ind == ind), prm_air = prm_air, prm_time = prm_time)
-    # writeLines(paste("Sneeze$To_aerosol: t_ind =", ind))
-    # print(Sneeze$To_aerosol)
-    
-    # writeLines(paste("Sneeze$To_aerosol / V_rooms: t_ind =", ind))
-    # print(Sneeze$To_aerosol / V_rooms)
     
     # 1.4 COUGHS ----
     Cough <- f_Cough(SubW = subset(W, t_ind == ind), Rooms = WhoIs$Rooms, SubS = subset(S, t_ind == ind), prm_air = prm_air, prm_time = prm_time)
@@ -502,6 +504,7 @@ f_Module_Master <- function (
     dsed = S_rooms %*% Vsed * 60    # (dsed in m3/min)
 
     # 2.2 FROM AIR to WORKERS ---- 
+    # (A) THE FRACTION OF DROPLETS FROM AIR INHALED BY WORKERS
     # [[1]] cont_mask; [[2]] cont_no_mask; [[3]] no_cont_mask; [[4]] no_cont_no_mask
     Resp_inh = ((WhoIs$Cont_mask + WhoIs$Non_Cont_mask) * (1 - Mask_Eff) + (WhoIs$Cont_no_mask + WhoIs$Non_Cont_no_mask)) * resp
     
@@ -516,6 +519,17 @@ f_Module_Master <- function (
     
     # Cumulative (during the day) exposition of all workers to all classes --> dose response model at the end of the day
     W_droplet_Expos_cumul = W_droplet_Expos_cumul + Reduce("+", W_droplet_Expos) * Step + Sneeze$d_expo + Cough$d_expo
+    
+    
+    # (B) THE FRACTION OF DROPLETS FROM AIR RETAINED BY MASKS
+    # The portion of droplets retained by the masks
+    Mask_kept = (WhoIs$Cont_mask + WhoIs$Non_Cont_mask) * Mask_Eff * resp ## droplets retained by the mask during respiration by workers wearing it
+    Mask_droplet_kept <- lapply(seq(1:N_rooms),
+                                function(x) return(Mask_kept[,x] * t(matrix(rep(as.matrix(Cd[x,]), NWorkers), ncol = NWorkers))))
+    d_retainedbyMask <- t(sapply(seq(1:N_rooms),
+                                 function (x) return(colSums(Mask_droplet_kept[[x]]))))
+    
+    
     
     # 2.3 FROM WORKERS to AIR ----
     # total number of droplets exhaled per employee (All employee)
@@ -545,34 +559,54 @@ f_Module_Master <- function (
     # 2.5 AEROSOL - EMISSION/ABSORPTION BALANCE EQUATION ----
     # [d / m3]
     MyAir[MyAir$t_ind == (ind+1), AIR_dclass] = Cd +
-      (dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd ) * Step / V_rooms + 
+      (dexhale * Method_calc - dinhale - (V_renew+dsed) * Cd - d_retainedbyMask) * Step / V_rooms + 
       Sneeze$To_aerosol/V_rooms + Cough$To_aerosol/V_rooms
     
-    ## 2.6 SURFACES - BALANCE EQUATION ----
-    if (ind < ind_max) {
-      S$viral_RNA[S$t_ind == ind+1] = S$viral_RNA[S$t_ind == ind] +
-        unname(rowSums(Cough$m2_drop)) + ## number of droplets falling on each tile (m2) due to coughing events
+    ## 2.6 TILES (M2) - BALANCE EQUATION ----
+    if (ind < ind_max) { ## 
+      
+      m2_tiles_ti <- unname(rowSums(Cough$m2_drop)) + ## number of droplets falling on each tile (m2) due to coughing events
         unname(rowSums(Sneeze$m2_drop)) + ## number of droplets falling on each tile (m2) due to sneezing events
         sum(dsed[1,] * Cd[1,] / S_rooms[1]) * Step ## average number of droplets settling from aerosol on each tile (m2) per time step (only in the cutting room [1,])
+      
+      names(m2_tiles_ti) <- S_ID
+      
+      ## 2.6 (A) TRANSFERS WHEN FOOD PORTIONS ARE PRESENT ----
+      if (nrow(FP) > 0) {
+        if (ind %in% min(FP$t_ind):(max(FP$t_ind)-1)) {
+          TRANSFERS <- f_transfers(S = S, FP = FP, m2_tiles_ti = m2_tiles_ti, ti = ind, prm_surfaces = prm_surfaces)
+          S <- TRANSFERS$S
+          FP <- TRANSFERS$FP
+        } else { ## 2.6 (B) NO TRANSFERS: SEDIMENTATION OF ALL DROPLETS ON SURFACES
+          S$RNA_load[S$t_ind == ind + 1] = S$RNA_load[S$t_ind == ind] + unname(m2_tiles_ti)
+        }
+      }
+      else {
+        S$RNA_load[S$t_ind == ind + 1] = S$RNA_load[S$t_ind == ind] + unname(m2_tiles_ti)
+      }
+
+      
     }
-  }
+  } ## End : for loop
   
-  ## The vector indicating if each worker wears a mask or not when exposed to droplets
-  subset(W, t_ind == ind_min) %>%
-    arrange(., W_ID) %>%
-    pull(., W_mask) %>%
-    `names<-` (., sort(unique(W$W_ID))) -> eff_mask
-
-  ## Calculating the mask efficiency
-  eff_mask[eff_mask == "mask"] <- 1 - Mask_Eff
-  eff_mask[eff_mask == "no mask"] <- 1
-  eff_mask[is.na(eff_mask)] <- 0
-  eff_mask <- as.numeric(eff_mask)
-
-  ## Take into account the efficiency in the cumulative exposition for each worker
-  Expocum <- W_droplet_Expos_cumul * eff_mask
-
-  # Expocum <- W_droplet_Expos_cumul
+  close(pb)
+  
+  # ## The vector indicating if each worker wears a mask or not when exposed to droplets
+  # subset(W, t_ind == ind_min) %>%
+  #   arrange(., W_ID) %>%
+  #   pull(., W_mask) %>%
+  #   `names<-` (., sort(unique(W$W_ID))) -> eff_mask
+  # 
+  # ## Calculating the mask efficiency
+  # eff_mask[eff_mask == "mask"] <- 1 - Mask_Eff
+  # eff_mask[eff_mask == "no mask"] <- 1
+  # eff_mask[is.na(eff_mask)] <- 0
+  # eff_mask <- as.numeric(eff_mask)
+  # 
+  # ## Take into account the efficiency in the cumulative exposition for each worker
+  # Expocum <- W_droplet_Expos_cumul * eff_mask
+  
+  Expocum <- W_droplet_Expos_cumul
   
   return(list(MyAir = MyAir,
               Expocum = Expocum,

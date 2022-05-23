@@ -6,7 +6,7 @@ f_dailyWork_AM <- function(
   dt,
   seed = NULL
 ) {
-  writeLines(paste(">>> Day ", D, " - Morning team", sep=""))
+  # writeLines(paste(">>> Day ", D, " - Morning team", sep=""))
   active <- subset(W, W_active == "active" & Day == D)
   
   AM_ID <- subset(active, W_shift == "morning")$W_ID %>% unique()
@@ -91,7 +91,7 @@ f_dailyWork_T1 <- function(
   dt,
   seed = NULL
 ) {
-  writeLines(paste(">>> Day ", D, " - Transverse1 workers", sep=""))
+  # writeLines(paste(">>> Day ", D, " - Transverse1 workers", sep=""))
   
   active <- subset(W, W_active == "active" & Day == D)
   
@@ -186,7 +186,7 @@ f_dailyWork_PM <- function(
   dt,
   seed = NULL
 ) {
-  writeLines(paste(">>> Day ", D, " - Afternoon team", sep=""))
+  # writeLines(paste(">>> Day ", D, " - Afternoon team", sep=""))
   active <- subset(W, W_active == "active" & Day == D)
   
   PM_ID <- subset(active, W_shift == "afternoon")$W_ID %>% unique()
@@ -198,27 +198,27 @@ f_dailyWork_PM <- function(
   L1_location <- c("Arrival gate", "WS-Conveyor1-Head")
   L2_location <- c("WS-Conveyor2-Tail", "Waste area", "WS-Equipment 1", "Cooling area")
   
-  ## 14:00
-  W <- f_moveWorkers(Plant, W, PM_ID, "Entry hall", t_ind=f_convertTime("time2ind",D,14,0,dt=dt))
+  ## 13:00
+  W <- f_moveWorkers(Plant, W, PM_ID, "Entry hall", t_ind=f_convertTime("time2ind",D,13,0,dt=dt))
   
-  ## 14:05
-  t_ind <- f_convertTime("time2ind",D,14,5,dt=dt)
+  ## 13:05
+  t_ind <- f_convertTime("time2ind",D,13,5,dt=dt)
   W <- f_assignCuttersPosition(Plant, W, t_ind=t_ind, cuttertype = 1, shift = "afternoon")
   W <- f_assignCuttersPosition(Plant, W, t_ind=t_ind, cuttertype = 2, shift = "afternoon")
   W <- f_moveWorkers(Plant, W, PM_L1_ID, to=sample(L1_location,1), t_ind=t_ind)
   W <- f_moveWorkers(Plant, W, PM_L2_ID, to=sample(L2_location,1), t_ind=t_ind)
   
-  ## from 14:05 to 21:55
-  t_ind_begin <- f_convertTime("time2ind",D,14,5,dt=dt)
-  t_ind_end <- f_convertTime("time2ind",D,21,55,dt=dt)
+  ## from 13:05 to 20:55
+  t_ind_begin <- f_convertTime("time2ind",D,13,5,dt=dt)
+  t_ind_end <- f_convertTime("time2ind",D,20,55,dt=dt)
   
-  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "location", c(14,5), c(21,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "coordX", c(14,5), c(21,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "coordY", c(14,5), c(21,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "location", c(13,5), c(20,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "coordX", c(13,5), c(20,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C1_ID, "coordY", c(13,5), c(20,55), D=D, dt=dt)
   
-  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "location", c(14,5), c(21,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "coordX", c(14,5), c(21,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "coordY", c(14,5), c(21,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "location", c(13,5), c(20,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "coordX", c(13,5), c(20,55), D=D, dt=dt)
+  W <- f_replicateWorkerstime2time(W, PM_C2_ID, "coordY", c(13,5), c(20,55), D=D, dt=dt)
   
   # logistic1 workers - afternoon - random moves in their workspace
   Wsub <- subset(W, t_ind >= t_ind_begin & t_ind <= t_ind_end & W_ID %in% PM_L1_ID)
@@ -274,7 +274,7 @@ f_dailyWork_T2 <- function(
   dt,
   seed = NULL
 ) {
-  writeLines(paste(">>> Day ", D, " - Transverse2 workers", sep=""))
+  # writeLines(paste(">>> Day ", D, " - Transverse2 workers", sep=""))
   active <- subset(W, W_active == "active" & Day == D)
   
   T2_ID <- subset(active, W_type == "transverse2")$W_ID %>% unique()
@@ -314,7 +314,8 @@ f_dailyWork_AllTeams <- function(
   seed = NULL
 ) {
   if (!is.null(seed)) {set.seed(seed)}
-  writeLines(paste("========== Day ", D, " =========", sep=""))
+  writeLines(paste(">>> Daily work: Assign positions for all active workers from different teams (day ", D,")", sep=""))
+  
   W <- f_dailyWork_AM(Plant, W, D, dt)
   W <- f_dailyWork_T1(Plant, W, D, dt)
   W <- f_dailyWork_PM(Plant, W, D, dt)
@@ -324,6 +325,53 @@ f_dailyWork_AllTeams <- function(
   return(W)
 }
 
+##### f_checkdailyWorkerType #####
+f_checkdailyWorkerType <- function(
+  W,
+  day
+) {
+  
+  Wsub <- subset(W, Day == day & Hour == 0 & Min == 0 & W_active == "active")
+  compo <- table(Wsub$W_team, Wsub$W_type)[c("teamA", "teamB") , c("cutter1", "cutter2", "logistic1", "logistic2")]
+  
+  for (team in c("teamA", "teamB")) { ## for each team (A or B / morning or afternoon depending on the week)
+    
+    if (compo[team , "logistic1"] < 1 | compo[team, "logistic2"] < 1) { ## if there is any missing logistic1 or logistic2 worker
+      writeLines(paste("/!\\ Missing logistic workers in the ", team, " : randomly choose another from the remaining types", sep = ""))
+      
+      ## if there are at least 2 logistic workers for switching between them
+      if (sum(compo[team , c("logistic1", "logistic2")]) >= 2) { 
+        if (compo[team , "logistic1"] > compo[team , "logistic2"]) { ## if there are more logistic1 workers than logistic2 ones
+          changingWorker_ID <- subset(Wsub, W_team == team & W_type == "logistic1")$W_ID %>% sample(., 1) ## take 1 random logistic1 worker to become logistic2 worker
+          W$W_type[W$Day == day & W$W_ID == changingWorker_ID] <- "logistic2"
+        }
+        if (compo[team , "logistic2"] > compo[team , "logistic1"]) { ## otherwise, if there are more logistic2 workers than logistic1 ones
+          changingWorker_ID <- subset(Wsub, W_team == team & W_type == "logistic2")$W_ID %>% sample(., 1) ## take 1 random logistic2 worker to become logistic1 worker
+          W$W_type[W$Day == day & W$W_ID == changingWorker_ID] <- "logistic1"
+        }
+      }
+      
+      ## if there are less than 2 logistic workers for switching between them: take from the cutters group
+      if (sum(compo[team , c("logistic1", "logistic2")]) < 2) {
+        ## take a random cutter worker
+        changingWorker_ID <- subset(Wsub, W_team == team & W_type %in% c("cutter1", "cutter2"))$W_ID %>% sample(., 1)
+        
+        if (compo[team , "logistic1"] < 1) { ## if the missing worker is logistic1
+          W$W_type[W$Day == day & W$W_ID == changingWorker_ID] <- "logistic1" ## the taken cutter worker becomes logistic1
+        } else { ## otherwise
+          W$W_type[W$Day == day & W$W_ID == changingWorker_ID] <- "logistic2" ## the taken cutter worker becomes logistic2
+        }
+      }
+      
+    } ## end (missing logistic1 or logistic2 workers in the current team)
+    
+  } ## end (missing logistic1 or logistic2 workers in each team) 
+
+  return(W)
+}
+
+
+
 ##### f_dailyMaskWearing_AllTeams #####
 f_dailyMaskWearing <- function(
   WD, ## data frame associated with ONE GIVEN DAY
@@ -331,12 +379,10 @@ f_dailyMaskWearing <- function(
 ) {
   D <- unique(WD$Day)
   
-  # writeLines(paste("## Day ", D, " - Check 'Mask wearing' status of all active workers", sep=""))
-  
   active <- subset(WD, W_active == "active")
   Wcomp <- subset(WD, W_active != "active")
   
-  active_ID <- active$W_ID %>% unique()
+  active_ID <- unique(active$W_ID)
   
   W_mask_by_ID <- sample(c("mask", "no mask"), replace = T,
                          size = length(active_ID),

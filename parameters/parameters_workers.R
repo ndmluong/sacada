@@ -2,7 +2,7 @@
 Parms_Workers <- list(
   #### NUMBER OF WORKERS ####
   ## Total number of fixed workers (regular/temporary/subcontract)
-  NWorkers = 100,
+  NWorkers = 80,
   
   ####*****Not used yet *****###
   ## Total number of exterior workers
@@ -100,7 +100,11 @@ Parms_Workers <- list(
   RecoveredDay = 18, ## the day at which the person becomes negative: NonInfectiousDay + NonInfectiousDuration
   
   ## Proportion of asymptomatic
-  pAsymptom = 0.335 ## [0.18-0.475] (Alene et al. 2021; Ma et al. 2021; Sah et al. 2021)
+  pAsymptom = 0.335, ## [0.18-0.475] (Alene et al. 2021; Ma et al. 2021; Sah et al. 2021)
+  
+  ## Probability of absence for symptomatic workers
+  pPresenceSymp = 24/140, ## (Mallet 2021)
+  AbsenceDuration = 7 ## (assumption)
 )
 
 # (Optional) Parameters with unchanged values that can be saved in global environment 

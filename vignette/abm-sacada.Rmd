@@ -470,6 +470,7 @@ bla bla bla
 
 Scenario chosen based on an epidemiological investigation on several SARS-CoV-2 clusters in France during the period between May 2020 and April 2021.
 
+
 #### Persistence 
 
 Analyses from experiments and literature reviews
@@ -484,11 +485,11 @@ For each simulation, the model was initialized at the first day with an initial 
 
 ### **Parallel computing**
 
+** sensitivity analysis**
 
+# **Model validation and sensitivity analysis**
 
-<!-- # **Model validation and sensitivity analysis** -->
-
-
+regional data in France (SpF) : ex. Bretagne / volume de l'établissement, ...
 
 
 # **Some examples**

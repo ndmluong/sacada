@@ -20,14 +20,8 @@ f_updateStatusByCounter <- function(
     SymptomEvent <- sample(c("symptomatic", "asymptomatic"), ## random sampling for these workers for presenting a symptom or not
                            size = length(W_SymptomBegin), replace = T,
                            prob = c(1 - prm_workers$pAsymptom, prm_workers$pAsymptom))
-    writeLines(paste("/!\\ Begin of the symptomatic period for the worker(s): ", toString(W_SymptomBegin),
+    writeLines(paste("/!\\ Begin of the symptomatic period : worker(s): ", toString(W_SymptomBegin),
                      "\nwith their respective symptoms development as follows: ", toString(SymptomEvent), sep=""))
-    # ## /!\ NON-OPTIMIZED CODE
-    # for (wi in 1:length(W_SymptomBegin)) {
-    #   WD$W_status[which(WD$W_ID == W_SymptomBegin[wi] &
-    #                      WD$W_statusCounter == prm_workers$SymptomDay)] <- SymptomEvent[wi]
-    # }
-    # ## /!\ NON-OPTIMIZED CODE (END)
     
     ## /!\ OPTIMIZED CODE
     names(SymptomEvent) <- W_SymptomBegin # rename the symptom vector using the corresponding worker ID
@@ -140,17 +134,19 @@ f_individual_viral_load <- function(
   return(indi_viral_load)
 }
 
-#### f_dailyContamination #####
+##### f_dailyContamination #####
 f_dailyContamination <- function(
   MyAir,
   W,
   S,
+  FP,
   day,
   indi_viral_load,
   prm_plant,
   prm_workers,
   prm_time,
   prm_air,
+  prm_surfaces,
   prm_conta,
   inf_log,
   seed = NULL,
@@ -160,22 +156,24 @@ f_dailyContamination <- function(
   
   if (!is.null(seed)) {set.seed(seed+day)}
   
-  writeLines(paste("\n ================== Daily contamination : begin of day ", day, " ========================", sep =""))
+  writeLines(paste("\n***** Daily contamination : end of the day ", day-1, " *****", sep =""))
   
   InfectedWorkers <- subset(W, Day == day-1 & W_statusCounter>0)$W_ID %>% unique() # already infected
   
   ################### INFECTION SOURCE 1: AEROSOL ################################
-  writeLines("\n (i) Aerosol")
+  writeLines("\n (i) Contamination inside the processing plant - Transfers between surfaces and food portions")
   # The total cumulative number of the droplets
   # inhaled by each worker on the PREVIOUS day
   # writeLines("- Calculating the cumulative number of droplets inhaled by each worker")
   MASTER <- f_Module_Master(MyAir = MyAir,
                             W = W,
                             S = S,
+                            FP = FP,
                             prm_plant = prm_plant,
                             prm_air = prm_air,
                             prm_time = prm_time,
                             prm_workers = prm_workers,
+                            prm_surfaces = prm_surfaces,
                             ind_min = subset(W, Day == day-1)$t_ind %>% min(),
                             ind_max = subset(W, Day == day-1)$t_ind %>% max()) # OK
 
@@ -186,46 +184,10 @@ f_dailyContamination <- function(
   S <- MASTER$S
 
   ##### ASSUMPTION 1 : 1 RNA copies per droplet !
-  # The percentage of droplets contaminated by RNA copies
-  # Dose_per_class1 <- rep(0, prm_workers$NWorkers)
-  # Dose_per_class2 <- rep(0, prm_workers$NWorkers)
-  # Dose_per_class3 <- rep(0, prm_workers$NWorkers)
-  # Dose_per_class4 <- rep(0, prm_workers$NWorkers)
-  # 
-  # Dose_per_class1[Expocum[,1]>0] <- rbinom(n = sum(Expocum[,1]>0),size= round(Expocum[Expocum[,1]>0,1]), prob = P[1])
-  # Dose_per_class2[Expocum[,2]>0] <- rbinom(n = sum(Expocum[,2]>0),size= round(Expocum[Expocum[,2]>0,2]), prob = P[2])
-  # Dose_per_class3[Expocum[,3]>0] <- rbinom(n = sum(Expocum[,3]>0),size= round(Expocum[Expocum[,3]>0,3]), prob = P[3])
-  # Dose_per_class4[Expocum[,4]>0] <- rbinom(n = sum(Expocum[,4]>0),size= round(Expocum[Expocum[,4]>0,4]), prob = P[4])
-
   # Total dose of infectious virus for every classes inhaled by each worker at the day day
   Virion_dose = rowSums(Expocum) / prm_conta$RNA_virion_ratio
 
   ##### ASSUMTION 1 (END)
-
-  # # ##### ASSUMPTION 2 : Calculate the number of RNA copies per droplet for each droplet class
-  # # set.seed(seed+day)
-  # # Nd <- rpois(n = length(Parms_Air$Droplet_class),
-  # #             lambda = VPR)
-  # # 
-  # # RNA_per_class1 <- round(Expocum[, 1]) * Nd[1]
-  # # RNA_per_class2 <- round(Expocum[, 2]) * Nd[2]
-  # # RNA_per_class3 <- round(Expocum[, 3]) * Nd[3]
-  # # RNA_per_class4 <- round(Expocum[, 4]) * Nd[4]
-  # # 
-  # # RNA_tot = RNA_per_class1 + RNA_per_class2 + RNA_per_class3 + RNA_per_class4 # number of RNA copies inhaled by each worker
-  # # 
-  # # Virion_dose <- RNA_tot / RNA_virion_ratio
-  # # ##### ASSUMTION 2 (END)
-
-  # ##### ASSUMPTION 3 : Calculate the number of virion per droplet for each droplet class
-  # # by applying the RNA-Virion ratio from the beginning
-  # VPR <- VP / RNA_virion_ratio
-  # 
-  # Ndr <- rpois(n = length(prm_air$Droplet_class),
-  #              lambda = VPR)
-
-  # Virion_dose <- round(Expocum[,1]) * Ndr[1] + round(Expocum[,2]) * Ndr[2] + round(Expocum[,3]) * Ndr[3] + round(Expocum[,4]) * Ndr[4]
-  ##### ASSUMTION 3 (END)
 
   ##### DOSE-RESPONSE MODEL : WATANABE MODEL
   # r: best fit for the form parameter of the Watanabe's dose-response model
@@ -342,8 +304,45 @@ f_dailyContamination <- function(
   return(list(MyAir = MyAir,
               W = W,
               S = S,
+              FP = FP,
               inf_log = inf_log,
               Virion_dose = Virion_dose, 
               Expocum = Expocum))
   ## END OF FUNCTION
 }
+
+
+##### f_estimateR() #####
+f_estimateRt <- function(
+  ISsub, ## data.frame (Infection summary), output of the function f_runModel associated with ONE GIVEN SIMULATION SEED
+  prm_conta
+){
+  
+  ISsub <- tibble::add_column(ISsub, Incidence = NA, .after = "Day")
+  ISsub$Incidence[1] <- ISsub$Infected_cumul[1]
+  for (i in 2:nrow(ISsub)) {
+    ISsub$Incidence[i] <- ISsub$Infected_cumul[i] - ISsub$Infected_cumul[i-1]
+  }
+  
+  onset <- rep(ISsub$Day, ISsub$Incidence)
+  inci <- incidence(onset)
+  plot(inci, border = "white")
+  
+  Rt_res <- earlyR::get_R(inci,
+                          si_mean = prm_conta$SerialInterval[[prm_conta$VoC]][["mu"]],
+                          si_sd = prm_conta$SerialInterval[[prm_conta$VoC]][["sigma"]])
+  
+  Rt_val <- sample_R(R_res, 1000)
+  
+  return(Rt_val)
+  
+}
+
+
+
+
+
+
+
+
+

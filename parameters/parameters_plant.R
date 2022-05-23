@@ -1,12 +1,12 @@
 ##### USER DEFINED PARAMETERS FOR THE PLANT #####
 Parms_Plant <- list(
   #### Plant
-  dim.X = 30, ## (numeric - m) length of the processing plants (meter)
-  dim.Y = 20, ## (numeric - m) width of the processing plants (meter)
+  dim.X = 26, ## (numeric - m) length of the processing plants (meter)
+  dim.Y = 21, ## (numeric - m) width of the processing plants (meter)
   dim.Z = 5,  ## (numeric - m) height of the room 
   label = "Cutting Room",
   Air_Cond_Type = "AHU", #Air Handing Unit
-  Air_renewal = 1000, # TO MODIFY !!!!!!! (m3/h)
+  Air_renewal = 2400, # TO MODIFY !!!!!!! (m3/h) (2400 m3/h for 40 persons approximately)
   AirflowRate = 90000, # 30Vol/h TO MODIFY !!!!!!! (m3/h)
   
   ######### SPACES (begin)
@@ -14,12 +14,12 @@ Parms_Plant <- list(
     ## Entry hall
     entry = list( 
       label = "Entry hall",
-      dim.X = 3, # dimensions (meter)
-      dim.Y = 3, # dimensions (meter)
+      dim.X = 5, # dimensions (meter)
+      dim.Y = 4, # dimensions (meter)
       dim.Z = 3, # dimensions (meter)
       pos.X = 0, # (numeric from 0 to 1) Position of regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
-      intdoor.side = "top",
+      pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      intdoor.side = "bottom",
       extdoor.side = "left",
       Air_Cond_Type = "CMV", # Controlled Mechanical Ventilation
       Air_renewal = 90, # TO MODIFY !!!!!!! (m3/h)
@@ -33,7 +33,7 @@ Parms_Plant <- list(
       dim.Y = 2, # dimensions (meter)
       dim.Z = 2.5, # dimensions (meter)
       pos.X = 1, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "left",
       extdoor.side = NA, 
       Air_Cond_Type = "CMV", # Controlled Mecanical Ventilation 
@@ -44,11 +44,11 @@ Parms_Plant <- list(
     ## Cooling area
     cool = list( 
       label = "Cooling area",
-      dim.X = 3, # dimensions (meter)
-      dim.Y = 3, # dimensions (meter)
+      dim.X = 5, # dimensions (meter)
+      dim.Y = 5, # dimensions (meter)
       dim.Z = 3, # dimensions (meter)
       pos.X = 1, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "left",
       extdoor.side = NA,
       Air_Cond_Type = "DEC", # Direct Expansion Coil
@@ -63,7 +63,7 @@ Parms_Plant <- list(
       dim.Y = 2, # dimensions (meter)
       dim.Z = 3, # dimensions (meter)
       pos.X = 0, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.5, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      pos.Y = 0.4, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
       intdoor.side = "right",
       extdoor.side = "left",
       Air_Cond_Type = "DEC", # Direct Expansion Coil
@@ -78,9 +78,9 @@ Parms_Plant <- list(
       dim.Y = 3, # dimensions
       dim.Z = 3, # dimensions (meter)
       pos.X = 0.7, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
-      intdoor.side = "top",
-      extdoor.side = "bottom",
+      pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      intdoor.side = "bottom",
+      extdoor.side = "top",
       Air_Cond_Type = "DEC", # Direct Expansion Coil
       Air_renewal = 120, # TO MODIFY !!!!!!! (m3/h)
       AirflowRate = 200 # TO MODIFY !!!!!!! (m3/h)
@@ -89,12 +89,12 @@ Parms_Plant <- list(
     ## Office
     office = list(
       label = "Office",
-      dim.X = 4, # dimensions
-      dim.Y = 3, # dimensions
+      dim.X = 5, # dimensions
+      dim.Y = 4, # dimensions
       dim.Z = 3, # dimensions (meter)
-      pos.X = 0, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 1, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
-      intdoor.side = "right",
+      pos.X = 1, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.5, # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      intdoor.side = "left",
       extdoor.side = NA,
       Air_Cond_Type = "CMV", # Controlled Mecanical Ventilation
       Air_renewal = 60, # TO MODIFY !!!!!!! (m3/h)
@@ -127,28 +127,28 @@ Parms_Plant <- list(
     ## conveyor treadmill
     cvy = list(
       label = "Conveyor1",
-      dim.X = 13, # dimensions
-      dim.Y = 3, # dimensions
-      pos.X = 0.15, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.30 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      dim.X = 12, # dimensions
+      dim.Y = 1, # dimensions
+      pos.X = 0.2, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.45 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
     )
     ,
     ## New object
     cvy2 = list(
       label = "Conveyor2",
-      dim.X = 18, # dimensions
-      dim.Y = 3, # dimensions
-      pos.X = 0.35, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.55 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      dim.X = 10, # dimensions
+      dim.Y = 1, # dimensions
+      pos.X = 0.25, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.25 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
     )
     ,
     ## 'Eplucheuse'
     epm1 = list(
       label = "Equipment 1",
-      dim.X = 2, # dimensions
-      dim.Y = 2, # dimensions
-      pos.X = 0.85, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
-      pos.Y = 0.8 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
+      dim.X = 1, # dimensions
+      dim.Y = 1, # dimensions
+      pos.X = 0.75, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
+      pos.Y = 0.35 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
     )
     
     ####### NOTE /!\ 

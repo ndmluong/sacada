@@ -14,5 +14,10 @@ Parms_Conta <- list(
   DRM1_r = 0.00246,
   
   ## Ratio between the number of RNA copies and infectious virions in aerosol
-  RNA_virion_ratio = 100
+  RNA_virion_ratio = 500,
+  
+  SerialInterval = list(original = c("mu" = 3.96, "sigma" = 4.75),
+                        delta = c("mu" = 3.4, "sigma" = 0.35), ## Zhanwei Du et al. 2022
+                        omicron = c("mu" = 3.1, "sigma" = 0.15), ## Zhanwei Du et al. 2022
+                        alpha = c("mu" = NA, "sigma" = NA)) 
 )
