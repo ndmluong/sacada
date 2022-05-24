@@ -10,6 +10,7 @@ library(gridExtra)
 library(earlyR)
 library(incidence)
 library(purrr)
+library(EnvStats)
 
 ##### FUNCTIONS #####
 source("functions/functions_actions.R")
@@ -132,7 +133,7 @@ S_summary <- data.frame(Day = numeric(),
 #### SIMULATING DAILY CONTAMINATIONS ####
 writeLines("***** Simulating daily contamination *****")
 
-for (day in 2:6) {
+for (day in 2:17) {
   CONTA <- f_dailyContamination(MyAir = MyAir,
                                 W = MyWorkers,
                                 S = MySurfaces,
@@ -219,7 +220,7 @@ for (day in 2:6) {
   
 }
 
-
+# save.image("test_2022_05_23_checkpoint1.RData") ## day 2 to 17
 
 
 
