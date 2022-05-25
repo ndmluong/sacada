@@ -332,8 +332,8 @@ f_estimateRt <- function(
                           si_mean = prm_conta$SerialInterval[[prm_conta$VoC]][["mu"]],
                           si_sd = prm_conta$SerialInterval[[prm_conta$VoC]][["sigma"]])
   
-  Rt_val <- sample_R(R_res, 1000)
-  
+  Rt_val <- sample_R(Rt_res, 1000)
+  summary(Rt_val)
   return(Rt_val)
   
 }

@@ -91,18 +91,18 @@ f_transfers <- function(
     FP_ID_expoZ_tip1 <- sort(as.vector(sample(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti+1],
                                               size = min(prm_surfaces$nFP_expo,
                                                          length(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti+1])))))
-    
+
     S2F <- (m2_tiles_ti[[Z]] * prm_surfaces$inert_prop) * prm_surfaces$transfer_S2F / prm_surfaces$nFP_expo
-    
+
     FP$RNA_load[FP$t_ind == ti+1 & FP$coords_ID == Z & FP$FP_ID %in% FP_ID_expoZ_tip1] =
       FP$RNA_load[FP$t_ind == ti & FP$FP_ID %in% FP_ID_expoZ_tip1] +
       S2F
-    
+
     ## TRANSFER FROM FOOD PORTIONS TO SURFACES
     F2S <- m2_tiles_ti[[Z]] * (1-prm_surfaces$inert_prop) * prm_surfaces$transfer_F2S
-    
+
     S$RNA_load[S$S_ID == Z & S$t_ind == ti+1] = S$RNA_load[S$S_ID == Z & S$t_ind == ti] + F2S
-    
+
     FP$RNA_load[FP$t_ind == ti+1 & FP$FP_ID %in% FP_ID_expoZ_ti] =
       FP$RNA_load[FP$t_ind == ti & FP$FP_ID %in% FP_ID_expoZ_ti] +
       m2_tiles_ti[[Z]] * (1-prm_surfaces$inert_prop) * (1 - prm_surfaces$transfer_F2S) / prm_surfaces$nFP_expo

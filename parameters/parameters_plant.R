@@ -127,7 +127,7 @@ Parms_Plant <- list(
     ## conveyor treadmill
     cvy = list(
       label = "Conveyor1",
-      dim.X = 12, # dimensions
+      dim.X = 14, # dimensions
       dim.Y = 1, # dimensions
       pos.X = 0.2, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0.45 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)
@@ -136,7 +136,7 @@ Parms_Plant <- list(
     ## New object
     cvy2 = list(
       label = "Conveyor2",
-      dim.X = 10, # dimensions
+      dim.X = 14, # dimensions
       dim.Y = 1, # dimensions
       pos.X = 0.25, # (numeric from 0 to 1) Position regarding the X axis of the plant (0: left, 0.5: middle, 1:right)
       pos.Y = 0.25 # (numeric from 0 to 1) Position regarding the Y axis of the plant (0: bottom, 0.5: middle, 1:top)

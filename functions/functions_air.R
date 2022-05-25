@@ -78,14 +78,14 @@ f_Vsed <- function(
   #  Vsed (m.s-1) (value, vector) sedimentation velocity for each droplet class
 ) {
   g = 9.81 # (m².S-1) -  Gravity
-  mu = 1.77*10^(-5) # (Pas.s) - Dynamic viscosity at 10°C
+  mu = 1.77*10^(-5) # (Pas.s) - Dynamic viscosity at 10 C
   
-  # - 0°C ->1.72e-05 (for later if ever we want to take the T°C on air props... )
-  # - 5°C ->1.75e-05
-  # - 15°C ->1.79e-05
+  # - 0 C ->1.72e-05 (for later if ever we want to take the T°C on air props... )
+  # - 5 ->1.75e-05
+  # - 15 C ->1.79e-05
   
-  rho_eau = 1000 # (kg.m-3) - Water density at 10°C
-  rho_air = 1.24 # (kg.m-3) -Water density at 10°C 1.29 à0°C 1.22*15°C
+  rho_eau = 1000 # (kg.m-3) - Water density at 10 C
+  rho_air = 1.24 # (kg.m-3) -Water density at 10 C 1.29 a 0 C 1.22*15 
   
   return((prm_air$Droplet_class*10^(-6))^2*g*(rho_eau-rho_air)/(18*mu)) # Stokes'law 
   #### END OF FUNCTION

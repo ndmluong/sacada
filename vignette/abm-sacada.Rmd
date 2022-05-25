@@ -17,10 +17,14 @@ bibliography: "www/abm-sacada.bib"
 link-citations: TRUE
 citecolor: blue
 csl: "www/apa.csl"
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
+```{=html}
 <style> div.main-container { max-width: 1400px; } </style>
-
+```
 <img src="fig/logo/logo_anses.png" width="60px"/>
 <img src="fig/logo/logo_inrae.png" width="60px"/>
 <img src="fig/logo/logo_oniris.png" width="60px"/>
@@ -28,7 +32,7 @@ csl: "www/apa.csl"
 <img src="fig/logo/logo_pasteur.png" width="80px"/>
 <img src="fig/logo/logo_enva.png" width="80px"/>
 
-**SACADA Project** 
+**SACADA Project**
 
 *April 2021 - September 2022*
 
@@ -45,68 +49,71 @@ library(survival)
 library(fitdistrplus)
 ```
 
-
-<!-- ################################################################################## -->
-<!-- ############################### INTRODUCTION ##################################### -->
-<!-- ################################################################################## -->
-
 # **Introduction**
 
-**(section to be re-written)**
 This modelling study aimed to...
 
-The Agent Based Model considered three sources of contaminations: the exposition to Sars-CoV2 througout working activities (aerosol and/or fomites), the contamination throught the exposition outside the factory and for employees leaving in community, the intra-group transmission during shared activities (transport, living). 
+The Agent Based Model considered three sources of contaminations: the
+exposition to Sars-CoV2 througout working activities (aerosol and/or
+fomites), the contamination throught the exposition outside the factory
+and for employees leaving in community, the intra-group transmission
+during shared activities (transport, living).
 
-In order to consider the first source of contamination (in the factory), the durations of the stages of infections and the Viral load (viral RNA concentration) exhaled by infected people have to be quantified. For assessing the possibility of transmission in community the secondary attack rate have to be quantified.
+In order to consider the first source of contamination (in the factory),
+the durations of the stages of infections and the Viral load (viral RNA
+concentration) exhaled by infected people have to be quantified. For
+assessing the possibility of transmission in community the secondary
+attack rate have to be quantified.
 
-The different waves of Sars-CoV2 outbreaks that have occurred show that each Variants of Concern, i.e. VoC (alpha, beta, delta and omicron SARS-CoV-2 VoCs) have their own characteistics, e.g. different viral load, or rates of reinfection [@Karim2021].
+The different waves of Sars-CoV2 outbreaks that have occurred show that
+each Variants of Concern, i.e. VoC (alpha, beta, delta and omicron
+SARS-CoV-2 VoCs) have their own characteistics, e.g. different viral
+load, or rates of reinfection [@Karim2021].
 
-This document aims to identify the parameters of interest for building the Agent Based Model of the ANR Sacada project.
-
-
-<!-- ################################################################################## -->
-<!-- ########################## MODEL DESCRIPTION ##################################### -->
-<!-- ################################################################################## -->
+This document aims to identify the parameters of interest for building
+the Agent Based Model of the ANR Sacada project.
 
 # **Agent-based model: Description**
 
-The ABM model is presented in this study according to the Overview-Design-Details (ODD) protocol as recommended by @Grimm2010. 
+The ABM model is presented in this study according to the
+Overview-Design-Details (ODD) protocol as recommended by @Grimm2010.
 
 ## **Overview**
-The general concept of the agent-based modelling workflow developed in this study is schematized in Figure \@ref(fig:FIG-abm-concept).
 
-```{r FIG-abm-concept, echo=F, fig.align = 'center', out.width = "85%", fig.cap = "General concept of the Agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities"}
+The general concept of the agent-based modelling workflow developed in
+this study is schematized in Figure \@ref(fig:FIG-abm-concept).
+
+```{r FIG-abm-concept, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "General concept of the Agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities"}
 knitr::include_graphics("fig/schema/abm-concept.png")
 ```
 
 **Purpose and patterns**
 
+-   predict the contamination of the workers
+
+-   predict the contamination of the food portions
+
+-   predict the contamination of the
+
 **States variables and scales**
 
 **Process overview and scheduling**
-
-
 
 ## **Design concept**
 
 **Basic principles**
 
 <!-- **Emergence** -->
+
 <!-- **Adaptation**  -->
+
 <!-- **Objectives** -->
+
 <!-- **Learning** -->
-**Prediction**
-<!-- **Sensing** -->
-<!-- **Interaction** -->
 
-**Stochasticity**
-<!-- **Collectives** -->
-<!-- **Observation** -->
+**Prediction** <!-- **Sensing** --> <!-- **Interaction** -->
 
-
-
-
-
+**Stochasticity** <!-- **Collectives** --> <!-- **Observation** -->
 
 ## **Details**
 
@@ -116,22 +123,28 @@ knitr::include_graphics("fig/schema/abm-concept.png")
 
 **Dimensions and structures**
 
-The model requires the construction of the plan of the processing plant. Here are the elements taken into account for six rooms in the whole plant (cf. Figure \@ref(fig:FIG-map-plant)) *(associated R script: parameters_plant.R)* :
+The model requires the construction of the plan of the processing plant.
+Here are the elements taken into account for six rooms in the whole
+plant (cf. Figure \@ref(fig:FIG-map-plant)) *(associated R script:
+parameters_plant.R)* :
 
-+ Cutting room (the main room of the plant) 
-+ Entry hall
-+ Waste area
-+ W.C.
-+ Cooling area
-+ Office
-+ Arrival gate
+-   Cutting room (the main room of the plant)
+-   Entry hall
+-   Waste area
+-   W.C.
+-   Cooling area
+-   Office
+-   Arrival gate
 
 ```{r FIG-map-plant, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant"}
 knitr::include_graphics("fig/schema/map_of_plant.png")
 ```
 
-Each room needs to be positioned on the entire workshop grid. The cutting room is the main build by subtracting all other rooms. 
-The position of the door is also mentioned with four variables : "top", "bottom", "left" or "right" (Table \@ref(tab:TAB-plant-room-parameters)).
+Each room needs to be positioned on the entire workshop grid. The
+cutting room is the main build by subtracting all other rooms. The
+position of the door is also mentioned with four variables : "top",
+"bottom", "left" or "right" (Table
+\@ref(tab:TAB-plant-room-parameters)).
 
 ```{r TAB-plant-room-parameters, echo=FALSE}
 data<-read.csv("csv/parameters_room_plant.csv",sep=";",header = T)
@@ -153,16 +166,17 @@ pack_rows("*Arrival gate* : The product arrival gate, allows the supply of produ
   
 ```
 
-For this purpose each room has to be defined. Two elements are taken into account
+For this purpose each room has to be defined. Two elements are taken
+into account
 
-- the dimensions of the rooms: length, width and height 
-- the parameters related to the ventilation of the room
+-   the dimensions of the rooms: length, width and height
+-   the parameters related to the ventilation of the room
 
-Several air conditioning types can be considered: 
+Several air conditioning types can be considered:
 
-- Controlled Mecanical Ventilation [CMV]
-- Direct Expansion Coil [DEC]
-- Air Handing Unit [AHU]
+-   Controlled Mecanical Ventilation [CMV]
+-   Direct Expansion Coil [DEC]
+-   Air Handing Unit [AHU]
 
 ```{r TAB-plant-parameters, echo=FALSE}
 data<-read.csv("csv/parameters_plant.csv",sep=";",header = T)
@@ -194,9 +208,15 @@ row_spec(29:30, color = "red")
 
 **Objects**
 
-The objects must be defined. They are positioned in the model on the X and Y axis, together with the dimensions. 
+The objects must be defined. They are positioned in the model on the X
+and Y axis, together with the dimensions.
 
-As illustrated in Figure \@ref(fig:FIG-map-plant-object), we implemented two types of objects: two conveyors, that allows the pieces of meat to be transported from one point to another, and an equipment that can be shared by several operators, such as a peeler. The parameters associated with these objects are gathered in Table \@ref(tab:TAB-plant-object-parameters).
+As illustrated in Figure \@ref(fig:FIG-map-plant-object), we implemented
+two types of objects: two conveyors, that allows the pieces of meat to
+be transported from one point to another, and an equipment that can be
+shared by several operators, such as a peeler. The parameters associated
+with these objects are gathered in Table
+\@ref(tab:TAB-plant-object-parameters).
 
 ```{r FIG-map-plant-object, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant"}
 knitr::include_graphics("fig/schema/map_of_plant_object.png")
@@ -215,13 +235,6 @@ knitr::kable(
 
 ```
 
-
-
-
-
-
-
-
 #### **Module Workers**
 
 ##### Characteristics
@@ -230,18 +243,20 @@ knitr::kable(
 
 The operators are differentiated according to their functions
 
-- Cutter 1 : deboning or cutting carcasses into large pieces 
-- Cutter 2 : cutting large pieces into small pieces 
-- Logistic 1 : bringing the carcasses to the cutters 
-- Logistic 2 : recover cut products then pack and store
-- Transverse 1: manager / chief / maintenance staff who come to the workshop a few times a day
-- Transverse 2: people from the cleaning team
+-   Cutter 1 : deboning or cutting carcasses into large pieces
+-   Cutter 2 : cutting large pieces into small pieces
+-   Logistic 1 : bringing the carcasses to the cutters
+-   Logistic 2 : recover cut products then pack and store
+-   Transverse 1: manager / chief / maintenance staff who come to the
+    workshop a few times a day
+-   Transverse 2: people from the cleaning team
 
 ```{r FIG-map-plant-object-worker, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant with worker"}
 knitr::include_graphics("fig/schema/map_of_plant_obj_worker.png")
 ```
 
-The total number of employees is defined as shown is Table \@ref(tab:TAB-workers-parameters).
+The total number of employees is defined as shown is Table
+\@ref(tab:TAB-workers-parameters).
 
 ```{r TAB-workers-parameters, echo=FALSE}
 data<-read.csv("csv/parameters_worker.csv",sep=";",header = T)
@@ -256,28 +271,16 @@ pack_rows("*Overall proportion for different types of workers *" , 5, 10)
 
 ```
 
-The proportion of types of workers of cutters and logistics worked in two teams.This proportion is defined in the variable **pTeam**, where the proportion of workers in each team is defined, between 0 and 1, with the total of "teamA" and "teamB" being equal to 1. (For example : teamA = 0.5, teamB = 0.5),
-Moreover, this worker can alternatively change the working shift (morning/afternoon) from one week to another, and so change of team. The proportion of workers is defined in **pChangeTeam** (0 to 1). The value will be 0.05 (5%) <span style="color:red"> Sources </span>.
+The proportion of types of workers of cutters and logistics worked in
+two teams.This proportion is defined in the variable **pTeam**, where
+the proportion of workers in each team is defined, between 0 and 1, with
+the total of "teamA" and "teamB" being equal to 1. (For example : teamA
+= 0.5, teamB = 0.5), Moreover, this worker can alternatively change the
+working shift (morning/afternoon) from one week to another, and so
+change of team. The proportion of workers is defined in **pChangeTeam**
+(0 to 1). The value will be 0.05 (5%) [Sources]{style="color:red"}.
 
 ##### Rules
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #### **Module Air**
 
@@ -289,36 +292,7 @@ knitr::include_graphics("fig/schema/abm-infection-air.png")
 
 ##### Processing rules
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 #### **Module Surfaces**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #### **Module Food**
 
@@ -326,45 +300,76 @@ knitr::include_graphics("fig/schema/abm-infection-air.png")
 
 <!-- *(associated R script : parameters_food.R) * -->
 
-
-
-+ The type of meat
-+ Ncarcass_daily
-+ carcass_weight
-+ net_weight
-+ CSU
+-   The type of meat
+-   Ncarcass_daily
+-   carcass_weight
+-   net_weight
+-   CSU
 
 ##### Rules
 
--	All characteristics of the agents "food portions" were initialized daily. The food portions came from different carcasses. The total number of carcasses (and agents) was calculated each day depending on the expected total meat quantity produced by the establishment (expressed as number of carcasses per day or per week). Each initialized agent had a unique ID (e.g: B_12_028_004 corresponds to the 4th portion of the 28th carcass of the 12th day, "B" stands for "bovine").
+-   All characteristics of the agents "food portions" were initialized
+    daily. The food portions came from different carcasses. The total
+    number of carcasses (and agents) was calculated each day depending
+    on the expected total meat quantity produced by the establishment
+    (expressed as number of carcasses per day or per week). Each
+    initialized agent had a unique ID (e.g: B_12_028_004 corresponds to
+    the 4th portion of the 28th carcass of the 12th day, "B" stands for
+    "bovine").
 
-- The duration (expressed in minutes) corresponding to different cutting steps for each carcass and for separating food portions at different locations in the plant were estimated/assumed based on information from industrial interviews. Hence, knowing this duration, the carcasses could arrive sequentially and/or simultaneously in the cutting room depending on the expected number of carcasses per day.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+-   The duration (expressed in minutes) corresponding to different
+    cutting steps for each carcass and for separating food portions at
+    different locations in the plant were estimated/assumed based on
+    information from industrial interviews. Hence, knowing this
+    duration, the carcasses could arrive sequentially and/or
+    simultaneously in the cutting room depending on the expected number
+    of carcasses per day.
 
 #### **Infection by SARS-CoV-2**
 
-##### Infection phases
+##### *Infection phases*
 
-The parameters associated with the duration of different infections phases were considered as fixed. These phases are schematized in Figure \@ref(fig:FIG-infection-status). The uncertainty ranges of the different values have been identified for sensitivity analysis of the hypothesis of the model (Table \@ref(tab:TAB-infection-duration)).
+The parameters associated with the duration of different infections
+phases were considered as fixed. These phases are schematized in Figure
+\@ref(fig:FIG-infection-status). The uncertainty ranges of the different
+values have been identified for sensitivity analysis of the hypothesis
+of the model (Table \@ref(tab:TAB-infection-duration)).
 
-After contamination, individuals remain in a pre-symptomatic state. The presymptomactic period is composed of two sub-periods. There is first a latent period where no virus can be detected then individuals become infectious before symptom onset [@Lau2020]. The duration of the latent period has been estimated to 3.3 days with 95% CI [0.2-7.9] [@Zhao2021]. The infectious period of the presymtomatic period has a length duration of 2 days (with an uncertainty range between 1 and 4 days) [@Byrne2020]. At this stage of the model development, considering the data available for delta VoC [@Kang2021;@Grant2021], the presymptomatic period duration was considered to be equivalent for every VoCs.
-At the end of the pre-symptomactic period, one fraction of the individual will develop symptoms. Several studies are available for estimating this proportion [@He2021;@Alene2021;@Ma2021;@Sah2021]. @Alene2021 estimated the pooled proportion of asymptomatic COVID-19 cases throughout the course of infection was 25% (with 95%CI: 16%â€“38%). @Ma2021 estimated that the pooled percentage of asymptomatic infections among the confirmed population was 40.50% (with 95%CI: 33.50%-47.50%). @Sah2021 estimated that percentage at 35.1% (with 95% CI: 30.7-39.9%) For the ABM model, the mean of these three percentages has been used, i.e. 33.5%. The range of possible values was also derived from the 95%CI of these studies. The range of values for that proortion was set between 16% and 47.5%.
+After contamination, individuals remain in a pre-symptomatic state. The
+presymptomactic period is composed of two sub-periods. There is first a
+latent period where no virus can be detected then individuals become
+infectious before symptom onset [@Lau2020]. The duration of the latent
+period has been estimated to 3.3 days with 95% CI [0.2-7.9] [@Zhao2021].
+The infectious period of the presymtomatic period has a length duration
+of 2 days (with an uncertainty range between 1 and 4 days) [@Byrne2020].
+At this stage of the model development, considering the data available
+for delta VoC [@Kang2021; @Grant2021], the presymptomatic period
+duration was considered to be equivalent for every VoCs. At the end of
+the pre-symptomactic period, one fraction of the individual will develop
+symptoms. Several studies are available for estimating this proportion
+[@He2021; @Alene2021; @Ma2021; @Sah2021]. @Alene2021 estimated the
+pooled proportion of asymptomatic COVID-19 cases throughout the course
+of infection was 25% (with 95%CI: 16%â€“38%). @Ma2021 estimated that the
+pooled percentage of asymptomatic infections among the confirmed
+population was 40.50% (with 95%CI: 33.50%-47.50%). @Sah2021 estimated
+that percentage at 35.1% (with 95% CI: 30.7-39.9%) For the ABM model,
+the mean of these three percentages has been used, i.e. 33.5%. The range
+of possible values was also derived from the 95%CI of these studies. The
+range of values for that proortion was set between 16% and 47.5%.
 
-For the symptomatic population, the mean duration of symptoms has been found uncertain according to studies [@Byrne2020]. The durations of the differents symptoms differ according to their nature [@Santos2021]. From the onset of symptoms to recovery,  a period of 13 days can be considered With an uncertainty range comprise between 11 and 16 days [@Byrne2020]. During that period, virus can be detected but it as estimated that infectiousness is usually low after 7 days [@He2020]. The uncertainty range for the infectiousness period can be estimated from @Byrne2020. They stated that virus detection overestimates the infectious period on average by 2â€“6 days. @vanKampen2021 provide another estimation of the uncertainty range of infectiousness period. They considered the duration between 5 and 11 days.The value of 8 days [@vanKampen2021] was used in the model .
+For the symptomatic population, the mean duration of symptoms has been
+found uncertain according to studies [@Byrne2020]. The durations of the
+differents symptoms differ according to their nature [@Santos2021]. From
+the onset of symptoms to recovery, a period of 13 days can be considered
+With an uncertainty range comprise between 11 and 16 days [@Byrne2020].
+During that period, virus can be detected but it as estimated that
+infectiousness is usually low after 7 days [@He2020]. The uncertainty
+range for the infectiousness period can be estimated from @Byrne2020.
+They stated that virus detection overestimates the infectious period on
+average by 2â€“6 days. @vanKampen2021 provide another estimation of the
+uncertainty range of infectiousness period. They considered the duration
+between 5 and 11 days.The value of 8 days [@vanKampen2021] was used in
+the model .
 
 ```{r FIG-infection-status, echo=FALSE, fig.align = 'center', out.width = "65%", fig.cap="Representation of the stage of infection for SARS-CoV2"}
 test<-grViz("     
@@ -403,11 +408,21 @@ knitr::kable(
 
 ```
 
-##### Individual variability in viral load
+##### *Individual variability in viral load*
 
-In the ABM, viral load was modeled only during the period of infectiousness of individuals. Viral loads were considered to be similar between asymptomatic and symptomatic persons [@Walsh2020]. During the infectiousness period, the viral load for an individual was considered to be constant. The Agent-Based model takes into account the between individual variability of virus load in sputum and the VoC.
+In the ABM, viral load was modeled only during the period of
+infectiousness of individuals. Viral loads were considered to be similar
+between asymptomatic and symptomatic persons [@Walsh2020]. During the
+infectiousness period, the viral load for an individual was considered
+to be constant. The Agent-Based model takes into account the between
+individual variability of virus load in sputum and the VoC.
 
-In order to estimate the variability of viral load, the data from @Jones2021 obtained on presymptomatic, asymptomatic,and mildly symptomatic (PAMS) cases were used. This variability corresponds to the *alpha* variant (that is B.1.1.7). The viral load of the alpha variant was found to be 1 log10 higher than the original Sars-CoV2 strain [@Teyssou2021].
+In order to estimate the variability of viral load, the data from
+@Jones2021 obtained on presymptomatic, asymptomatic,and mildly
+symptomatic (PAMS) cases were used. This variability corresponds to the
+*alpha* variant (that is B.1.1.7). The viral load of the alpha variant
+was found to be 1 log10 higher than the original Sars-CoV2 strain
+[@Teyssou2021].
 
 ```{r FIG-triangular, warning = FALSE, echo=FALSE, fig.align='center', fig.cap="Fitting of triangular distribution to virus load measurements in log10 (copy/ml). Data from Jones et al (2021) "}
 load<-read.csv("csv/viral_load.csv",sep=";",header = T)
@@ -415,11 +430,21 @@ f1<-fitdist(load$log10Load, "triang", method="mge", start = list(min=2, mode=6,m
 plot(f1)
 ```
 
-The parameters of the triangular distribution used to describe variability of viral load are respectively, min=`r round(f1$estimate[1],1)`, mode=`r round(f1$estimate[2],1)` and max=`r round(f1$estimate[3],1)`.
+The parameters of the triangular distribution used to describe
+variability of viral load are respectively,
+min=`r round(f1$estimate[1],1)`, mode=`r round(f1$estimate[2],1)` and
+max=`r round(f1$estimate[3],1)`.
 
-The delta VoC is associated with higher viral load [@Luo2021;@Wang2021;@Teyssou2021]. The concentration of delta VoC was found to be 2 times more important than for delta [@Teyssou2021]. Other differences observed in Ct values suggest that the difference could be higher [@Luo2021;@Wang2021]. In the ABM model the distribution of viral load was considered to be shifted by 0.5 log10 for delta variant with an uncertainty range between 0.3 and 1 log10. 
+The delta VoC is associated with higher viral load [@Luo2021; @Wang2021;
+@Teyssou2021]. The concentration of delta VoC was found to be 2 times
+more important than for delta [@Teyssou2021]. Other differences observed
+in Ct values suggest that the difference could be higher [@Luo2021;
+@Wang2021]. In the ABM model the distribution of viral load was
+considered to be shifted by 0.5 log10 for delta variant with an
+uncertainty range between 0.3 and 1 log10.
 
-The level of viral load for omicron VoC was found to be similar to delta virus load [@Lyngse2021]. 
+The level of viral load for omicron VoC was found to be similar to delta
+virus load [@Lyngse2021].
 
 ```{r TAB-load-VoC, echo=FALSE}
 data<-read.csv("csv/parameters_vload.csv",sep=";",header = T)
@@ -433,11 +458,18 @@ knitr::kable(
 
 ```
 
-##### Secondary attack rate
+##### *Secondary attack rate*
 
-The secondary attack rate is the parameter used to estimate the probability of contraction Sars-CoV2  for the employees living in community. The SAR of the original and alpha variant has been found by @Fung2021 to be equal to 17.1% (with 95%CI 13-21%). According to @Singanayagam2021, the SAR was found to be 38% for delta variant (with 95%CI 24-53%) in case of unvaccinated people, and 25% (with 95%CI 18-33%) for vaccinated people.  
+The secondary attack rate is the parameter used to estimate the
+probability of contraction Sars-CoV2 for the employees living in
+community. The SAR of the original and alpha variant has been found by
+@Fung2021 to be equal to 17.1% (with 95%CI 13-21%). According to
+@Singanayagam2021, the SAR was found to be 38% for delta variant (with
+95%CI 24-53%) in case of unvaccinated people, and 25% (with 95%CI
+18-33%) for vaccinated people.
 
-The SAR for omicron is respectively 1.2 for vaccinated and 2.6 times more important than for delta [@Lyngse2021].  
+The SAR for omicron is respectively 1.2 for vaccinated and 2.6 times
+more important than for delta [@Lyngse2021].
 
 ```{r TAB-SAR, echo=FALSE}
 data<-read.csv("csv/parameters_sar.csv",sep=";",header = T)
@@ -451,65 +483,35 @@ knitr::kable(
 
 ```
 
+##### *Dose-response modelling*
 
-##### Dose-response modelling
-
-**Principles**
-
-bla bla bla
-
-
-
-
-
-
+Principles of the dose-response modelling approaches
 
 ### **Input data**
 
-#### Scenarios 
+#### Parameters values set for default scenario
 
-Scenario chosen based on an epidemiological investigation on several SARS-CoV-2 clusters in France during the period between May 2020 and April 2021.
+Scenario chosen based on an epidemiological investigation on several
+SARS-CoV-2 clusters in France during the period between May 2020 and
+April 2021.
 
-
-#### Persistence 
-
-Analyses from experiments and literature reviews
-
-
-
-### **Initialization of the model**
-
-For each simulation, the model was initialized at the first day with an initial number of infected workers $n_{Contaminated-Init} = 5$
-
-
+For each simulation, the model was initialized at the first day with an
+initial number of infected workers $n_{Contaminated-Init} = 5$
 
 ### **Parallel computing**
 
-** sensitivity analysis**
+R package parallel
 
-# **Model validation and sensitivity analysis**
+### **Convergence check**
 
-regional data in France (SpF) : ex. Bretagne / volume de l'établissement, ...
+### **Uncertainty analyses** 
 
+### **Model validation**
 
-# **Some examples**
+regional data in France (SpF) : ex. Bretagne / volume de
+l'établissement, ...
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# **Scenarios**
 
 # **Supplementary materials**
 
@@ -517,17 +519,37 @@ regional data in France (SpF) : ex. Bretagne / volume de l'établissement, ...
 
 **Principles**
 
-Dose-response modelling is the process of using mathematical relationships to describe the probability of an adverse health effect (e.g., infection, illness) occurring in an individual or the frequency of an adverse health effect in a population when that individual or population is exposed to a specific dose of pathogenic microorganisms.
+Dose-response modelling is the process of using mathematical
+relationships to describe the probability of an adverse health effect
+(e.g., infection, illness) occurring in an individual or the frequency
+of an adverse health effect in a population when that individual or
+population is exposed to a specific dose of pathogenic microorganisms.
 
-Two types of modelling approaches can be distinguished [@Haas2002]. In the first, it is considered that there is a cooperation between ingested/inhalated microorganisms, involving the notion of minimum infective dose: the infection is the result of the combined action of multiple micro-organism units, and it becomes possible only if the dose exceeds a threshold (the so-called "minimal infective dose"). In the second approach it is assumed on an independence of action of microorganism units. Each microorganism unit has a non-zero chance of causing infection on its own.
-For Sars-CoV2, as for other infectiuos pathogens, the models currently used are based on the single hit model theory and the absence of a threshold [@Poydenot2021].
+Two types of modelling approaches can be distinguished [@Haas2002]. In
+the first, it is considered that there is a cooperation between
+ingested/inhalated microorganisms, involving the notion of minimum
+infective dose: the infection is the result of the combined action of
+multiple micro-organism units, and it becomes possible only if the dose
+exceeds a threshold (the so-called "minimal infective dose"). In the
+second approach it is assumed on an independence of action of
+microorganism units. Each microorganism unit has a non-zero chance of
+causing infection on its own. For Sars-CoV2, as for other infectiuos
+pathogens, the models currently used are based on the single hit model
+theory and the absence of a threshold [@Poydenot2021].
 
 **Exponential dose response model**
 
-The exponential model is a no-threshold model, where the probability of infection (*r*) for a virion particle  is constant, and the number of virions inhalated is not perfectly known but assumed to follow a Poisson distribution of parameter *d* .
-The hypothesis of the constancy of *r* means that the result of the interaction between host, microorganism and environmental factors does not vary much between exposed individuals. 
-The Poisson distribution is applicable in case the contamination is considered homogeneous. This assumption appears suitable for characterizing droplet distribution in the air.
-The probability of being infected following the inhalation of air in which the average contamination is equal to *d* is expressed as follows:
+The exponential model is a no-threshold model, where the probability of
+infection (*r*) for a virion particle is constant, and the number of
+virions inhalated is not perfectly known but assumed to follow a Poisson
+distribution of parameter *d* . The hypothesis of the constancy of *r*
+means that the result of the interaction between host, microorganism and
+environmental factors does not vary much between exposed individuals.
+The Poisson distribution is applicable in case the contamination is
+considered homogeneous. This assumption appears suitable for
+characterizing droplet distribution in the air. The probability of being
+infected following the inhalation of air in which the average
+contamination is equal to *d* is expressed as follows:
 
 $$P(\mathrm{infection}|d)=1-\exp(-r/d)$$
 
@@ -563,7 +585,13 @@ g1
 
 **Wells-Riley model**
 
-The Wells-Riley model can also be used to calculate the probability of infection based on given dose [@Wells1955;@Sze2010]. It also relies on the hypothesis of a random distribution of the pathogen in the air. But it uses another parametrisation compared to the exponential dose-response model. The quantum of infection *q* is used. *q* corresponds to a quantity of inhaled virions for which the probability of infection in the population is 63%.
+The Wells-Riley model can also be used to calculate the probability of
+infection based on given dose [@Wells1955; @Sze2010]. It also relies on
+the hypothesis of a random distribution of the pathogen in the air. But
+it uses another parametrisation compared to the exponential
+dose-response model. The quantum of infection *q* is used. *q*
+corresponds to a quantity of inhaled virions for which the probability
+of infection in the population is 63%.
 
 $$P(\mathrm{infection}|d)=1-\exp(-d/q)$$
 
@@ -585,12 +613,22 @@ g2
 
 **Comparison of models**
 
-No data have been used so far for fitting an exponential dose response curve for Sars-Cov2 [@Parhizkar2021]. However prior work has shown that dose-responses for other coronaviruses [@Watanabe2010;@Haas2021]. This dose-response has been used in several risk assessment for Sars-Cov2 [e.g. @Pitol2021]. 
+No data have been used so far for fitting an exponential dose response
+curve for Sars-Cov2 [@Parhizkar2021]. However prior work has shown that
+dose-responses for other coronaviruses [@Watanabe2010; @Haas2021]. This
+dose-response has been used in several risk assessment for Sars-Cov2
+[e.g. @Pitol2021].
 
-@Prentiss2020 provided some estimates of *q* values based on estimation of exposure and observed attack rates. Six values were obtained from 6 six different situations were the attack rates. The values ranged from 322 to 3012. @Augenbraun2020 assumed a conservative value of *q* equal to 100. 
+@Prentiss2020 provided some estimates of *q* values based on estimation
+of exposure and observed attack rates. Six values were obtained from 6
+six different situations were the attack rates. The values ranged from
+322 to 3012. @Augenbraun2020 assumed a conservative value of *q* equal
+to 100.
 
-Figure \@ref(fig:FIG-DRM-compare) compared the exponential dose response derived from @Watanabe2010 and available in [QMRAwiki](http://qmrawiki.org/experiments/sars) and the values derived from @Prentiss2020.
-
+Figure \@ref(fig:FIG-DRM-compare) compared the exponential dose response
+derived from @Watanabe2010 and available in
+[QMRAwiki](http://qmrawiki.org/experiments/sars) and the values derived
+from @Prentiss2020.
 
 ```{r FIG-DRM-compare, echo=FALSE, fig.align = "center", fig.cap='Comparison of different dose-response models', out.width = "50%"}
 
@@ -623,13 +661,19 @@ g3<-ggplot(data=data,aes(x=log10(dose),y=p,group=tag))+geom_line(aes(x=log10(dos
 g3
 ```
 
-The Wanabe's model provide a conservative estimate of the probability of infection. At this stage the exponential dose response and the best fit value for *r* (**0.00246**) is used in the SACADA_ABM model. The 95% CI are used in the sensitivity analysis of the model (**0.00128** and **0.00527**).
+The Wanabe's model provide a conservative estimate of the probability of
+infection. At this stage the exponential dose response and the best fit
+value for *r* (**0.00246**) is used in the SACADA_ABM model. The 95% CI
+are used in the sensitivity analysis of the model (**0.00128** and
+**0.00527**).
 
 **Expression of dose to assess probability of infection**
 
-Evidence suggests that the concentration of SARS-Cov2 expressed in gene copies or in infectious virus are strongly different. Different ratios have been proposed to account of this difference. Infective virus are though to be from 100 to 1000 lower than gene copies [@Miller2021;@Pitol2021]. The value of .......500 (100?)...... is used in SACADA_ABM. The values of 100 to 1000 will be used in the sensitivity analysis.
-
-
-
+Evidence suggests that the concentration of SARS-Cov2 expressed in gene
+copies or in infectious virus are strongly different. Different ratios
+have been proposed to account of this difference. Infective virus are
+though to be from 100 to 1000 lower than gene copies [@Miller2021;
+@Pitol2021]. The value of .......500 (100?)...... is used in SACADA_ABM.
+The values of 100 to 1000 will be used in the sensitivity analysis.
 
 # **References**

@@ -220,7 +220,32 @@ for (day in 2:17) {
   
 }
 
-# save.image("test_2022_05_23_checkpoint1.RData") ## day 2 to 17
+# save.image("test_2022_05_23_checkpoint1.RData") ## day 2 to 18
+
+
+
+### test walk
+aa <- integer()
+purrr::map_int(1:16, .f = function(x) {
+  aa <- c(aa, x)
+  return(aa)
+})
+
+
+S <- MySurfaces
+FP <- MyFood
+
+tiles <- 1:23
+names(tiles) <- S_ID
+
+ti <- 4608
+
+purrr::map(.x = as.vector(S_ID), .f = function(Z) {
+  S0 <- subset(S, S_ID == Z)
+  S0$RNA_load[S0$t_ind == ti + 1] <- S0$RNA_load[S0$t_ind == ti] + tiles[[Z]]
+  return(S0)
+}) %>% rbindlist() -> aa
+
 
 
 
@@ -264,12 +289,19 @@ OUTPUT <- list(seed = seed,
 
 
 
+### OUTPUT TREATMENT : Infection summary
+IS <- subset(InfectionSummary, Day <= 18)
+IS$seed <- as.factor(IS$seed)
 
 
 
+### OUTPUT TREATMENT : Infection source (for all workers and all simulations)
+IL <- data.frame(InfectionLog, seed = rep(seed, nrow(InfectionLog)))
+IL$seed <- as.factor(IL$seed)
+IL$InfectionSource <- as.factor(IL$InfectionSource)
 
 
-
+f_plotOutput(IL = IL, IS = IS, seed_select = 103, detailed_plot = T)
 
 
 
@@ -279,7 +311,7 @@ OUTPUT <- list(seed = seed,
 
 
 ##### Estimating R #####
-source("functions/functions_contamination.R")
+# source("functions/functions_contamination.R")
 Parms_Conta <- append(Parms_Conta, list(SerialInterval = list(original = c("mu" = 3.96, "sigma" = 4.75),
                                                  delta = c("mu" = 3.4, "sigma" = 0.35), ## Zhanwei Du et al. 2022
                                                  omicron = c("mu" = 3.1, "sigma" = 0.15), ## Zhanwei Du et al. 2022
@@ -288,24 +320,28 @@ Parms_Conta <- append(Parms_Conta, list(SerialInterval = list(original = c("mu" 
 lapply(unique(IS$seed), FUN = function(seedx) {
   writeLines(paste("seed", seedx))
   ISsub <- subset(IS, seed == seedx)
-  f_estimateR(ISsub = ISsub,
+  f_estimateRt(ISsub = ISsub,
               prm_conta = Parms_Conta)
-}) 
+})
 
 
 
-
-ISsub <- subset(IS, seed == 103)
+ISsub <- subset(IS, seed == 110)
 
 
 ISsub <- tibble::add_column(ISsub, Incidence = NA, .after = "Day")
-ISsub$Incidence[1] <- ISsub$Infected_cumul[1]
+ISsub$Incidence[1] <- ISsub$Symptomatic[1]
 for (i in 2:nrow(ISsub)) {
-  ISsub$Incidence[i] <- ISsub$Infected_cumul[i] - ISsub$Infected_cumul[i-1]
+  if (ISsub$Symptomatic[i] > ISsub$Symptomatic[i-1]) {
+    ISsub$Incidence[i] <- ISsub$Symptomatic[i] - ISsub$Symptomatic[i-1]
+  } else {
+    ISsub$Incidence[i] <- 0
+  }
+  
 }
 
 onset <- rep(ISsub$Day, ISsub$Incidence)
-inci <- incidence(onset)
+inci <- incidence(onset, last_date = 42)
 plot(inci, border = "white")
 
 R_coeff <- get_R(inci,
@@ -314,6 +350,7 @@ R_coeff <- get_R(inci,
 R_coeff$si
 R_val <- sample_R(R_coeff, 1000)
 summary(R_val)
+
 hist(R_val)
 
 
