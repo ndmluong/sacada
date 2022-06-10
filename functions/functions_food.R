@@ -11,10 +11,9 @@ f_allocateCarcassTimeIndex <- function(
   
   writeLines(">>> Indexing the carcasses depending on the total number of active cutters")
   ## Total number of active cutters
-  filter(W, Day == day, W_active == "active", W_type == "cutter2") %>%
-    select(., W_ID) %>%
+  filter(W, Day == day, W_active == "active", W_type == "cutter2")$W_ID %>%
     unique() %>%
-    nrow() -> NW
+    length() -> NW
   
   ## Total daily number of carcasses to be processed depending on the total active number of cutters 2
   Ncarcass <- NW * prm_food$worker_rhythm[[meat]][["cutter2"]] * 60 * 8 # 60 min per hour and 8 hours of cutting per worker

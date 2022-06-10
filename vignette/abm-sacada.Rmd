@@ -123,22 +123,32 @@ knitr::include_graphics("fig/schema/abm-concept.png")
 
 **Dimensions and structures**
 
-The model requires the construction of the plan of the processing plant.
-Here are the elements taken into account for six rooms in the whole
-plant (cf. Figure \@ref(fig:FIG-map-plant)) *(associated R script:
-parameters_plant.R)* :
-
--   Cutting room (the main room of the plant)
--   Entry hall
--   Waste area
--   W.C.
--   Cooling area
--   Office
--   Arrival gate
+The plan of the multi-room food processing plant can be taken into
+account in the model. Based on industrial investigations, seven
+principal rooms (spaces) were included herein as an example to define
+the plant structure, including the Cutting room (the main space of the
+plant), Entry hall (for workers), Arrival gate (for food arrival into
+the cutting room), Cooling area (for food storage), Waste area, W.C.,
+and Office (illustration in Figure \@ref(fig:FIG-map-plant)).
 
 ```{r FIG-map-plant, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant"}
 knitr::include_graphics("fig/schema/map_of_plant.png")
 ```
+
+The different characteristics of each room are taken into account in the
+model :
+
+-   dimensions of the rooms (length, width, height);
+-   positions of the room in the plant;
+-   presence and relative positions of internal/external door for each
+    room;
+-   ventilation specifications: several air conditioning types can be
+    indicated such as Controlled Mechanical Ventilation (CMV), Direct
+    Expansion Coil (DEC) or Air Handing Unit (AHU).
+
+The above characteristics were defined in the model as model parameters
+based on industrial investigations or previous works. The *(associated R
+script: parameters_plant.R)* :
 
 Each room needs to be positioned on the entire workshop grid. The
 cutting room is the main build by subtracting all other rooms. The
@@ -165,18 +175,6 @@ pack_rows("*Office* : The offices are located at the top left.", 7, 7)%>%
 pack_rows("*Arrival gate* : The product arrival gate, allows the supply of products, is located in the middle of the left" , 8, 8)
   
 ```
-
-For this purpose each room has to be defined. Two elements are taken
-into account
-
--   the dimensions of the rooms: length, width and height
--   the parameters related to the ventilation of the room
-
-Several air conditioning types can be considered:
-
--   Controlled Mecanical Ventilation [CMV]
--   Direct Expansion Coil [DEC]
--   Air Handing Unit [AHU]
 
 ```{r TAB-plant-parameters, echo=FALSE}
 data<-read.csv("csv/parameters_plant.csv",sep=";",header = T)
@@ -504,7 +502,7 @@ R package parallel
 
 ### **Convergence check**
 
-### **Uncertainty analyses** 
+### **Uncertainty analyses**
 
 ### **Model validation**
 
