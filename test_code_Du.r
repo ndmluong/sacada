@@ -47,7 +47,7 @@ g_emptyPlant <- f_plotPlant(Plant = MyPlant,
 # g_emptyPlant
 # ggplotly(g_emptyPlant)
 
-seed = 1
+seed = 20001
 
 ##### WORKERS #####
 ### SCHEDULE ###
@@ -224,32 +224,6 @@ for (day in 2:(max(MyWorkers$Day)-1)) {
 
 
 
-### test walk
-aa <- integer()
-purrr::map_int(1:16, .f = function(x) {
-  aa <- c(aa, x)
-  return(aa)
-})
-
-
-S <- MySurfaces
-FP <- MyFood
-
-tiles <- 1:23
-names(tiles) <- S_ID
-
-ti <- 4608
-
-purrr::map(.x = as.vector(S_ID), .f = function(Z) {
-  S0 <- subset(S, S_ID == Z)
-  S0$RNA_load[S0$t_ind == ti + 1] <- S0$RNA_load[S0$t_ind == ti] + tiles[[Z]]
-  return(S0)
-}) %>% rbindlist() -> aa
-
-
-
-
-
 #### SUMMARY FOR ALL INFECTIONS AFTER 42 DAYS ####
 writeLines("***** Infection: Summary processing *****")
 InfectionSummary <- data.frame(Day = seq(1,max(MyWorkers$Day-1)),
@@ -282,7 +256,8 @@ OUTPUT <- list(seed = seed,
                MyPlant = MyPlant,
                MyWorkers = MyWorkers,
                MyAir = MyAir,
-               MySurfaces = MySurfaces,
+               S_summary = S_summary,
+               FP_summary = FP_summary,
                InfectionLog = InfectionLog,
                InfectionSummary = InfectionSummary,
                Expocum = Expocum)
