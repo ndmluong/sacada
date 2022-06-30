@@ -47,7 +47,7 @@ g_emptyPlant <- f_plotPlant(Plant = MyPlant,
 # g_emptyPlant
 # ggplotly(g_emptyPlant)
 
-seed = 103
+seed = 1
 
 ##### WORKERS #####
 ### SCHEDULE ###
@@ -133,7 +133,7 @@ S_summary <- data.frame(Day = numeric(),
 #### SIMULATING DAILY CONTAMINATIONS ####
 writeLines("***** Simulating daily contamination *****")
 
-for (day in 2:17) {
+for (day in 2:(max(MyWorkers$Day)-1)) {
   CONTA <- f_dailyContamination(MyAir = MyAir,
                                 W = MyWorkers,
                                 S = MySurfaces,
@@ -290,18 +290,35 @@ OUTPUT <- list(seed = seed,
 
 
 ### OUTPUT TREATMENT : Infection summary
-IS <- subset(InfectionSummary, Day <= 18)
+IS <- InfectionSummary
 IS$seed <- as.factor(IS$seed)
 
 
 
 ### OUTPUT TREATMENT : Infection source (for all workers and all simulations)
 IL <- data.frame(InfectionLog, seed = rep(seed, nrow(InfectionLog)))
+IL$InfectionSource[is.na(IL$InfectionSource)] <- "not_infected"
 IL$seed <- as.factor(IL$seed)
 IL$InfectionSource <- as.factor(IL$InfectionSource)
 
+tapply(IL$InfectionSource, IL$seed, summary) %>%
+  sapply(., FUN = function(x) {
+    if (length(x) > 4) {
+      return(as.vector(x))
+    } else {
+      allsourcenames <- c("aerosol", "community", "epidemy", "initialised", "not_infected")
+      missingsources <- setdiff(allsourcenames, names(x))
+      updatesources <- c(as.vector(x), rep(0, length(missingsources)))
+      names(updatesources) <- c(names(x), missingsources)
+      return(updatesources)
+    } 
+  }) %>%
+  t() %>%
+  as.data.frame() %>%
+  select(order(colnames(.)))-> ILF
 
-f_plotOutput(IL = IL, IS = IS, seed_select = 103, detailed_plot = T)
+
+f_plotOutput(IL = IL, IS = IS, seed_select = 1, detailed_plot = T)
 
 
 
@@ -313,15 +330,15 @@ f_plotOutput(IL = IL, IS = IS, seed_select = 103, detailed_plot = T)
 ##### Estimating R #####
 # source("functions/functions_contamination.R")
 Parms_Conta <- append(Parms_Conta, list(SerialInterval = list(original = c("mu" = 3.96, "sigma" = 4.75),
-                                                 delta = c("mu" = 3.4, "sigma" = 0.35), ## Zhanwei Du et al. 2022
-                                                 omicron = c("mu" = 3.1, "sigma" = 0.15), ## Zhanwei Du et al. 2022
-                                                 alpha = c("mu" = NA, "sigma" = NA)) ))
+                                                              delta = c("mu" = 3.4, "sigma" = 0.35), ## Zhanwei Du et al. 2022
+                                                              omicron = c("mu" = 3.1, "sigma" = 0.15), ## Zhanwei Du et al. 2022
+                                                              alpha = c("mu" = NA, "sigma" = NA)) ))
 
 lapply(unique(IS$seed), FUN = function(seedx) {
   writeLines(paste("seed", seedx))
   ISsub <- subset(IS, seed == seedx)
   f_estimateRt(ISsub = ISsub,
-              prm_conta = Parms_Conta)
+               prm_conta = Parms_Conta)
 })
 
 

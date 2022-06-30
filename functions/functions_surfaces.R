@@ -1,6 +1,6 @@
 ##### f_initSurfaces #####
 f_initSurfaces <- function(
-  ## Function allowing to initialize (at the beginning of every day) the agent surfaces involving in the SARS-CoV-2 infection
+    ## Function allowing to initialize (at the beginning of every day) the agent surfaces involving in the SARS-CoV-2 infection
   #### INPUT
   P, ## (matrix) the matrix corresponding to the details of each plant tile (output of the function f_createPlant())
   prm_plant, ## (list) the parameters associated with the timetable (check the script "parameters_plant.R")
@@ -24,7 +24,7 @@ f_initSurfaces <- function(
   ## unique ID of each surface tile
   expand.grid(str_pad(1:nrow(P), width = 2, pad = "0"), ## X coordinates crossed with the Y coordinates
               str_pad(1:ncol(P), width = 2, pad = "0") ## Y coordinates
-              ) %>%
+  ) %>%
     as.data.frame(.) %>%
     `colnames<-`(., c("coordX", "coordY")) %>%
     apply(., 1, function(id) { ## create ID with the format S_xx_yy
@@ -43,21 +43,21 @@ f_initSurfaces <- function(
     dplyr::mutate(.,
                   coordX = as.numeric(str_sub(S_ID, start = 3, end = 4)), ## X coordinates from the ID
                   coordY = as.numeric(str_sub(S_ID, start = 6, end = 7)) ## Y coordinates from the ID)
-                  ) -> S
+    ) -> S
   
   S %>% apply(., 1, function(a) {
-      P[ as.numeric(a["coordX"]) , as.numeric(a["coordY"])]
-      }) -> location
+    P[ as.numeric(a["coordX"]) , as.numeric(a["coordY"])]
+  }) -> location
   
   S %>%
     tibble::add_column(location = location,
                        RNA_load = 0, ## the viral load (number of RNA copies) present on the surfaces
-                       ) %>%
+    ) %>%
     ## retain only the surfaces involving in the SARS-CoV-2 transmission
     dplyr::filter(., location %in% S_selected) -> S
   
   S_ID <<- sort(unique(S$S_ID))
-    
+  
   return(S)
   #### END OF FUNCTION
 }
@@ -82,39 +82,94 @@ f_transfers <- function(
   
   FP$RNA_load[FP$t_ind == ti+1 & FP$FP_ID %in% FP_ID_2ti] = FP$RNA_load[FP$t_ind == ti & FP$FP_ID %in% FP_ID_2ti]
   
-  ## for each tile Z in S_ID
-  for (Z in as.vector(S_ID)) {
+  # #### NON-OPTIMIZED CODE (BEGIN)
+  # ## for each tile Z in S_ID
+  # for (Z in as.vector(S_ID)) {
+  #   ## TRANSFER FROM SURFACES TO FOOD PORTIONS
+  #   FP_ID_expoZ_ti <- sort(as.vector(sample(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti],
+  #                                           size = min(prm_surfaces$nFP_expo,
+  #                                                      length(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti])))))
+  #   FP_ID_expoZ_tip1 <- sort(as.vector(sample(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti+1],
+  #                                             size = min(prm_surfaces$nFP_expo,
+  #                                                        length(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti+1])))))
+  # 
+  #   S2F <- (m2_tiles_ti[[Z]] * prm_surfaces$inert_prop) * prm_surfaces$transfer_S2F / prm_surfaces$nFP_expo
+  # 
+  #   FP$RNA_load[FP$t_ind == ti+1 & FP$coords_ID == Z & FP$FP_ID %in% FP_ID_expoZ_tip1] =
+  #     FP$RNA_load[FP$t_ind == ti & FP$FP_ID %in% FP_ID_expoZ_tip1] +
+  #     S2F
+  # 
+  #   ## TRANSFER FROM FOOD PORTIONS TO SURFACES
+  #   F2S <- m2_tiles_ti[[Z]] * (1-prm_surfaces$inert_prop) * prm_surfaces$transfer_F2S
+  # 
+  #   S$RNA_load[S$S_ID == Z & S$t_ind == ti+1] = S$RNA_load[S$S_ID == Z & S$t_ind == ti] + F2S
+  # 
+  #   FP$RNA_load[FP$t_ind == ti+1 & FP$FP_ID %in% FP_ID_expoZ_ti] =
+  #     FP$RNA_load[FP$t_ind == ti & FP$FP_ID %in% FP_ID_expoZ_ti] +
+  #     m2_tiles_ti[[Z]] * (1-prm_surfaces$inert_prop) * (1 - prm_surfaces$transfer_F2S) / prm_surfaces$nFP_expo
+  # }
+  # #### NON-OPTIMIZED CODE (END)
+  
+  #### OPTIMIZED CODE (BEGIN)
+  # S_comp <- subset(S, ! S_ID %in% as.vector(S_ID))
+  FP_comp <- subset(FP, ! coords_ID %in% as.vector(S_ID))
+  
+  S_sub <- data.frame()
+  FP_sub <- data.frame()
+  
+  lapply(as.vector(S_ID), FUN = function(Z) { ## for each tile Z corresponding to the inert surfaces
+    # subsetting data corresponding to the tile Z
+    S1 <- subset(S, S_ID == Z)
+    FP1 <- subset(FP, coords_ID == Z)
+    
     ## TRANSFER FROM SURFACES TO FOOD PORTIONS
-    FP_ID_expoZ_ti <- sort(as.vector(sample(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti],
+    # among all food portions (IDs) present on the tile Z at the time indexes ti and ti+1:
+    # select random portions concerned by the transfers (the number of portions max: nFP_expo)
+    FP_ID_expoZ_ti <- sort(as.vector(sample(FP1$FP_ID[FP1$coords_ID == Z & FP1$t_ind == ti],
                                             size = min(prm_surfaces$nFP_expo,
-                                                       length(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti])))))
-    FP_ID_expoZ_tip1 <- sort(as.vector(sample(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti+1],
+                                                       length(FP1$FP_ID[FP1$coords_ID == Z & FP1$t_ind == ti])))))
+    FP_ID_expoZ_tip1 <- sort(as.vector(sample(FP1$FP_ID[FP1$coords_ID == Z & FP1$t_ind == ti+1],
                                               size = min(prm_surfaces$nFP_expo,
-                                                         length(FP$FP_ID[FP$coords_ID == Z & FP$t_ind == ti+1])))))
-
+                                                         length(FP1$FP_ID[FP1$coords_ID == Z & FP1$t_ind == ti+1])))))
+    # transfers from the inert surfaces to the food portions sampled above
     S2F <- (m2_tiles_ti[[Z]] * prm_surfaces$inert_prop) * prm_surfaces$transfer_S2F / prm_surfaces$nFP_expo
-
-    FP$RNA_load[FP$t_ind == ti+1 & FP$coords_ID == Z & FP$FP_ID %in% FP_ID_expoZ_tip1] =
+    
+    FP1$RNA_load[FP1$t_ind == ti+1 & FP1$coords_ID == Z & FP1$FP_ID %in% FP_ID_expoZ_tip1] =
       FP$RNA_load[FP$t_ind == ti & FP$FP_ID %in% FP_ID_expoZ_tip1] +
       S2F
-
+    
     ## TRANSFER FROM FOOD PORTIONS TO SURFACES
     F2S <- m2_tiles_ti[[Z]] * (1-prm_surfaces$inert_prop) * prm_surfaces$transfer_F2S
-
-    S$RNA_load[S$S_ID == Z & S$t_ind == ti+1] = S$RNA_load[S$S_ID == Z & S$t_ind == ti] + F2S
-
+    
+    S1$RNA_load[S1$S_ID == Z & S1$t_ind == ti+1] = S1$RNA_load[S1$S_ID == Z & S1$t_ind == ti] + F2S
+    
+    ## New contamination of the tile from the aerosol
     FP$RNA_load[FP$t_ind == ti+1 & FP$FP_ID %in% FP_ID_expoZ_ti] =
-      FP$RNA_load[FP$t_ind == ti & FP$FP_ID %in% FP_ID_expoZ_ti] +
+      FP1$RNA_load[FP1$t_ind == ti & FP1$FP_ID %in% FP_ID_expoZ_ti] +
       m2_tiles_ti[[Z]] * (1-prm_surfaces$inert_prop) * (1 - prm_surfaces$transfer_F2S) / prm_surfaces$nFP_expo
-  }
-
+    
+    return(list(S1 = S1,
+                FP1 = FP1))
+  }) -> tmp
+  
+  do.call(rbind, lapply(tmp, function(x) x[["S1"]])) -> S
+  # do.call(rbind, lapply(tmp, function(x) x[["S1"]])) %>%
+  #   arrange(., S_ID, t_ind) -> S
+  
+  do.call(rbind, lapply(tmp, function(x) x[["FP1"]])) %>%
+    rbind(., FP_comp) -> FP
+  # do.call(rbind, lapply(tmp, function(x) x[["FP1"]])) %>%
+  #   rbind(., FP_comp) %>%
+  #   arrange(., FP_ID, t_ind) -> FP
+  
+  #### OPTIMIZED CODE (END)
   return(list(S = S,
               FP = FP))
 }
 
 # ##### f_tiles2surfaces #####
 # f_tiles2surfaces <- function(
-#     S,
+    #     S,
 #     m2_tiles_ti,
 #     ti
 # ) {

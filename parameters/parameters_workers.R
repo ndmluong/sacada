@@ -2,7 +2,7 @@
 Parms_Workers <- list(
   #### NUMBER OF WORKERS ####
   ## Total number of fixed workers (regular/temporary/subcontract)
-  NWorkers = 80,
+  NWorkers = 100,
   
   ####*****Not used yet *****###
   ## Total number of exterior workers
@@ -35,7 +35,7 @@ Parms_Workers <- list(
   
   #### COMMUNITY ACTIVITIES ####
   ## Proportion of the workers susceptible to have community activities
-  pCommunityActivity = 0.50, 
+  pCommunityActivity = 0.21, 
   ## Average number of workers within a commune for activity
   N_perCommunityActivity = 5, 
   
@@ -75,7 +75,7 @@ Parms_Workers <- list(
   
   #### EPIDEMIOLOGY SCENARIO ####
   ## The number of contaminated workers at the day 0
-  nContaminated_Init = 5,
+  nContaminated_Init = 1,
   ## Regional prevalence ##
   prev = 50/100000,
   
@@ -104,7 +104,7 @@ Parms_Workers <- list(
   
   ## Probability of absence for symptomatic workers
   pPresenceSymp = 24/140, ## (Mallet 2021)
-  AbsenceDuration = 7 ## (assumption)
+  AbsenceDuration = 10 ## (SpF/French legislation: DGS-Urgent-2021_20)
 )
 
 # (Optional) Parameters with unchanged values that can be saved in global environment 

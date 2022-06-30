@@ -55,9 +55,9 @@ This modelling study aimed to...
 
 The Agent Based Model considered three sources of contaminations: the
 exposition to Sars-CoV2 througout working activities (aerosol and/or
-fomites), the contamination throught the exposition outside the factory
-and for employees leaving in community, the intra-group transmission
-during shared activities (transport, living).
+fomites), the contamination throught the exposition outside the
+processing plant for employees having shared activities in community
+(transport and/or living).
 
 In order to consider the first source of contamination (in the factory),
 the durations of the stages of infections and the Viral load (viral RNA

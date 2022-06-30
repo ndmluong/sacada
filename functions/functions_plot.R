@@ -1,6 +1,6 @@
 ##### f_plotPlant() FUNCTION TO PLOT THE EMPTY PROCESSING PLANT #####
 f_plotPlant <- function(
-  #### INPUT PARAMETERS
+    #### INPUT PARAMETERS
   Plant, ## (list with the following elements): food processing plant (output of the function f_createPlant())
   ##  - $L: (data frame) coordinates of all locations
   ##  - $P: (character matrix) processing plant
@@ -87,7 +87,7 @@ f_plotPlant <- function(
 
 ##### f_Border() SUB-FUNCTION OF f_plotPlant() FOR PLOTTING - DETERMINE THE COORDINATES OF THE BORDERS (SPACES) #####
 f_Border <- function(
-  #### INPUT 
+    #### INPUT 
   Plant, ## (list with the following elements): food processing plant (output of the function f_createPlant)
   ##  - $L: (data frame) coordinates of all locations
   ##  - $P: (character matrix) processing plant
@@ -118,7 +118,7 @@ f_Border <- function(
 
 ##### f_coordDoor() SUB-FUNCTION OF f_plotPlant() FOR PLOTTING - DETERMINE THE COORDINATES OF THE DOORS (SPACES) #####
 f_coordDoor <- function(
-  ## INPUT
+    ## INPUT
   prm, ## list of parameters (see the R script "parameters.R")
   L, ## (data frame): coordinates of all spaces (one output of the function f_createPlant())
   ...
@@ -213,7 +213,7 @@ f_coordDoor <- function(
 
 ##### f_tile_colour() SUB-FUNCTION OF f_plotPlant() FOR PERSONALIZING THE COLOURS OF THE PLANT TILES #####
 f_tile_colour <- function(
-  P # matrix : processing plant 
+    P # matrix : processing plant 
 ) {
   tile_name <- levels(as.factor(P))
   
@@ -229,16 +229,16 @@ f_tile_colour <- function(
 
 ##### f_plotAgents() FUNCTION TO PLOT THE AGENTS INSIDE A PRE-PLOTTED PLANT #####
 f_plotAgents <- function(
-  g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
-  W, ## (data.frame): information of the workers with at least these attributes
-  FP = NULL,
-  ##  - W_ID (character): worker ID
-  ##  - coordX (numeric): coordinates in the X axis of the worker
-  ##  - coordY (numeric): coordinates in the X axis of the worker
-  ##  - W_state (character/factor): infected/not infected worker 
-  ##  - W_mask (character/factor): mask/no mask
-  ## time index
-  ...
+    g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
+    W, ## (data.frame): information of the workers with at least these attributes
+    FP = NULL,
+    ##  - W_ID (character): worker ID
+    ##  - coordX (numeric): coordinates in the X axis of the worker
+    ##  - coordY (numeric): coordinates in the X axis of the worker
+    ##  - W_state (character/factor): infected/not infected worker 
+    ##  - W_mask (character/factor): mask/no mask
+    ## time index
+    ...
 ) {
   #### BEGIN OF FUNCTION
   ##
@@ -268,9 +268,9 @@ f_plotAgents <- function(
                      time_minutes = FP$t_ind * 5)
     g_Plant <- g_Plant +
       geom_point(data = FP,
-                mapping = aes(x=FP_coordX, y=FP_coordY, frame=time_minutes),
-                size = 0.8, shape = 15,
-                position = position_jitter(width = 0.3, height = 0.1, seed=408))
+                 mapping = aes(x=FP_coordX, y=FP_coordY, frame=time_minutes),
+                 size = 0.8, shape = 15,
+                 position = position_jitter(width = 0.3, height = 0.1, seed=408))
   }
   
   return(g_Plant)
@@ -280,10 +280,10 @@ f_plotAgents <- function(
 
 ##### f_plotWorkers() FUNCTION TO PLOT THE WORKERS INSIDE A PRE-PLOTTED PLANT AT A GIVEN TIME INDEX #####
 f_plotWorkers <- function(
-  g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
-  W, ## (data.frame): information of the workers with at least these attributes
-  ti,
-  ...
+    g_emptyPlant, ## empty processing plant (ggplot2 graph object): output of the function f_plotPlant()
+    W, ## (data.frame): information of the workers with at least these attributes
+    ti,
+    ...
 ) {
   #### BEGIN OF FUNCTION
   ##
@@ -323,12 +323,12 @@ f_plotWorkers <- function(
 
 ##### f_plotScehedule() FUNCTION TO VISUALISE THE SCHEDULE OF ALL WORKERS #####
 f_plotSchedule <- function(
-  W,
-  Dmin,
-  Dmax,
-  Dfocus = NULL,
-  SHOW_ID = NULL,
-  ...
+    W,
+    Dmin,
+    Dmax,
+    Dfocus = NULL,
+    SHOW_ID = NULL,
+    ...
 ) {
   df <- subset(W, Hour == 0 & Min == 0 & Day >= Dmin & Day <= Dmax)
   
@@ -386,9 +386,9 @@ f_plotSchedule <- function(
 
 ##### f_summaryWorkersAtDay() FUNCTION TO SHOW SUMMARY SCHEDULE INFORMATION AT A GIVEN DAY #####
 f_summaryWorkersAtDay <- function(
-  W,
-  Dfocus,
-  SHOW = T
+    W,
+    Dfocus,
+    SHOW = T
 ) {
   dd <- subset(W, Day == Dfocus & Hour == 0 & Min == 0)
   dtA <- subset(dd, W_active == "active" & W_team == "teamA")
@@ -431,11 +431,19 @@ f_plotOutput <- function(
   
   tapply(IL$InfectionSource, IL$seed, summary) %>%
     sapply(., FUN = function(x) {
-      if (length(x) > 4) {return(as.vector(x))} else {return(c(as.vector(x), "not_infected"=0))} 
+      if (length(x) > 4) {
+        return(as.vector(x))
+      } else {
+        allsourcenames <- c("aerosol", "community", "epidemy", "initialised", "not_infected")
+        missingsources <- setdiff(allsourcenames, names(x))
+        updatesources <- c(as.vector(x), rep(0, length(missingsources)))
+        names(updatesources) <- c(names(x), missingsources)
+        return(updatesources)
+      } 
     }) %>%
     t() %>%
-    as.data.frame() -> ILF
-  colnames(ILF) <- c(levels(IL$InfectionSource), "not_infected")
+    as.data.frame() %>%
+    select(order(colnames(.)))-> ILF
   ILF <- data.frame(seed = rownames(ILF),
                     ILF)
   rownames(ILF) <- 1:nrow(ILF)

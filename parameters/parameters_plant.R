@@ -82,7 +82,7 @@ Parms_Plant <- list(
       intdoor.side = "bottom",
       extdoor.side = "top",
       Air_Cond_Type = "DEC", # Direct Expansion Coil
-      Air_renewal = 120, # TO MODIFY !!!!!!! (m3/h)
+      Air_renewal = 30, # TO MODIFY !!!!!!! (m3/h)
       AirflowRate = 200 # TO MODIFY !!!!!!! (m3/h)
     )
     ,
@@ -97,8 +97,8 @@ Parms_Plant <- list(
       intdoor.side = "left",
       extdoor.side = NA,
       Air_Cond_Type = "CMV", # Controlled Mecanical Ventilation
-      Air_renewal = 60, # TO MODIFY !!!!!!! (m3/h)
-      AirflowRate = 60 # TO MODIFY !!!!!!! (m3/h)
+      Air_renewal = 120, # TO MODIFY !!!!!!! (m3/h)
+      AirflowRate = 200 # TO MODIFY !!!!!!! (m3/h)
 
     )
     ####### NOTE /!\ 

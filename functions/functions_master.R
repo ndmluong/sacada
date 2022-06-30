@@ -1,6 +1,6 @@
 ##### f_Who_is() - At a given time index: Who ? Where ? Status ? Mask?  #####
 f_Who_is <- function(
-  ## Function to look for every workers at the different locations of the plant  
+    ## Function to look for every workers at the different locations of the plant  
   ## depending on their sanitary status and mask wearing attributes at a given time index 
   ## INPUT
   SubW, ## (subset of MyWorkers) The workers attributes associated with one given time index
@@ -68,22 +68,22 @@ f_Who_is <- function(
                 NC_M_ID = NC_M_ID[[x]],
                 NC_NM_ID = NC_NM_ID[[x]]))
   }) %>% `names<-`(.,unique(Spaces_label))-> Rooms
-
+  
   symptomatic = SubW$W_status == "symptomatic"
-
+  
   return(list(Cont_mask = Cont_mask,
               Cont_no_mask = Cont_no_mask,
               Non_Cont_mask = Non_Cont_mask,
               Non_Cont_no_mask = Non_Cont_no_mask,
               Rooms = Rooms,
               symptomatic = symptomatic))
-
+  
 }
 
 
 ##### f_Sneeze #####
 f_Sneeze <- function(
-  ## INTPUT
+    ## INTPUT
   SubW, ## (subset of) MyWorkers associated with ONE GIVEN TIME INDEX,
   SubS, ## (subset of) MySurfaces associated with ONE GIVEN TIME INDEX
   Rooms, ## One of the outputs of the function f_Who_is() (check for details)
@@ -173,7 +173,7 @@ f_Sneeze <- function(
       # Extract their IDs and X,Y coordinates
       Source_X <- SubW$coordX[SubW$W_ID %in% Source_ID] # X coordinates
       Source_Y <- SubW$coordY[SubW$W_ID %in% Source_ID] # Y coordinates
-
+      
       for (s in 1:length(Source_ID)) { ## for each source (sneezing worker) s
         # Distance between the near susceptible workers and the source (sneezing worker) s
         DX = abs(Source_X[s]-W_susceptible$coordX)
@@ -190,7 +190,7 @@ f_Sneeze <- function(
         ## The total number of droplets exposed to each susceptible worker (unit: # droplets) (# 2 corresponds to 2m3 of the air volume around the worker)
         d_expo[W_susceptible$W_ID, ] = d_expo[W_susceptible$W_ID,] +
           eff[W_susceptible$W_ID] * (p_zone_air * resp / 2) %*% (P_drop_conta[Source_ID[s],] * nd_Source * (1-Mask_Eff) * tsed) 
-
+        
         ## Droplets settling events exclusively in the cutting room
         if (names(Rooms[i]) == "Cutting Room") {
           ## distance between the current source S and the near locations (coordinates)
@@ -262,7 +262,7 @@ f_Sneeze <- function(
 
 ##### f_Cough #####
 f_Cough <- function(
-  ## INTPUT
+    ## INTPUT
   SubW, ## (subset of) MyWorkers associated with ONE GIVEN TIME INDEX,
   SubS, ## (subset of) MySurfaces associated with ONE GIVEN TIME INDEX
   Rooms, ## One of the outputs of the function f_Who_is() (check for details)
@@ -448,22 +448,22 @@ f_Cough <- function(
 # 2 - The tranfers between the different modules at time ind are calculated, e.g., sedimentation, inhalation, die-off.... 
 # 3 - The Balances in the different module are calculated to determine the aerosol concentration or the quantity of virus at the time ind+1  
 f_Module_Master <- function (
-  MyAir, ## (object MyAir)
-  W, ## (object MyWorkers)
-  S, ## (object MySurfaces)
-  FP, ## (object MyFood)
-  prm_plant,
-  prm_air,
-  prm_time,
-  prm_workers,
-  prm_surfaces,
-  ind_min,
-  ind_max,
-  seed = NULL, ## added for simulation purposes
-  ## Some objects in global environment will be used
-  ## - S_rooms, V_rooms, NWorkers, N_rooms, V_renew (check the function f_initAir),
-  ## - P_drop_conta (check the function f_indi_viral_load)
-  ...
+    MyAir, ## (object MyAir)
+    W, ## (object MyWorkers)
+    S, ## (object MySurfaces)
+    FP, ## (object MyFood)
+    prm_plant,
+    prm_air,
+    prm_time,
+    prm_workers,
+    prm_surfaces,
+    ind_min,
+    ind_max,
+    seed = NULL, ## added for simulation purposes
+    ## Some objects in global environment will be used
+    ## - S_rooms, V_rooms, NWorkers, N_rooms, V_renew (check the function f_initAir),
+    ## - P_drop_conta (check the function f_indi_viral_load)
+    ...
 ) {
   ## Simulation seed
   if (!is.null(seed)) {set.seed(seed)}
@@ -502,7 +502,7 @@ f_Module_Master <- function (
     # 2. From air to surfaces (sedimentation) ----
     ## Droplet sedimentation of the surfaces 
     dsed = S_rooms %*% Vsed * 60    # (dsed in m3/min)
-
+    
     # 2.2 FROM AIR to WORKERS ---- 
     # (A) THE FRACTION OF DROPLETS FROM AIR INHALED BY WORKERS
     # [[1]] cont_mask; [[2]] cont_no_mask; [[3]] no_cont_mask; [[4]] no_cont_no_mask
@@ -511,7 +511,7 @@ f_Module_Master <- function (
     # list[[7]] for each room, number of droplets inhaled in each droplet class per workers [d / min]
     W_droplet_Expos <- lapply(seq(1:N_rooms), 
                               function(x) return(Resp_inh[,x] * t(matrix(rep(as.matrix(Cd[x,]), NWorkers), ncol = NWorkers)))
-                              )
+    )
     
     # Total number of droplets inhaled in each rooms for each droplet classes --> Air module balance equation [d / min]
     dinhale <- t(sapply(seq(1:N_rooms), 
@@ -555,7 +555,7 @@ f_Module_Master <- function (
     # V_renew <- c(prm_plant$Air_renewal,
     #              unname(unlist(lapply(prm_plant$Spaces, function (x) return(x$Air_renewal)))))/60
     
-
+    
     # 2.5 AEROSOL - EMISSION/ABSORPTION BALANCE EQUATION ----
     # [d / m3]
     MyAir[MyAir$t_ind == (ind+1), AIR_dclass] = Cd +
@@ -584,7 +584,7 @@ f_Module_Master <- function (
       else {
         S$RNA_load[S$t_ind == ind + 1] = S$RNA_load[S$t_ind == ind] + unname(m2_tiles_ti)
       }
-
+      
       
     }
   } ## End : for loop
@@ -610,5 +610,6 @@ f_Module_Master <- function (
   
   return(list(MyAir = MyAir,
               Expocum = Expocum,
-              S = S))
+              S = S,
+              FP = FP))
 }
