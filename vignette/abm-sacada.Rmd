@@ -1,7 +1,7 @@
 ---
 title: An agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities
 # author: "SACADA Project"
-# date: "February 23rd, 2022"
+# date: "July 1st, 2022"
 output:
   bookdown::html_document2:
     theme: paper
@@ -119,7 +119,7 @@ knitr::include_graphics("fig/schema/abm-concept.png")
 
 ### **Sub-models**
 
-#### **Meat processing plant**
+#### **Characteristics of the food processing plant**
 
 **Dimensions and structures**
 
@@ -135,10 +135,12 @@ and Office (illustration in Figure \@ref(fig:FIG-map-plant)).
 knitr::include_graphics("fig/schema/map_of_plant.png")
 ```
 
-The different characteristics of each room are taken into account in the
+The different characteristics of each room are included as inputs of the
 model :
 
--   dimensions of the rooms (length, width, height);
+-   dimensions of the plant and dimensions of the different rooms,
+    expressed in *m* (the length and width on two axes, denoted X and Y
+    axes, respectively, and height on a 3rd axis, denoted Z axis);
 -   positions of the room in the plant;
 -   presence and relative positions of internal/external door for each
     room;
@@ -148,12 +150,13 @@ model :
 
 The above characteristics were defined in the model as model parameters
 based on industrial investigations or previous works. The *(associated R
-script: parameters_plant.R)* :
-
-Each room needs to be positioned on the entire workshop grid. The
-cutting room is the main build by subtracting all other rooms. The
-position of the door is also mentioned with four variables : "top",
-"bottom", "left" or "right" (Table
+script: parameters_plant.R)*. For example, as illustrated in Table
+\@ref(tab:TAB-plant-room-parameters), each room needs to be positioned
+on the entire workshop grid using a numerical value between 0 and 1
+indicating the relative position over the axes. The cutting room is the
+main build by subtracting all other rooms. The position of the internal
+and external doors can also be mentioned using the predefined values
+"top", "bottom", "left" or "right" (Table
 \@ref(tab:TAB-plant-room-parameters)).
 
 ```{r TAB-plant-room-parameters, echo=FALSE}
@@ -204,17 +207,18 @@ row_spec(29:30, color = "red")
      
 ```
 
-**Objects**
+**Equipment and objects**
 
-The objects must be defined. They are positioned in the model on the X
-and Y axis, together with the dimensions.
-
-As illustrated in Figure \@ref(fig:FIG-map-plant-object), we implemented
-two types of objects: two conveyors, that allows the pieces of meat to
-be transported from one point to another, and an equipment that can be
-shared by several operators, such as a peeler. The parameters associated
-with these objects are gathered in Table
-\@ref(tab:TAB-plant-object-parameters).
+The different objects or equipment can be included inside the plant such
+as conveyors, peeler, etc. In the same ways as for the different rooms,
+their dimensions and their relative position alongside the X and Y axes
+are taken into account as model inputs. As illustrated in Figure
+\@ref(fig:FIG-map-plant-object), two types of objects were included :
+two conveyors allowing to transport the different carcasses or food
+portions from one point to another, and an equipment that can be shared
+by several operators (e.g.: a peeler, frequently used in meat cutting
+plant). The parameters associated with these objects are gathered in
+Table \@ref(tab:TAB-plant-object-parameters).
 
 ```{r FIG-map-plant-object, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant"}
 knitr::include_graphics("fig/schema/map_of_plant_object.png")
@@ -233,13 +237,13 @@ knitr::kable(
 
 ```
 
-#### **Module Workers**
+#### **Module 1 - Workers**
 
 ##### Characteristics
 
-**Type of workers**
-
-The operators are differentiated according to their functions
+Different principal types of workers were taken into account in the
+model depending on the their daily tasks inside the plant. According to
+industrial investigations and expert knowledge, the
 
 -   Cutter 1 : deboning or cutting carcasses into large pieces
 -   Cutter 2 : cutting large pieces into small pieces
@@ -280,7 +284,7 @@ change of team. The proportion of workers is defined in **pChangeTeam**
 
 ##### Rules
 
-#### **Module Air**
+#### **Module 2 - Air**
 
 ##### Circulation of the droplets
 
@@ -290,9 +294,9 @@ knitr::include_graphics("fig/schema/abm-infection-air.png")
 
 ##### Processing rules
 
-#### **Module Surfaces**
+#### **Module 3 - Surfaces**
 
-#### **Module Food**
+#### **Module 4 - Food**
 
 ##### Characteristics
 
