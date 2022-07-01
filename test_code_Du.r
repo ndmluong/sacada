@@ -1,4 +1,4 @@
-##### PACKAGES #####
+# PACKAGES #####
 library(ggplot2)
 library(tibble)
 library(reshape2)
@@ -12,30 +12,32 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 
-##### FUNCTIONS #####
-source("functions/functions_actions.R")
-source("functions/functions_air.R")
-source("functions/functions_contamination.R")
-source("functions/functions_dailyWork.R")
-source("functions/functions_food.R")
-source("functions/functions_master.R")
-source("functions/functions_plant.R")
-source("functions/functions_plot.R")
-source("functions/functions_run.R")
-source("functions/functions_surfaces.R")
-source("functions/functions_time.R")
-source("functions/functions_workers.R")
 
 
-##### PARAMETERS #####
-## Check the scripts for more details / change parameter values if needed
-source("parameters/parameters_plant.R") ## PLANT
-source("parameters/parameters_time.R") ## TIME
-source("parameters/parameters_workers.R") ## WORKERS
-source("parameters/parameters_food.R") ## FOOD PORTIONS
-source("parameters/parameters_air.R") ## AIR
-source("parameters/parameters_conta.R") ## CONTAMINATION
-source("parameters/parameters_surfaces.R") ## SURFACES
+
+# FUNCTIONS #####
+source("functions/functions.R")
+
+
+
+# PARAMETERS ####
+## Values by default #####
+source("parameters/parameters.R")
+
+## Changes for analyses (check the XLSX file)
+Parms_Workers$prev <- 100/100000
+Parms_Time$NDays <- 28
+
+
+
+
+
+
+# SIMULATION ####
+## seed numbers
+all_seed <- 20001
+
+
 
 
 ##### PLANT #####
@@ -318,31 +320,27 @@ lapply(unique(IS$seed), FUN = function(seedx) {
 
 
 
-ISsub <- subset(IS, seed == 110)
+ISsub <- subset(IS, seed == 20001)
 
 
 ISsub <- tibble::add_column(ISsub, Incidence = NA, .after = "Day")
-ISsub$Incidence[1] <- ISsub$Symptomatic[1]
+ISsub$Incidence[1] <- ISsub$Infected_cumul[1]
 for (i in 2:nrow(ISsub)) {
-  if (ISsub$Symptomatic[i] > ISsub$Symptomatic[i-1]) {
-    ISsub$Incidence[i] <- ISsub$Symptomatic[i] - ISsub$Symptomatic[i-1]
-  } else {
-    ISsub$Incidence[i] <- 0
-  }
-  
+  ISsub$Incidence[i] <- ISsub$Infected_cumul[i] - ISsub$Infected_cumul[i-1]
 }
 
 onset <- rep(ISsub$Day, ISsub$Incidence)
-inci <- incidence(onset, last_date = 42)
+inci <- incidence(onset)
 plot(inci, border = "white")
 
-R_coeff <- get_R(inci,
-                 si_mean = Parms_Conta$SerialInterval[["delta"]][["mu"]],
-                 si_sd = 0.5)
-R_coeff$si
-R_val <- sample_R(R_coeff, 1000)
-summary(R_val)
+Rt_res <- earlyR::get_R(inci,
+                        si_mean = Parms_Conta$SerialInterval[[Parms_Conta$VoC]][["mu"]],
+                        si_sd = Parms_Conta$SerialInterval[[Parms_Conta$VoC]][["sigma"]])
 
+Rt_val <- sample_R(Rt_res, 1000)
+summary(Rt_val)
+set.seed(20001)
+R_val <- rgamma(n=1000, shape = Rt_res$si$parameters$shape, scale = Rt_res$si$parameters$scale)
 hist(R_val)
 
 

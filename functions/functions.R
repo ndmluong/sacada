@@ -1,0 +1,13 @@
+##### FUNCTIONS #####
+source("functions/functions_actions.R")
+source("functions/functions_air.R")
+source("functions/functions_contamination.R")
+source("functions/functions_dailyWork.R")
+source("functions/functions_food.R")
+source("functions/functions_master.R")
+source("functions/functions_plant.R")
+source("functions/functions_plot.R")
+source("functions/functions_run.R")
+source("functions/functions_surfaces.R")
+source("functions/functions_time.R")
+source("functions/functions_workers.R")

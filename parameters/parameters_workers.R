@@ -77,7 +77,7 @@ Parms_Workers <- list(
   ## The number of contaminated workers at the day 0
   nContaminated_Init = 1,
   ## Regional prevalence ##
-  prev = 100/100000,
+  prev = 50/100000,
   
   ## Contamination day (counter expressed in day)
   InfectedDay = 1, ## first day of the course of infections

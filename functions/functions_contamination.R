@@ -315,10 +315,10 @@ f_dailyContamination <- function(
 
 ##### f_estimateR() #####
 f_estimateRt <- function(
-    ISsub, ## data.frame (Infection summary), output of the function f_runModel associated with ONE GIVEN SIMULATION SEED
-    prm_conta
+  ISsub, ## data.frame (Infection summary), output of the function f_runModel associated with ONE GIVEN SIMULATION SEED
+  prm_conta,
+  seed
 ){
-  
   ISsub <- tibble::add_column(ISsub, Incidence = NA, .after = "Day")
   ISsub$Incidence[1] <- ISsub$Infected_cumul[1]
   for (i in 2:nrow(ISsub)) {
@@ -327,17 +327,22 @@ f_estimateRt <- function(
   
   onset <- rep(ISsub$Day, ISsub$Incidence)
   inci <- incidence(onset)
-  plot(inci, border = "white")
   
   Rt_res <- earlyR::get_R(inci,
                           si_mean = prm_conta$SerialInterval[[prm_conta$VoC]][["mu"]],
                           si_sd = prm_conta$SerialInterval[[prm_conta$VoC]][["sigma"]])
   
-  Rt_val <- sample_R(Rt_res, 1000)
-  summary(Rt_val)
-  return(Rt_val)
+  set.seed(seed)
+  R_val <- rgamma(n=1000,
+                  shape = Rt_res$si$parameters$shape,
+                  scale = Rt_res$si$parameters$scale)
+  c("seed" = seed, summary(R_val)) %>%
+    t() %>%
+    as.data.frame() -> Rt_out
+  return(Rt_out)
   
 }
+
 
 
 

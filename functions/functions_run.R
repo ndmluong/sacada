@@ -324,6 +324,8 @@ f_run_4M <- function(
     prm_workers,
     prm_air,
     prm_conta,
+    prm_surfaces,
+    prm_food,
     seed
 ) {
   writeLines("================================= BEGIN =============================================")
@@ -332,10 +334,10 @@ f_run_4M <- function(
   
   ##### PLANT #####
   ## Create the plant
-  MyPlant <- f_createPlant(prm = Parms_Plant)
+  MyPlant <- f_createPlant(prm = prm_plant)
   ## Plot
   g_emptyPlant <- f_plotPlant(Plant = MyPlant,
-                              prm = Parms_Plant)
+                              prm = prm_plant)
   # g_emptyPlant
   # ggplotly(g_emptyPlant)
   
@@ -344,8 +346,8 @@ f_run_4M <- function(
   ##### WORKERS #####
   ### SCHEDULE ###
   # Create workers : MyWorkers
-  MyWorkers <- f_initWorkers(prm = Parms_Workers, prm_time = Parms_Time, seed = seed)
-  MyWorkers <- f_setupSchedule(W = MyWorkers, prm = Parms_Workers, seed = seed)
+  MyWorkers <- f_initWorkers(prm = prm_workers, prm_time = prm_time, seed = seed)
+  MyWorkers <- f_setupSchedule(W = MyWorkers, prm = prm_workers, seed = seed)
   
   # # SCHEDULE VISUALISATION
   # # Plot schedule with information at one given day
@@ -370,26 +372,26 @@ f_run_4M <- function(
   
   ### WEARING MASK ###
   f_dailyMaskWearing(WD = subset(MyWorkers, Day == 1),
-                     probMask = Parms_Workers$pMaskAcceptability[Parms_Workers$MaskType]) %>%
+                     probMask = prm_workers$pMaskAcceptability[prm_workers$MaskType]) %>%
     rbind(., subset(MyWorkers, Day != 1)) %>%
     arrange(.,t_ind, W_ID) -> MyWorkers
   
   ## Random state (in day) of the first initialized contaminated worker
-  MyWorkers <- f_initStatusCounterDay1(W = MyWorkers, prm_workers = Parms_Workers, prm_time = Parms_Time, seed = seed)
+  MyWorkers <- f_initStatusCounterDay1(W = MyWorkers, prm_workers = prm_workers, prm_time = prm_time, seed = seed)
   
   #### Inter-individuals variability in the viral load (RNA load), in log10 copies/ml
-  indi_viral_load <- f_individual_viral_load(prm_workers = Parms_Workers,
-                                             prm_air = Parms_Air,
-                                             prm_conta = Parms_Conta)
+  indi_viral_load <- f_individual_viral_load(prm_workers = prm_workers,
+                                             prm_air = prm_air,
+                                             prm_conta = prm_conta)
   
   ##### AEROSOL #####
-  MyAir <- f_initAir(prm = Parms_Plant, prm_time = Parms_Time, prm_air = Parms_Air)
+  MyAir <- f_initAir(prm = prm_plant, prm_time = prm_time, prm_air = prm_air)
   
   ##### INFECTION LOG #####
   ## Infection log indicating the contamination day and sources of every workers over time
   InfectionLog <- data.frame(W_ID = unique(MyWorkers$W_ID),
-                             InfectedDay = rep(NA, Parms_Workers$NWorkers),
-                             InfectionSource = rep(NA, Parms_Workers$NWorkers))
+                             InfectedDay = rep(NA, prm_workers$NWorkers),
+                             InfectionSource = rep(NA, prm_workers$NWorkers))
   
   Infected_init <- subset(MyWorkers, Day == 1 & W_status == "infected")$W_ID %>% unique()
   InfectionLog$InfectedDay[InfectionLog$W_ID %in% Infected_init] <- 1
@@ -398,15 +400,15 @@ f_run_4M <- function(
   ##### SURFACES #####
   ## Initialize the surfaces for the day 1 ###
   MySurfaces <- f_initSurfaces(P = MyPlant$P,
-                               prm_plant = Parms_Plant,
-                               prm_time = Parms_Time,
+                               prm_plant = prm_plant,
+                               prm_time = prm_time,
                                day = 1)
   
   ##### FOOD PORTIONS #####
   ## Initialize the food portion for the day 1 ###
-  MyFood <- f_ProcessFood(prm_food = Parms_Food,
-                          prm_workers = Parms_Workers,
-                          prm_time = Parms_Time,
+  MyFood <- f_ProcessFood(prm_food = prm_food,
+                          prm_workers = prm_workers,
+                          prm_time = prm_time,
                           W = MyWorkers,
                           day = 1) ## Day 1
   
@@ -432,12 +434,12 @@ f_run_4M <- function(
                                   FP = MyFood,
                                   day = day,
                                   indi_viral_load = indi_viral_load,
-                                  prm_plant = Parms_Plant,
-                                  prm_workers = Parms_Workers,
-                                  prm_time = Parms_Time,
-                                  prm_air = Parms_Air,
-                                  prm_conta = Parms_Conta,
-                                  prm_surfaces = Parms_Surfaces,
+                                  prm_plant = prm_plant,
+                                  prm_workers = prm_workers,
+                                  prm_time = prm_time,
+                                  prm_air = prm_air,
+                                  prm_conta = prm_conta,
+                                  prm_surfaces = prm_surfaces,
                                   inf_log = InfectionLog,
                                   seed = seed)
     
@@ -448,15 +450,15 @@ f_run_4M <- function(
       add_row(Day = day-1,
               nb_carcass = length(unique(FP_End$carcass_ID)),
               nb_FP = length(unique(FP_End$FP_ID)),
-              pos_FP = length(FP_End$RNA_load[FP_End$RNA_load > Parms_Surfaces$pos_threshold])) -> FP_summary
+              pos_FP = length(FP_End$RNA_load[FP_End$RNA_load > prm_surfaces$pos_threshold])) -> FP_summary
     
     
     ## Surfaces - Contamination summary      
     S_End <- subset(CONTA$S, t_ind == max(CONTA$S$t_ind))
     S_summary %>%
       add_row(Day = day-1,
-              pos_S = length(S_End$RNA_load[S_End$RNA_load >= Parms_Surfaces$pos_threshold]),
-              S_ID = subset(S_End, RNA_load >= Parms_Surfaces$pos_threshold)$S_ID %>% paste(., collapse = ", ")) -> S_summary
+              pos_S = length(S_End$RNA_load[S_End$RNA_load >= prm_surfaces$pos_threshold]),
+              S_ID = subset(S_End, RNA_load >= prm_surfaces$pos_threshold)$S_ID %>% paste(., collapse = ", ")) -> S_summary
     
     MyWorkers <- CONTA$W
     MyAir <- CONTA$MyAir
@@ -466,7 +468,7 @@ f_run_4M <- function(
     ## Processing CONTA (1) - WORKERS
     ## set possible absence for symptomatic worker(s)
     writeLines(">>> Setting possible absence for symptomatic workers")
-    MyWorkers <- f_setAbsence(W = MyWorkers, day = day, prm_workers = Parms_Workers)
+    MyWorkers <- f_setAbsence(W = MyWorkers, day = day, prm_workers = prm_workers)
     
     ## Check if there is any missing logistic workers in every team
     if (day %in% WorkingDays) {
@@ -487,22 +489,22 @@ f_run_4M <- function(
     
     # Wearing mask #
     f_dailyMaskWearing(WD = subset(MyWorkers, Day == day),
-                       probMask = Parms_Workers$pMaskAcceptability[Parms_Workers$MaskType]) %>%
+                       probMask = prm_workers$pMaskAcceptability[prm_workers$MaskType]) %>%
       rbind(., subset(MyWorkers, Day != day)) %>%
       arrange(.,t_ind, W_ID) -> MyWorkers
     
     ## Initialize the surfaces for the day ###
     MySurfaces <- f_initSurfaces(P = MyPlant$P,
-                                 prm_plant = Parms_Plant,
-                                 prm_time = Parms_Time,
+                                 prm_plant = prm_plant,
+                                 prm_time = prm_time,
                                  day = day)
     
     ##### FOOD PORTIONS #####
     ## Initialize the food portion for the day  ###
     if (day %in% WorkingDays) {
-      MyFood <- f_ProcessFood(prm_food = Parms_Food,
-                              prm_workers = Parms_Workers,
-                              prm_time = Parms_Time,
+      MyFood <- f_ProcessFood(prm_food = prm_food,
+                              prm_workers = prm_workers,
+                              prm_time = prm_time,
                               W = MyWorkers,
                               day = day)
     } else {
@@ -558,4 +560,34 @@ f_run_4M <- function(
 }
 
 
+#### f_IL ####
+f_IL <- function(OUTPUT_allseeds) {
+  lapply(OUTPUT_allseeds, function(x) {
+    return(data.frame(x$InfectionLog,
+                      seed = rep(x$seed, nrow(x$InfectionLog))))
+  }) %>%
+    data.table::rbindlist() -> IL
+  IL$seed <- as.factor(IL$seed)
+  IL$InfectionSource <- as.factor(IL$InfectionSource)
+  return(IL)
+}
 
+f_IS <- function(OUTPUT_allseeds) {
+  lapply(OUTPUT_allseeds, function(x) {return(x$InfectionSummary)}) %>%
+    data.table::rbindlist() -> IS
+  IS$seed <- as.factor(IS$seed)
+  return(IS)
+}
+
+f_summaryRt <- function(
+  IS,
+  prm_conta
+) {
+  lapply(as.numeric(levels(IS$seed)), function(x) {
+    f_estimateRt(ISsub = subset(IS, seed == x),
+                 prm_conta = prm_conta,
+                 seed = x)
+  }) %>%
+    data.table::rbindlist() -> Rt_summary
+  return(Rt_summary)
+}

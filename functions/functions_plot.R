@@ -431,10 +431,14 @@ f_plotOutput <- function(
   
   tapply(IL$InfectionSource, IL$seed, summary) %>%
     sapply(., FUN = function(x) {
+      allsourcenames <- c("aerosol", "community", "epidemy", "initialised", "not_infected")
+      
       if (length(x) > 4) {
-        return(as.vector(x))
-      } else {
-        allsourcenames <- c("aerosol", "community", "epidemy", "initialised", "not_infected")
+        updatesources <- as.vector(x)
+        names(updatesources) <- allsourcenames
+        return(updatesources)
+      }
+      else {
         missingsources <- setdiff(allsourcenames, names(x))
         updatesources <- c(as.vector(x), rep(0, length(missingsources)))
         names(updatesources) <- c(names(x), missingsources)
@@ -443,7 +447,7 @@ f_plotOutput <- function(
     }) %>%
     t() %>%
     as.data.frame() %>%
-    select(order(colnames(.)))-> ILF
+    select(order(colnames(.))) -> ILF
   ILF <- data.frame(seed = rownames(ILF),
                     ILF)
   rownames(ILF) <- 1:nrow(ILF)
