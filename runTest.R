@@ -26,6 +26,7 @@ Parms_Food$worker_rhythm$porcine <- c("logistic1" = 0.025,
                                       "cutter1" = 0.05,
                                       "cutter2" = 0.025,
                                       "logistic2" = 0.125)
+MyPlant <- f_createPlant(prm = Parms_Plant)
 
 # SIMULATION ####
 ## seed number ####
@@ -87,5 +88,3 @@ f_summaryRt(IS = IS, prm_conta = Parms_Conta)
 
 # SAVE RESULTS ####
 save.image(file = paste("simulation_output/", output_filename, sep=""))
-
-

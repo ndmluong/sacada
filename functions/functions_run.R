@@ -335,13 +335,6 @@ f_run_4M <- function(
   ##### PLANT #####
   ## Create the plant
   MyPlant <- f_createPlant(prm = prm_plant)
-  ## Plot
-  g_emptyPlant <- f_plotPlant(Plant = MyPlant,
-                              prm = prm_plant)
-  # g_emptyPlant
-  # ggplotly(g_emptyPlant)
-  
-  seed = 20001
   
   ##### WORKERS #####
   ### SCHEDULE ###
