@@ -390,6 +390,9 @@ f_run_4M <- function(
   InfectionLog$InfectedDay[InfectionLog$W_ID %in% Infected_init] <- 1
   InfectionLog$InfectionSource[InfectionLog$W_ID %in% Infected_init] <- "initialised"
   
+  
+  Expocum <- list()
+  
   ##### SURFACES #####
   ## Initialize the surfaces for the day 1 ###
   MySurfaces <- f_initSurfaces(P = MyPlant$P,
@@ -405,8 +408,6 @@ f_run_4M <- function(
                           prm_time = prm_time,
                           W = MyWorkers,
                           day = 1) ## Day 1
-  
-  Expocum <- list()
   
   FP_summary <- data.frame(Day = numeric(),
                            nb_carcass = numeric(),
