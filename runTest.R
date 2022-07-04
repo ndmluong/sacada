@@ -26,7 +26,6 @@ Parms_Food$worker_rhythm$porcine <- c("logistic1" = 0.025,
                                       "cutter1" = 0.05,
                                       "cutter2" = 0.025,
                                       "logistic2" = 0.125)
-MyPlant <- f_createPlant(prm = Parms_Plant)
 
 # SIMULATION ####
 ## seed number ####
@@ -57,19 +56,6 @@ output_filename <- "output_runTestbis.RData"
 }
 
 
-f_run_4M(prm_plant = Parms_Plant,
-         prm_time = Parms_Time,
-         prm_workers = Parms_Workers,
-         prm_air = Parms_Air,
-         prm_conta = Parms_Conta,
-         prm_surfaces = Parms_Surfaces,
-         prm_food = Parms_Food,
-         seed = 20001)
-
-
-
-
-
 # OUTPUT ####
 ## Treatment ####
 ### Infection summary ####
@@ -78,19 +64,16 @@ IS <- f_IS(OUTPUT_allseeds)
 ### Infection log (infection sources) ####
 IL <- f_IL(OUTPUT_allseeds)
 
-## Plot ####
-#### Workers contamination ####
-f_plotOutput(IL = IL, IS = IS)
-f_plotOutput(IL = IL, IS = IS, detailed_plot = T)
-
-
-
-## Indicators #### (voir avec Steven/Laurent)
-### Rt ####
-f_summaryRt(IS = IS, prm_conta = Parms_Conta)
-
-
-
+# ## Plot ####
+# #### Workers contamination ####
+# f_plotOutput(IL = IL, IS = IS)
+# f_plotOutput(IL = IL, IS = IS, detailed_plot = T)
+# 
+# 
+# 
+# ## Indicators #### (voir avec Steven/Laurent)
+# ### Rt ####
+# f_summaryRt(IS = IS, prm_conta = Parms_Conta)
 
 
 # SAVE RESULTS ####
