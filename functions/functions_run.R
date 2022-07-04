@@ -533,7 +533,8 @@ f_run_4M <- function(
     ##### FOOD PORTIONS #####
     ## Initialize the food portion for the day  ###
     if (day %in% WorkingDays) {
-      MyFood <- f_ProcessFood(prm_food = prm_food,
+      MyFood <- f_ProcessFood(plant = MyPlant,
+                              prm_food = prm_food,
                               prm_workers = prm_workers,
                               prm_time = prm_time,
                               W = MyWorkers,
