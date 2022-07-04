@@ -92,6 +92,7 @@ f_ProcessFood <- function(
   ## Function allowing to initialize a set of food portions at a given day
   ## depending on food parameters provided as input argument.
   #### INPUT
+  plant,
   prm_food, ## (list) parameters associated with all attributes of the food portions (check Parms_Food.R)
   prm_workers, ## (list) parameters associated with all attributes of the workers (check Parms_Workers.R)
   prm_time, ## (list) parameters associated with the simulation time (check Parms_Time.R)
@@ -185,7 +186,7 @@ f_ProcessFood <- function(
   lapply(unique(FP$location), FUN = function(l) { ## for each location l inside the plant 
     
     FPl <- subset(FP, location == l) ## extract the Food Portion data of the day associated with the location l
-    l_coords <- subset(MyPlant$L, location == l) ## extract the X,Y coordinates of the location l
+    l_coords <- subset(plant$L, location == l) ## extract the X,Y coordinates of the location l
     
     ## sampling random coordinates for each portion  
     randomcoords <- l_coords[sample(1:nrow(l_coords), size = nrow(FPl), replace = T),]

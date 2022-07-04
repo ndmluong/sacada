@@ -328,10 +328,10 @@ f_dailyWork_AllTeams <- function(
 ##### f_checkdailyWorkerType #####
 f_checkdailyWorkerType <- function(
   W,
-  day
+  D
 ) {
   
-  Wsub <- subset(W, Day == day & Hour == 0 & Min == 0 & W_active == "active")
+  Wsub <- subset(W, Day == D & Hour == 0 & Min == 0 & W_active == "active")
   compo <- table(Wsub$W_team, Wsub$W_type)[c("teamA", "teamB") , c("cutter1", "cutter2", "logistic1", "logistic2")]
   
   for (team in c("teamA", "teamB")) { ## for each team (A or B / morning or afternoon depending on the week)
@@ -343,11 +343,11 @@ f_checkdailyWorkerType <- function(
       if (sum(compo[team , c("logistic1", "logistic2")]) >= 2) { 
         if (compo[team , "logistic1"] > compo[team , "logistic2"]) { ## if there are more logistic1 workers than logistic2 ones
           changingWorker_ID <- subset(Wsub, W_team == team & W_type == "logistic1")$W_ID %>% sample(., 1) ## take 1 random logistic1 worker to become logistic2 worker
-          W$W_type[W$Day == day & W$W_ID == changingWorker_ID] <- "logistic2"
+          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic2"
         }
         if (compo[team , "logistic2"] > compo[team , "logistic1"]) { ## otherwise, if there are more logistic2 workers than logistic1 ones
           changingWorker_ID <- subset(Wsub, W_team == team & W_type == "logistic2")$W_ID %>% sample(., 1) ## take 1 random logistic2 worker to become logistic1 worker
-          W$W_type[W$Day == day & W$W_ID == changingWorker_ID] <- "logistic1"
+          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic1"
         }
       }
       
@@ -357,9 +357,9 @@ f_checkdailyWorkerType <- function(
         changingWorker_ID <- subset(Wsub, W_team == team & W_type %in% c("cutter1", "cutter2"))$W_ID %>% sample(., 1)
         
         if (compo[team , "logistic1"] < 1) { ## if the missing worker is logistic1
-          W$W_type[W$Day == day & W$W_ID == changingWorker_ID] <- "logistic1" ## the taken cutter worker becomes logistic1
+          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic1" ## the taken cutter worker becomes logistic1
         } else { ## otherwise
-          W$W_type[W$Day == day & W$W_ID == changingWorker_ID] <- "logistic2" ## the taken cutter worker becomes logistic2
+          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic2" ## the taken cutter worker becomes logistic2
         }
       }
       

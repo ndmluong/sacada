@@ -11,5 +11,11 @@ Parms_Surfaces <- list(
   transfer_F2S = 0.28, # Duret et al., 2017
   
   # positive threshold for inert and meat contamination (expressed in number of RNA copies)
-  pos_threshold = 10^5 # assumption, taking into account the number
+  pos_threshold = c("3log" = 10^3,
+                    "4log" = 10^4,
+                    "5log" = 10^5,
+                    "6log" = 10^6,
+                    "7log" = 10^7,
+                    "8log" = 10^8,
+                    "9log" = 10^9) # assumption, taking into account the number
 )

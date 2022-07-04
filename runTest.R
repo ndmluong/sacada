@@ -33,7 +33,7 @@ MyPlant <- f_createPlant(prm = Parms_Plant)
 all_seed <- 20001
 
 ## output file name /!\ ####
-output_filename <- "output_runTest.RData"
+output_filename <- "output_runTestbis.RData"
 
 ## RUN ####
 {
@@ -57,7 +57,14 @@ output_filename <- "output_runTest.RData"
 }
 
 
-
+f_run_4M(prm_plant = Parms_Plant,
+         prm_time = Parms_Time,
+         prm_workers = Parms_Workers,
+         prm_air = Parms_Air,
+         prm_conta = Parms_Conta,
+         prm_surfaces = Parms_Surfaces,
+         prm_food = Parms_Food,
+         seed = 20001)
 
 
 

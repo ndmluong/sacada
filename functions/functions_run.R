@@ -353,7 +353,7 @@ f_run_4M <- function(
   # OtherDays <- subset(MyWorkers, !Day %in% WorkingDays)$Day %>% unique() %>% sort()
   
   ## Check worker type composition for each team
-  MyWorkers <- f_checkdailyWorkerType(W = MyWorkers, day = 1)
+  MyWorkers <- f_checkdailyWorkerType(W = MyWorkers, D = 1)
   
   ## Assign location based on schedule for the first day (day 1)
   d1 <- subset(MyWorkers, Day == 1)
@@ -399,7 +399,8 @@ f_run_4M <- function(
   
   ##### FOOD PORTIONS #####
   ## Initialize the food portion for the day 1 ###
-  MyFood <- f_ProcessFood(prm_food = prm_food,
+  MyFood <- f_ProcessFood(plant = MyPlant,
+                          prm_food = prm_food,
                           prm_workers = prm_workers,
                           prm_time = prm_time,
                           W = MyWorkers,
@@ -410,11 +411,29 @@ f_run_4M <- function(
   FP_summary <- data.frame(Day = numeric(),
                            nb_carcass = numeric(),
                            nb_FP = numeric(),
-                           pos_FP = numeric())
+                           pos_FP_3log = numeric(),
+                           pos_FP_4log = numeric(),
+                           pos_FP_5log = numeric(),
+                           pos_FP_6log = numeric(),
+                           pos_FP_7log = numeric(),
+                           pos_FP_8log = numeric(),
+                           pos_FP_9log = numeric())
   
   S_summary <- data.frame(Day = numeric(),
-                          pos_S = numeric(),
-                          S_ID = character())
+                          pos_S_3log = numeric(),
+                          pos_S_4log = numeric(),
+                          pos_S_5log = numeric(),
+                          pos_S_6log = numeric(),
+                          pos_S_7log = numeric(),
+                          pos_S_8log = numeric(),
+                          pos_S_9log = numeric(),
+                          S_ID_3log = character(),
+                          S_ID_4log = character(),
+                          S_ID_5log = character(),
+                          S_ID_6log = character(),
+                          S_ID_7log = character(),
+                          S_ID_8log = character(),
+                          S_ID_9log = character())
   
   ## save.image("checkpoint0.RData")
   #### SIMULATING DAILY CONTAMINATIONS ####
@@ -443,15 +462,33 @@ f_run_4M <- function(
       add_row(Day = day-1,
               nb_carcass = length(unique(FP_End$carcass_ID)),
               nb_FP = length(unique(FP_End$FP_ID)),
-              pos_FP = length(FP_End$RNA_load[FP_End$RNA_load > prm_surfaces$pos_threshold])) -> FP_summary
+              pos_FP_3log = length(FP_End$RNA_load[FP_End$RNA_load >= prm_surfaces$pos_threshold[["3log"]]]),
+              pos_FP_4log = length(FP_End$RNA_load[FP_End$RNA_load >= prm_surfaces$pos_threshold[["4log"]]]),
+              pos_FP_5log = length(FP_End$RNA_load[FP_End$RNA_load >= prm_surfaces$pos_threshold[["5log"]]]),
+              pos_FP_6log = length(FP_End$RNA_load[FP_End$RNA_load >= prm_surfaces$pos_threshold[["6log"]]]),
+              pos_FP_7log = length(FP_End$RNA_load[FP_End$RNA_load >= prm_surfaces$pos_threshold[["7log"]]]),
+              pos_FP_8log = length(FP_End$RNA_load[FP_End$RNA_load >= prm_surfaces$pos_threshold[["8log"]]]),
+              pos_FP_9log = length(FP_End$RNA_load[FP_End$RNA_load >= prm_surfaces$pos_threshold[["9log"]]])) -> FP_summary
     
     
     ## Surfaces - Contamination summary      
     S_End <- subset(CONTA$S, t_ind == max(CONTA$S$t_ind))
     S_summary %>%
       add_row(Day = day-1,
-              pos_S = length(S_End$RNA_load[S_End$RNA_load >= prm_surfaces$pos_threshold]),
-              S_ID = subset(S_End, RNA_load >= prm_surfaces$pos_threshold)$S_ID %>% paste(., collapse = ", ")) -> S_summary
+              pos_S_3log = length(S_End$RNA_load[S_End$RNA_load >= prm_surfaces$pos_threshold[["3log"]]]),
+              pos_S_4log = length(S_End$RNA_load[S_End$RNA_load >= prm_surfaces$pos_threshold[["4log"]]]),
+              pos_S_5log = length(S_End$RNA_load[S_End$RNA_load >= prm_surfaces$pos_threshold[["5log"]]]),
+              pos_S_6log = length(S_End$RNA_load[S_End$RNA_load >= prm_surfaces$pos_threshold[["6log"]]]),
+              pos_S_7log = length(S_End$RNA_load[S_End$RNA_load >= prm_surfaces$pos_threshold[["7log"]]]),
+              pos_S_8log = length(S_End$RNA_load[S_End$RNA_load >= prm_surfaces$pos_threshold[["8log"]]]),
+              pos_S_9log = length(S_End$RNA_load[S_End$RNA_load >= prm_surfaces$pos_threshold[["9log"]]]),
+              S_ID_3log = subset(S_End, RNA_load >= prm_surfaces$pos_threshold[["3log"]])$S_ID %>% paste(., collapse = ", "),
+              S_ID_4log = subset(S_End, RNA_load >= prm_surfaces$pos_threshold[["4log"]])$S_ID %>% paste(., collapse = ", "),
+              S_ID_5log = subset(S_End, RNA_load >= prm_surfaces$pos_threshold[["5log"]])$S_ID %>% paste(., collapse = ", "),
+              S_ID_6log = subset(S_End, RNA_load >= prm_surfaces$pos_threshold[["6log"]])$S_ID %>% paste(., collapse = ", "),
+              S_ID_7log = subset(S_End, RNA_load >= prm_surfaces$pos_threshold[["7log"]])$S_ID %>% paste(., collapse = ", "),
+              S_ID_8log = subset(S_End, RNA_load >= prm_surfaces$pos_threshold[["8log"]])$S_ID %>% paste(., collapse = ", "),
+              S_ID_9log = subset(S_End, RNA_load >= prm_surfaces$pos_threshold[["9log"]])$S_ID %>% paste(., collapse = ", ")) -> S_summary
     
     MyWorkers <- CONTA$W
     MyAir <- CONTA$MyAir
@@ -465,7 +502,7 @@ f_run_4M <- function(
     
     ## Check if there is any missing logistic workers in every team
     if (day %in% WorkingDays) {
-      MyWorkers <- f_checkdailyWorkerType(W = MyWorkers, day = day)
+      MyWorkers <- f_checkdailyWorkerType(W = MyWorkers, D = day)
     }
     
     ## Assign location based on schedule and the number of active workers for the current day
