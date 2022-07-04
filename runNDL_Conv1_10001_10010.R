@@ -31,11 +31,11 @@ Parms_Food$worker_rhythm$porcine <- c("logistic1" = 0.025,
                                       "logistic2" = 0.125)
 
 # SIMULATION ####
-## seed number #### 
-all_seed <- 20001:20050 ### MODIFY  
+## seed number ####
+all_seed <- 10001:10010
 
-## output file name (check the XLSX file) /!\ ####
-output_filename <- "output_runTestDataOutputname.RData"
+## output file name /!\ ####
+output_filename <- "outputNDL_runConv1_10001_10010.RData"
 
 ## RUN ####
 {
@@ -66,11 +66,6 @@ IS <- f_IS(OUTPUT_allseeds)
 
 ### Infection log (infection sources) ####
 IL <- f_IL(OUTPUT_allseeds)
-
-# ## Plot ####
-# f_plotOutput(IL = IL, IS = IS)
-# f_plotOutput(IL = IL, IS = IS, detailed_plot = T)
-# f_plotOutput(IL = IL, IS = IS, detailed_plot = T, seed_select = 20002:20010, wrap.nrow = 3) ## select the seed(s) to be shown
 
 # SAVE RESULTS ####
 save.image(file = paste("simulation_output/", output_filename, sep=""))
