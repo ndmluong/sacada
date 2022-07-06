@@ -84,7 +84,7 @@ The general concept of the agent-based modelling workflow developed in
 this study is schematized in Figure \@ref(fig:FIG-abm-concept).
 
 ```{r FIG-abm-concept, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "General concept of the Agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities"}
-knitr::include_graphics("fig/schema/abm-concept.png")
+knitr::include_graphics("fig/schema/abm_concept.png")
 ```
 
 **Purpose and patterns**
@@ -132,7 +132,7 @@ the cutting room), Cooling area (for food storage), Waste area, W.C.,
 and Office (illustration in Figure \@ref(fig:FIG-map-plant)).
 
 ```{r FIG-map-plant, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant"}
-knitr::include_graphics("fig/schema/map_of_plant.png")
+knitr::include_graphics("fig/schema/map_of_plant_obj_worker.png")
 ```
 
 The different characteristics of each room are included as inputs of the
@@ -220,10 +220,6 @@ by several operators (e.g.: a peeler, frequently used in meat cutting
 plant). The parameters associated with these objects are gathered in
 Table \@ref(tab:TAB-plant-object-parameters).
 
-```{r FIG-map-plant-object, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant"}
-knitr::include_graphics("fig/schema/map_of_plant_object.png")
-```
-
 ```{r TAB-plant-object-parameters, echo=FALSE}
 data<-read.csv("csv/parameters_object_plant.csv",sep=";",header = T)
 data<-as.data.frame(data)
@@ -243,15 +239,25 @@ knitr::kable(
 
 Different principal types of workers were taken into account in the
 model depending on the their daily tasks inside the plant. According to
-industrial investigations and expert knowledge, the
+industrial investigations and expert knowledge, six types of workers
+were included as following:
 
--   Cutter 1 : deboning or cutting carcasses into large pieces
--   Cutter 2 : cutting large pieces into small pieces
--   Logistic 1 : bringing the carcasses to the cutters
--   Logistic 2 : recover cut products then pack and store
--   Transverse 1: manager / chief / maintenance staff who come to the
-    workshop a few times a day
--   Transverse 2: people from the cleaning team
+-   *logistic1* : the workers in charge of bringing carcasses (or
+    half-carcasses), arriving in the cutting room through the arrival
+    gate, to the begin of the conveyor for cutting.
+-   *cutter1* : positioned around the first section of the conveyor,
+    denoted *conveyor1*, in charge of deboning, trimming and cutting
+    carcasses into large pieces;
+-   *cutter2* : workers in charge of cutting larges pieces from
+    *cutter1* into smaller food portions;
+-   
+-   *logistic2* : the workers in charge of transferring food portions
+    from the cutting tables to the packaging or supplementary treatment
+    equipment and storing packed products in the cooling area;
+-   *transverse1*: administrative workers such as manager, chief or
+    maintenance staff who mainly stay out of the cutting room during the
+    work day;
+-   *transverse2*: people from the cleaning team.
 
 ```{r FIG-map-plant-object-worker, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant with worker"}
 knitr::include_graphics("fig/schema/map_of_plant_obj_worker.png")
@@ -273,14 +279,19 @@ pack_rows("*Overall proportion for different types of workers *" , 5, 10)
 
 ```
 
-The proportion of types of workers of cutters and logistics worked in
-two teams.This proportion is defined in the variable **pTeam**, where
-the proportion of workers in each team is defined, between 0 and 1, with
-the total of "teamA" and "teamB" being equal to 1. (For example : teamA
-= 0.5, teamB = 0.5), Moreover, this worker can alternatively change the
-working shift (morning/afternoon) from one week to another, and so
-change of team. The proportion of workers is defined in **pChangeTeam**
-(0 to 1). The value will be 0.05 (5%) [Sources]{style="color:red"}.
+The workers were split afterwards into two teams, denoted *"team A"* and
+*"team B"* according to their working shift (morning or afternoon) and
+to their weekly schedule. In the model, this team dividing was included
+by the parameters *pTeam* (value between 0 and 1 representing the
+proportion of each team) and set by default at 0.5 (equal distribution
+between the two teams A and B). In each team, the types of workers
+(cutters, transverse and logistic workers) were proportionally
+distributed as described above. The two teams A and B alternatively
+change their shift (morning/afternoon) from one week to another.
+Finally, the workers change the team (between the teams A and B) from
+one week to another using a probability defined as model parameter,
+denoted *pChangeTeam*, (value between 0 and 1), set as 0.05 by default
+([Sources]{style="color:red"}).
 
 ##### Rules
 
@@ -289,7 +300,7 @@ change of team. The proportion of workers is defined in **pChangeTeam**
 ##### Circulation of the droplets
 
 ```{r FIG-abm-infection-air, echo=F, fig.align = 'center', out.width = "85%", fig.cap = "The circulation of the droplets between workers through the air in the room"}
-knitr::include_graphics("fig/schema/abm-infection-air.png")
+knitr::include_graphics("fig/schema/abm_infection_4M.png")
 ```
 
 ##### Processing rules
