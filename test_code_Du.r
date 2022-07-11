@@ -320,8 +320,7 @@ lapply(unique(IS$seed), FUN = function(seedx) {
 
 
 
-ISsub <- subset(IS, seed == 20001)
-
+ISsub <- subset(IS, seed == 103)
 
 ISsub <- tibble::add_column(ISsub, Incidence = NA, .after = "Day")
 ISsub$Incidence[1] <- ISsub$Infected_cumul[1]
@@ -329,22 +328,41 @@ for (i in 2:nrow(ISsub)) {
   ISsub$Incidence[i] <- ISsub$Infected_cumul[i] - ISsub$Infected_cumul[i-1]
 }
 
-onset <- rep(ISsub$Day, ISsub$Incidence)
-inci <- incidence(onset)
-plot(inci, border = "white")
+# onset <- rep(ISsub$Day, ISsub$Incidence)
+# inci <- incidence(onset)
+# plot(inci, border = "white")
 
-Rt_res <- earlyR::get_R(inci,
-                        si_mean = Parms_Conta$SerialInterval[[Parms_Conta$VoC]][["mu"]],
-                        si_sd = Parms_Conta$SerialInterval[[Parms_Conta$VoC]][["sigma"]])
+# Rt_res <- earlyR::get_R(inci,
+#                         si_mean = 3.6,
+#                         si_sd = 0.4)
+# Rt_res
+# Rt_val <- sample_R(Rt_res, 1000)
+# summary(Rt_val)
+# set.seed(20001)
+# R_val <- rgamma(n=1000, shape = Rt_res$si$parameters$shape, scale = Rt_res$si$parameters$scale)
+# hist(R_val)
 
-Rt_val <- sample_R(Rt_res, 1000)
-summary(Rt_val)
-set.seed(20001)
-R_val <- rgamma(n=1000, shape = Rt_res$si$parameters$shape, scale = Rt_res$si$parameters$scale)
-hist(R_val)
+
+MyInci <- data.frame(dates = as.numeric(ISsub$Day),
+                     I = ISsub$Incidence)
+DayLastInci <- max(MyInci$dates[MyInci$I > 0])
+tstep <- 6
+
+t_start <- 2:DayLastInci
+t_end <- t_start + 6
+Rt_res <- EpiEstim::estimate_R(incid = MyInci, method = "parametric_si", config = make_config(list(mean_si = 3.6, std_si = 0.4, t_start = t_start, t_end = t_end)))
+Rt_res$R
+c(mean(Rt_res$R$`Quantile.0.025(R)`),
+  mean(Rt_res$R$`Quantile.0.05(R)`),
+  mean(Rt_res$R$`Quantile.0.25(R)`),
+  mean(Rt_res$R$`Median(R)`),
+  mean(Rt_res$R$`Quantile.0.75(R)`),
+  mean(Rt_res$R$`Quantile.0.95(R)`),
+  mean(Rt_res$R$`Quantile.0.975(R)`))
 
 
-plot(R_coeff)
+
+plot(Rt_res)
 
 Parms_Conta$SerialInterval[["original"]][["mu"]]
 

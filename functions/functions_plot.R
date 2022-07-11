@@ -422,11 +422,11 @@ f_summaryWorkersAtDay <- function(
 
 ##### f_plotOutput() FUNCTION TO PLOT SIMULATION OUTPUT SUMMARY #####
 f_plotOutput <- function(
-    IL,
-    IS,
-    seed_select = NULL,
-    detailed_plot = F,
-    wrap.nrow = 1
+  IL,
+  IS,
+  seed_select = NULL,
+  detailed_plot = F,
+  wrap.nrow = 1
 ) {
   
   tapply(IL$InfectionSource, IL$seed, summary) %>%
@@ -468,7 +468,7 @@ f_plotOutput <- function(
     ggplot(data = ISsub) +
       geom_line(aes(x = Day, y = Infected_cumul, group = seed, colour = seed), size = 0.5) +
       theme(axis.ticks=element_blank(),
-            #legend.position = "none",
+            legend.position = "none",
             panel.background=element_rect(fill="white"),
             plot.title = element_text(face="bold", size=15),
             axis.title = element_text(face="bold", size=10),
@@ -478,12 +478,12 @@ f_plotOutput <- function(
             panel.grid.minor.y=element_line(colour="white"),
             panel.grid.minor.x=element_line(colour="lightgrey")) +
       scale_x_continuous(breaks = seq(1, max(IS$Day)+1, by = 7)) +
-      scale_y_continuous(breaks = seq(0, max(IS$Infected_cumul)+5, by = 5)) +
-      coord_cartesian(ylim = c(0, max(IS$Infected_cumul)+5),
+      scale_y_continuous(breaks = seq(0, length(unique(IL$W_ID)), by = 5)) +
+      coord_cartesian(ylim = c(0, length(unique(IL$W_ID))),
                       xlim = c(0, max(IS$Day)+1)) +
-      stat_summary(data = IS, aes(x=Day, y=Infected_cumul), fun = mean, geom="line", size = 2, colour = "black") + 
-      labs(title = "Cumulative number of infected workers",
-           subtitle = paste(length(unique(ISsub$seed)), "individual curves and the average trend (across", length(unique(IS$seed)), "independent simulations)")) +
+      stat_summary(data = IS, aes(x=Day, y=Infected_cumul), fun = mean, geom="line", size = 1.5, colour = "black") + 
+      labs(title = "Cumulative number of infected workers over time",
+           subtitle = "individual curves and the average trend across independent simulations") +
       xlab("time (day)") + ylab("number of workers") -> g_Output
   } 
   else {
