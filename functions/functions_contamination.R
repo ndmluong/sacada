@@ -317,7 +317,7 @@ f_dailyContamination <- function(
 f_estimateRt <- function(
   ISsub, ## data.frame (Infection summary), output of the function f_runModel associated with ONE GIVEN SIMULATION SEED
   prm_conta,
-  seed
+  prm_workers
 ){
   ISsub <- tibble::add_column(ISsub, Incidence = NA, .after = "Day")
   ISsub$Incidence[1] <- ISsub$Infected_cumul[1]
@@ -325,22 +325,38 @@ f_estimateRt <- function(
     ISsub$Incidence[i] <- ISsub$Infected_cumul[i] - ISsub$Infected_cumul[i-1]
   }
   
-  onset <- rep(ISsub$Day, ISsub$Incidence)
-  inci <- incidence(onset)
+  MyInci <- data.frame(dates = as.numeric(ISsub$Day),
+                       I = ISsub$Incidence)
   
-  Rt_res <- earlyR::get_R(inci,
-                          si_mean = prm_conta$SerialInterval[[prm_conta$VoC]][["mu"]],
-                          si_sd = prm_conta$SerialInterval[[prm_conta$VoC]][["sigma"]])
+  tstep <- prm_workers$RecoveredDay - prm_workers$InfectedDay ## width of the sliding windows for calculating Rt
   
-  set.seed(seed)
-  R_val <- rgamma(n=1000,
-                  shape = Rt_res$si$parameters$shape,
-                  scale = Rt_res$si$parameters$scale)
-  c("seed" = seed, summary(R_val)) %>%
-    t() %>%
-    as.data.frame() -> Rt_out
-  return(Rt_out)
+  DayLastInci <- max(MyInci$dates[MyInci$I > 0])
   
+  # beginning points for the windows
+  if (DayLastInci < 2) {
+    R_output <- 0
+  } else {
+    if (DayLastInci < tstep) {
+      t_start <- seq(2, DayLastInci)
+    } else {
+      t_start <- seq(2, nrow(MyInci) - tstep)
+    }
+    # ending points for the windows
+    t_end <- t_start + tstep
+    
+    options(warn = -1)
+    Rt_res <- EpiEstim::estimate_R(incid = MyInci,
+                                   method = "parametric_si",
+                                   config = make_config(list(mean_si = prm_conta$SerialInterval[[prm_conta$VoC]][["mu"]],
+                                                             std_si = prm_conta$SerialInterval[[prm_conta$VoC]][["sigma"]],
+                                                             t_start = t_start,
+                                                             t_end = t_end)))
+    options(warn = 0)
+    R_output <- mean(Rt_res$R$`Mean(R)`)
+    
+  }
+
+  return(R_output)
 }
 
 

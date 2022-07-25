@@ -592,34 +592,34 @@ f_run_4M <- function(
 }
 
 
-#### f_IL ####
-f_IL <- function(OUTPUT_allseeds) {
-  lapply(OUTPUT_allseeds, function(x) {
-    return(data.frame(x$InfectionLog,
-                      seed = rep(x$seed, nrow(x$InfectionLog))))
-  }) %>%
-    data.table::rbindlist() -> IL
-  IL$seed <- as.factor(IL$seed)
-  IL$InfectionSource <- as.factor(IL$InfectionSource)
-  return(IL)
-}
-
-f_IS <- function(OUTPUT_allseeds) {
-  lapply(OUTPUT_allseeds, function(x) {return(x$InfectionSummary)}) %>%
-    data.table::rbindlist() -> IS
-  IS$seed <- as.factor(IS$seed)
-  return(IS)
-}
-
-f_summaryRt <- function(
-  IS,
-  prm_conta
-) {
-  lapply(as.numeric(levels(IS$seed)), function(x) {
-    f_estimateRt(ISsub = subset(IS, seed == x),
-                 prm_conta = prm_conta,
-                 seed = x)
-  }) %>%
-    data.table::rbindlist() -> Rt_summary
-  return(Rt_summary)
-}
+# #### f_IL ####
+# f_IL <- function(OUTPUT_allseeds) {
+#   lapply(OUTPUT_allseeds, function(x) {
+#     return(data.frame(x$InfectionLog,
+#                       seed = rep(x$seed, nrow(x$InfectionLog))))
+#   }) %>%
+#     data.table::rbindlist() -> IL
+#   IL$seed <- as.factor(IL$seed)
+#   IL$InfectionSource <- as.factor(IL$InfectionSource)
+#   return(IL)
+# }
+# 
+# f_IS <- function(OUTPUT_allseeds) {
+#   lapply(OUTPUT_allseeds, function(x) {return(x$InfectionSummary)}) %>%
+#     data.table::rbindlist() -> IS
+#   IS$seed <- as.factor(IS$seed)
+#   return(IS)
+# }
+# 
+# f_summaryRt <- function(
+#   IS,
+#   prm_conta
+# ) {
+#   lapply(as.numeric(levels(IS$seed)), function(x) {
+#     f_estimateRt(ISsub = subset(IS, seed == x),
+#                  prm_conta = prm_conta,
+#                  seed = x)
+#   }) %>%
+#     data.table::rbindlist() -> Rt_summary
+#   return(Rt_summary)
+# }

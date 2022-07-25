@@ -362,7 +362,7 @@ the pre-symptomactic period, one fraction of the individual will develop
 symptoms. Several studies are available for estimating this proportion
 [@He2021; @Alene2021; @Ma2021; @Sah2021]. @Alene2021 estimated the
 pooled proportion of asymptomatic COVID-19 cases throughout the course
-of infection was 25% (with 95%CI: 16%â€“38%). @Ma2021 estimated that the
+of infection was 25% (with 95%CI: 16%â€"38%). @Ma2021 estimated that the
 pooled percentage of asymptomatic infections among the confirmed
 population was 40.50% (with 95%CI: 33.50%-47.50%). @Sah2021 estimated
 that percentage at 35.1% (with 95% CI: 30.7-39.9%) For the ABM model,
@@ -379,7 +379,7 @@ During that period, virus can be detected but it as estimated that
 infectiousness is usually low after 7 days [@He2020]. The uncertainty
 range for the infectiousness period can be estimated from @Byrne2020.
 They stated that virus detection overestimates the infectious period on
-average by 2â€“6 days. @vanKampen2021 provide another estimation of the
+average by 2â€"6 days. @vanKampen2021 provide another estimation of the
 uncertainty range of infectiousness period. They considered the duration
 between 5 and 11 days.The value of 8 days [@vanKampen2021] was used in
 the model .
