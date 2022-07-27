@@ -420,8 +420,8 @@ f_summaryWorkersAtDay <- function(
 
 
 
-##### f_plotOutput() FUNCTION TO PLOT SIMULATION OUTPUT SUMMARY #####
-f_plotOutput <- function(
+##### f_plotContaminatedWorkers() FUNCTION TO PLOT SIMULATION OUTPUT SUMMARY #####
+f_plotContaminatedWorkers <- function(
   IL,
   IS,
   seed_select = NULL,
@@ -517,7 +517,7 @@ f_plotOutput <- function(
       geom_rect(data = ILFsub, aes(xmin = max(IS$Day)+0.2, xmax = max(IS$Day)+1.5, ymin = initialised+aerosol+epidemy, ymax = initialised+aerosol+epidemy+community), fill = pal_turbo[3]) +
       facet_wrap(. ~ seed, nrow = wrap.nrow) +
       scale_x_continuous(breaks = seq(1, max(IS$Day), by = 7)) +
-      scale_y_continuous(breaks = seq(0, max(IS$Infected_cumul), by = 2)) +
+      scale_y_continuous(breaks = seq(0, max(IS$Infected_cumul), by = 10)) +
       scale_fill_manual(name = "Infection sources",
                         breaks = c("initialised", "aerosol", "epidemy", "community"),
                         values = c("initialised"="gray30", "aerosol"=pal_turbo[1], "epidemy"=pal_turbo[2], "community"=pal_turbo[3])) +

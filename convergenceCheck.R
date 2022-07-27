@@ -12,61 +12,123 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 library(EpiEstim)
+library(viridis)
 
 # Combine results from different simulations ####
 ALLOUTPUT <- list()
 
 ## 10001:10010
 load("simulation_output/outputNDL_runConv1_10001_10010.RData")
-ALLOUTPUT <- append(ALLOUTPUT,
-                 OUTPUT_allseeds)
+ALLOUTPUT <- append(ALLOUTPUT, OUTPUT_allseeds)
+gdata::keep(ALLOUTPUT, sure = TRUE)
 
 ## 10011:10050
 load("simulation_output/outputNDL_runConv1_10011_10050.RData")
-ALLOUTPUT <- append(ALLOUTPUT,
-                 OUTPUT_allseeds)
+ALLOUTPUT <- append(ALLOUTPUT, OUTPUT_allseeds)
+gdata::keep(ALLOUTPUT, sure = TRUE)
 
 ## 10051:10100
 load("simulation_output/outputNDL_runConv1_10051_10100.RData")
-ALLOUTPUT <- append(ALLOUTPUT,
-                 OUTPUT_allseeds)
+ALLOUTPUT <- append(ALLOUTPUT, OUTPUT_allseeds)
+gdata::keep(ALLOUTPUT, sure = TRUE)
 
 ## 10501:10550
 load("simulation_output/outputSD_runConv1_10501_10550.RData")
-ALLOUTPUT <- append(ALLOUTPUT,
-                 OUTPUT_allseeds)
+ALLOUTPUT <- append(ALLOUTPUT, OUTPUT_allseeds)
+gdata::keep(ALLOUTPUT, sure = TRUE)
 
 ## 10601:10700
 load("simulation_output/outputSD_runConv1_10601_10700.RData")
-ALLOUTPUT <- append(ALLOUTPUT,
-                 OUTPUT_allseeds)
+ALLOUTPUT <- append(ALLOUTPUT, OUTPUT_allseeds)
 
 # Clear environment
-rm(IL, IS, OUTPUT_allseeds, all_seed, ST_Begin, ST_End, output_filename)
+gdata::keep(ALLOUTPUT,
+            Parms_Air, Parms_Conta, Parms_Food, Parms_Plant, Parms_Surfaces, Parms_Time, Parms_Workers,
+            sure = TRUE)
 
-# Update functions #####
+
+# Save full output data #####
+# save.image("simulation_output/202207_ConvergenceCheck_FullData.RData")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# >>>>>>>>>> Checkpoint 1 <<<<<<<<<< ####
+
+# Load full output data #####
+# load("simulation_output/202207_ConvergenceCheck_FullData.RData")
+
+
+# Lighten the convergence output data ####
+# Extract the plant structure
+MyPlant <- ALLOUTPUT[[2]]$MyPlant
+
+# Keeping essential results
+lapply(ALLOUTPUT, 
+       function(x) {
+  if (!is.null(x)) {
+    x[names(x) %in% c("seed", "S_summary", "FP_summary", "InfectionLog", "InfectionSummary") == TRUE]
+  } else return(NULL)
+}) -> AllOutput
+
+# Cleaning environment
+rm(ALLOUTPUT)
+
+# Save light output data #####
+# save.image("simulation_output/202207_ConvergenceCheck_LightData.RData")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# >>>>>>>>>> Checkpoint 2 <<<<<<<<<< ####
+
+# Load light output data #####
+# load("simulation_output/202207_ConvergenceCheckData_LightData.RData")
+
+# Load all updated functions (optional) #####
 source("functions/functions.R")
 
-# SAVE CONVERGENCE DATA #####
-# save.image("simulation_output/202207_ConvergenceCheckData.RData")
-
-
-# >>> Checkpoint <<< ####
-# TREATMENT OF CONVERGENCE DATA ####
-## Load data (optional) ####
-load("simulation_output/202207_ConvergenceCheckData.RData")
-
+# Summaries extraction ####
 ## Success rate ####
 # Discard all null elements (simulations skipped due to errors)
-ALLOUTPUT %>%
-  purrr::discard(., is.null) -> OUTPUT ## sucess rate: 187/250
+AllOutput %>%
+  purrr::discard(., is.null) -> Output # success rate: 187/250
 
 # Rename the elements of the output by the seed number
-all_seeds <- sapply(OUTPUT, FUN = function(x) x$seed)
-names(OUTPUT) <- all_seeds
+all_seeds <- sapply(Output, function(x) x$seed)
+names(Output) <- all_seeds
 
-## IL: Infection logs for all seeds ####
-lapply(OUTPUT, FUN = function(x) {
+## IL - Infection logs for all seeds ####
+lapply(Output, function(x) {
   ILx <- data.frame(seed = rep(x$seed, nrow(x$InfectionLog)),
                     x$InfectionLog)
   return(ILx)
@@ -78,8 +140,8 @@ IL$seed <- as.factor(IL$seed)
 IL$InfectionSource <- as.factor(IL$InfectionSource)
 
 
-## IS: Infection logs for all seeds ####
-lapply(OUTPUT, FUN = function(x) x$InfectionSummary) %>%
+## IS - Infection status summary for all seeds ####
+lapply(Output, FUN = function(x) x$InfectionSummary) %>%
   data.table::rbindlist() %>%
   relocate(., seed) %>%
   arrange(., seed, Day) -> IS
@@ -87,7 +149,7 @@ lapply(OUTPUT, FUN = function(x) x$InfectionSummary) %>%
 IS$seed <- as.factor(IS$seed)
 
 ## SS: Contamination of the surfaces ####
-lapply(OUTPUT, FUN = function(x) {
+lapply(Output, function(x) {
   SSx <- data.frame(seed = rep(x$seed, nrow(x$S_summary)),
                     x$S_summary)
   return(SSx)
@@ -98,7 +160,7 @@ lapply(OUTPUT, FUN = function(x) {
 SS$seed <- as.factor(SS$seed)
 
 ## FPS: Contamination of the food portions ####
-lapply(OUTPUT, FUN = function(x) {
+lapply(Output, function(x) {
   FPSx <- data.frame(seed = rep(x$seed, nrow(x$FP_summary)),
                      x$FP_summary)
   return(FPSx)
@@ -108,9 +170,43 @@ lapply(OUTPUT, FUN = function(x) {
 
 FPS$seed <- as.factor(FPS$seed)
 
+# Save all summaries #####
+# save.image("simulation_output/202207_ConvergenceCheck_Summary.RData")
 
-f_plotOutput(IL = IL, IS = IS, detailed_plot = TRUE,
-             seed_select = sample(all_seeds, 15), wrap.nrow = 3)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# >>>>>>>>>> Checkpoint 3 <<<<<<<<<< ####
+
+# Load all summaries #####
+# load("simulation_output/202207_ConvergenceCheck_Summary.RData")
+
+# Plot - Infected workers ####
+f_plotContaminatedWorkers(IL = IL, IS = IS)
+f_plotContaminatedWorkers(IL = IL, IS = IS,
+                          seed_select = sample(all_seeds, 5), detailed_plot = T, wrap.nrow = 1)
+# >>> some interesting plots : 10527, 10658, 10669, 10627, 10536, 10601
+f_plotContaminatedWorkers(IL = IL, IS = IS,
+                          seed_select = c(10527, 10658, 10669, 10627, 10536, 10601),
+                          detailed_plot = T, wrap.nrow = 1)
 
 
