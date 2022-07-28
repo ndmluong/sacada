@@ -13,6 +13,7 @@ library(purrr)
 library(EnvStats)
 library(EpiEstim)
 library(viridis)
+library(ggpubr)
 
 # Combine results from different simulations ####
 ALLOUTPUT <- list()
@@ -200,6 +201,9 @@ FPS$seed <- as.factor(FPS$seed)
 # Load all summaries #####
 # load("simulation_output/202207_ConvergenceCheck_Summary.RData")
 
+# Load all updated functions (optional) #####
+source("functions/functions.R")
+
 # Plot - Infected workers ####
 f_plotContaminatedWorkers(IL = IL, IS = IS)
 f_plotContaminatedWorkers(IL = IL, IS = IS,
@@ -208,5 +212,16 @@ f_plotContaminatedWorkers(IL = IL, IS = IS,
 f_plotContaminatedWorkers(IL = IL, IS = IS,
                           seed_select = c(10527, 10658, 10669, 10627, 10536, 10601),
                           detailed_plot = T, wrap.nrow = 1)
+
+
+f_plotConvCumulContaWorkers(IL, IS, nsim = c(10, 40, 70, 100, 130, 160), resampling = 20, plotseed = 408, CVmax = 0.25) -> g_ConvCumulContaWorkers
+ggsave(filename="simulation_output/plot/g_ConvCumulContaWorkers.pdf", 
+       plot = g_ConvCumulContaWorkers, 
+       device = cairo_pdf, 
+       width = 210, 
+       height = 297, 
+       units = "mm")
+
+
 
 
