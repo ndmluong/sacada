@@ -199,7 +199,7 @@ FPS$seed <- as.factor(FPS$seed)
 # >>>>>>>>>> Checkpoint 3 <<<<<<<<<< ####
 
 # Load all summaries #####
-# load("simulation_output/202207_ConvergenceCheck_Summary.RData")
+load("simulation_output/202207_ConvergenceCheck_Summary.RData")
 
 # Load all updated functions (optional) #####
 source("functions/functions.R")
@@ -214,13 +214,81 @@ f_plotContaminatedWorkers(IL = IL, IS = IS,
                           detailed_plot = T, wrap.nrow = 1)
 
 
-f_plotConvCumulContaWorkers(IL, IS, nsim = c(10, 40, 70, 100, 130, 160), resampling = 20, plotseed = 408, CVmax = 0.25) -> g_ConvCumulContaWorkers
-ggsave(filename="simulation_output/plot/g_ConvCumulContaWorkers.pdf", 
-       plot = g_ConvCumulContaWorkers, 
-       device = cairo_pdf, 
-       width = 210, 
-       height = 297, 
-       units = "mm")
+
+
+
+
+# Convergence check ####
+## Indicator 1: Cumulative number of infected workers ####
+f_smrzCumulContaWorkers(IL = IL, IS = IS)
+f_smrzCumulContaWorkers(IL = IL, IS = IS)$cumul %>% mean()
+f_plotConvCumulContaWorkers(IL = IL, IS = IS,
+                            keptsim = c(10, 40, 70, 100, 130, 160),
+                            resampling = 20,
+                            plotseed = 408,
+                            CVmax = 0.20) -> g_ConvCumulContaWorkers
+
+
+
+
+
+
+## Indicator 2: Average food contamination ratio (> 5 log) ####
+f_smrzAverageFoodContaRatio(FPS = FPS, detection = 5)
+f_smrzAverageFoodContaRatio(FPS = FPS, detection = 5)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FPS, detection = 5, nbsim = 10)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FPS, detection = 5, nbsim = 10)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FPS, detection = 5, nbsim = 10, sampleseed = 408)$contaratio %>% mean()
+
+f_plotConvFoodContaRatio(FPS,
+                         detection = 5,
+                         keptsim = c(10, 40, 70, 100, 130, 160),
+                         resampling = 20,
+                         plotseed = 408,
+                         CVmax = 0.20) -> g_ConvFoodContaRatio
+
+
+
+
+
+
+## Indicator 3: Average surfaces contamination ratio (> 5log) ####
+f_smrzAverageSurfacesContaRatio(SS = SS, plant = MyPlant, detection = 5)
+f_smrzAverageSurfacesContaRatio(SS = SS, plant = MyPlant, detection = 5)$contaratio %>% mean()
+f_plotConvSurfacesContaRatio(SS = SS, 
+                             plant = MyPlant,
+                             detection = 5,
+                             keptsim = c(10, 40, 70, 100, 130, 160),
+                             resampling = 20,
+                             plotseed = 408,
+                             CVmax = 0.20) -> g_ConvSurfacesContaRatio
+
+
+
+
+## Indicator 4: Transmission rate Rt ####
+f_smrzRt(IS = IS, prm_conta = Parms_conta, prm_workers = Parms_Workers)
+f_smrzRt(IS = IS, prm_conta = Parms_conta, prm_workers = Parms_Workers)$Rt %>% mean(., na.rm = T)
+f_smrzRt(IS = IS, prm_conta = Parms_conta, prm_workers = Parms_Workers, nbsim = 10)$Rt %>% mean(., na.rm = T)
+f_smrzRt(IS = IS, prm_conta = Parms_conta, prm_workers = Parms_Workers, nbsim = 10)$Rt %>% mean(., na.rm = T)
+
+
+
+## All indicators ####
+ggpubr::ggarrange(plotlist = list(g_ConvCumulContaWorkers,
+                                  g_ConvFoodContaRatio,
+                                  g_ConvSurfacesContaRatio),
+                  nrow = 1) %>%
+  annotate_figure(.,
+                  top = text_grob("Convergence analysis with different output indicators", face = "bold", size = 20),
+                  left = text_grob("Probability density (curves) and mean values (vertical lines)", rot = 90,  face = "bold", size = 12),
+                  ) -> g_Convergence
+ggsave(filename="simulation_output/plot/g_Convergence.pdf", 
+       plot = g_Convergence, 
+       device = cairo_pdf, width = 420, height = 297, units = "mm")
+
+
+
 
 
 
