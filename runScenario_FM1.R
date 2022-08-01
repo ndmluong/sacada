@@ -32,6 +32,16 @@ output_filename <- paste("output_FM1_", MySeed,".RData", sep ="")
 
 
 
+OUTPUT_seedx <- f_run_4M(prm_plant = Parms_Plant,
+                         prm_time = Parms_Time,
+                         prm_workers = Parms_Workers,
+                         prm_air = Parms_Air,
+                         prm_conta = Parms_Conta,
+                         prm_surfaces = Parms_Surfaces,
+                         prm_food = Parms_Food,
+                         seed = MySeed)
+
+
 ## RUN ####
 OUTPUT_seedx <- tryCatch(f_run_4M(prm_plant = Parms_Plant,
                                   prm_time = Parms_Time,
@@ -42,7 +52,7 @@ OUTPUT_seedx <- tryCatch(f_run_4M(prm_plant = Parms_Plant,
                                   prm_food = Parms_Food,
                                   seed = MySeed),
                          error = function(e) {
-                           write(paste(Sys.time(),"- seed", x),
+                           write(paste(Sys.time(),"- seed", My),
                                  file = "error_log.txt", append = TRUE)})
 
 

@@ -91,86 +91,92 @@ f_dailyWork_T1 <- function(
   dt,
   seed = NULL
 ) {
-  # writeLines(paste(">>> Day ", D, " - Transverse1 workers", sep=""))
   
   active <- subset(W, W_active == "active" & Day == D)
   
   T1_ID <- subset(active, W_type == "transverse1")$W_ID %>% unique()
-  T1_location <- unique(Plant$L$location)
-  T1_location <- T1_location[!T1_location %in% c("Entry hall", "W.C.", "Conveyor1", "Conveyor2", "Equipment 1", "Office")]
   
-  # 9h
-  W <- f_moveWorkers(Plant, W, selectW=T1_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,9,0,dt=dt))
-  
-  # 9h05 - 11h55
-  W <- f_moveWorkers(Plant, W, selectW = T1_ID, to = "Office", t_ind = f_convertTime("time2ind",dt=dt,D,9,5))
-  
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "location",
-                                   time_begin = c(9,5), time_end=c(11,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordX",
-                                   time_begin = c(9,5), time_end=c(11,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordY",
-                                   time_begin = c(9,5), time_end=c(11,55), D=D, dt=dt)
-  
-  t_ind_begin <- f_convertTime("time2ind",dt=dt,D,9,5)
-  t_ind_end <- f_convertTime("time2ind",dt=dt,D,11,55)
-  Wsub <- subset(W, W_ID %in% T1_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end)
-  Wcomp <- subset(W, !(W_ID %in% T1_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end))
-  
-  lapply(T1_ID, FUN = function(x) { ## 3 random moves in the processing plant
-    d1 <- subset(Wsub, W_ID == x)
-    for (ti in sample(t_ind_begin:t_ind_end, 3)) {
-      d1 <- f_moveWorkers(Plant, d1, selectW = x, to = sample(T1_location,1), t_ind = ti)
-    }
-    return(d1)
-  }) %>% rbindlist() %>% rbind(Wcomp) -> W
-  
-  lapply(T1_ID, FUN = function(x) { ## 2 random moves in the W.C.
-    d1 <- subset(Wsub, W_ID == x)
-    for (ti in sample(t_ind_begin:t_ind_end,2)) {
-      d1 <- f_moveWorkers(Plant, d1, selectW = x, to = "W.C.", t_ind = ti)
-    }
-    return(d1)
-  }) %>% rbindlist() %>% rbind(Wcomp) -> W
-  
-  W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,12,0,dt=dt))
-  
-  ## nothing between 12h05-12h40
-  
-  # 12h45
-  W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,12,45,dt=dt))
-  
-  # 12h50-16h55
-  W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Office", t_ind=f_convertTime("time2ind",D,12,50,dt=dt))
-  
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "location",
-                                   time_begin = c(12,50), time_end=c(16,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordX",
-                                   time_begin = c(12,50), time_end=c(16,55), D=D, dt=dt)
-  W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordY",
-                                   time_begin = c(12,50), time_end=c(16,55), D=D, dt=dt)
-  
-  t_ind_begin <- f_convertTime("time2ind",dt=dt,D,12,50)
-  t_ind_end <- f_convertTime("time2ind",dt=dt,D,16,55)
-  Wsub <- subset(W, W_ID %in% T1_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end)
-  Wcomp <- subset(W, !(W_ID %in% T1_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end))
-  lapply(T1_ID, FUN = function(x) { ## 3 random moves in the processing plant
-    d1 <- subset(Wsub, W_ID == x)
-    for (ti in sample(t_ind_begin:t_ind_end, 3)) {
-      d1 <- f_moveWorkers(Plant, d1, selectW = x, to = sample(T1_location,1), t_ind = ti)
-    }
-    return(d1)
-  }) %>% rbindlist() %>% rbind(Wcomp) -> W
-  
-  lapply(T1_ID, FUN = function(x) { ## 2 random moves in the W.C.
-    d1 <- subset(Wsub, W_ID == x)
-    for (ti in sample(t_ind_begin:t_ind_end,2)) {
-      d1 <- f_moveWorkers(Plant, d1, selectW = x, to = "W.C.", t_ind = ti)
-    }
-    return(d1)
-  }) %>% rbindlist() %>% rbind(Wcomp) -> W
-  
-  W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,17,0,dt=dt))
+  if (length(T1_ID) >= 1) { # if there is at least one transverse1 worker
+    
+    T1_location <- unique(Plant$L$location)
+    T1_location <- T1_location[!T1_location %in% c("Entry hall", "W.C.", "Conveyor1", "Conveyor2", "Equipment 1", "Office")]
+    
+    # 9h
+    W <- f_moveWorkers(Plant, W, selectW=T1_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,9,0,dt=dt))
+    
+    # 9h05 - 11h55
+    W <- f_moveWorkers(Plant, W, selectW = T1_ID, to = "Office", t_ind = f_convertTime("time2ind",dt=dt,D,9,5))
+    
+    W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "location",
+                                     time_begin = c(9,5), time_end=c(11,55), D=D, dt=dt)
+    W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordX",
+                                     time_begin = c(9,5), time_end=c(11,55), D=D, dt=dt)
+    W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordY",
+                                     time_begin = c(9,5), time_end=c(11,55), D=D, dt=dt)
+    
+    t_ind_begin <- f_convertTime("time2ind",dt=dt,D,9,5)
+    t_ind_end <- f_convertTime("time2ind",dt=dt,D,11,55)
+    Wsub <- subset(W, W_ID %in% T1_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end)
+    Wcomp <- subset(W, !(W_ID %in% T1_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end))
+    
+    lapply(T1_ID, FUN = function(x) { ## 3 random moves in the processing plant
+      d1 <- subset(Wsub, W_ID == x)
+      for (ti in sample(t_ind_begin:t_ind_end, 3)) {
+        d1 <- f_moveWorkers(Plant, d1, selectW = x, to = sample(T1_location,1), t_ind = ti)
+      }
+      return(d1)
+    }) %>% rbindlist() %>% rbind(Wcomp) -> W
+    
+    lapply(T1_ID, FUN = function(x) { ## 2 random moves in the W.C.
+      d1 <- subset(Wsub, W_ID == x)
+      for (ti in sample(t_ind_begin:t_ind_end,2)) {
+        d1 <- f_moveWorkers(Plant, d1, selectW = x, to = "W.C.", t_ind = ti)
+      }
+      return(d1)
+    }) %>% rbindlist() %>% rbind(Wcomp) -> W
+    
+    W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,12,0,dt=dt))
+    
+    ## nothing between 12h05-12h40
+    
+    # 12h45
+    W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,12,45,dt=dt))
+    
+    # 12h50-16h55
+    W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Office", t_ind=f_convertTime("time2ind",D,12,50,dt=dt))
+    
+    W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "location",
+                                     time_begin = c(12,50), time_end=c(16,55), D=D, dt=dt)
+    W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordX",
+                                     time_begin = c(12,50), time_end=c(16,55), D=D, dt=dt)
+    W <- f_replicateWorkerstime2time(W, selectW = T1_ID, Invariant = "coordY",
+                                     time_begin = c(12,50), time_end=c(16,55), D=D, dt=dt)
+    
+    t_ind_begin <- f_convertTime("time2ind",dt=dt,D,12,50)
+    t_ind_end <- f_convertTime("time2ind",dt=dt,D,16,55)
+    Wsub <- subset(W, W_ID %in% T1_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end)
+    Wcomp <- subset(W, !(W_ID %in% T1_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end))
+    lapply(T1_ID, FUN = function(x) { ## 3 random moves in the processing plant
+      d1 <- subset(Wsub, W_ID == x)
+      for (ti in sample(t_ind_begin:t_ind_end, 3)) {
+        d1 <- f_moveWorkers(Plant, d1, selectW = x, to = sample(T1_location,1), t_ind = ti)
+      }
+      return(d1)
+    }) %>% rbindlist() %>% rbind(Wcomp) -> W
+    
+    lapply(T1_ID, FUN = function(x) { ## 2 random moves in the W.C.
+      d1 <- subset(Wsub, W_ID == x)
+      for (ti in sample(t_ind_begin:t_ind_end,2)) {
+        d1 <- f_moveWorkers(Plant, d1, selectW = x, to = "W.C.", t_ind = ti)
+      }
+      return(d1)
+    }) %>% rbindlist() %>% rbind(Wcomp) -> W
+    
+    W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,17,0,dt=dt))
+  }
+  else { # otherwise, if there is not any transverse1 worker
+    writeLines(paste("/!\\ warnings: day ", D, ": missing transverse1 worker during the day shift", sep =""))
+  }
   
   return(W)
 }
@@ -274,31 +280,37 @@ f_dailyWork_T2 <- function(
   dt,
   seed = NULL
 ) {
-  # writeLines(paste(">>> Day ", D, " - Transverse2 workers", sep=""))
   active <- subset(W, W_active == "active" & Day == D)
   
   T2_ID <- subset(active, W_type == "transverse2")$W_ID %>% unique()
-  T2_location <- unique(Plant$L$location)
-  T2_location <- T2_location[!T2_location %in% c("Conveyor1", "Conveyor2", "Equipment 1")]
   
-  ## 22h
-  W <- f_moveWorkers(Plant, W, selectW=T2_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,22,0,dt=dt))
-  
-  # random moves between different locations 22h05-23h55
-  t_ind_begin <- f_convertTime("time2ind",D,22,5,dt=dt)
-  t_ind_end <- f_convertTime("time2ind",D,23,50,dt=dt)
-  Wsub <- subset(W, W_ID %in% T2_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end)
-  Wcomp <- subset(W, !(W_ID %in% T2_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end))
-  
-  lapply(T2_ID, FUN = function(x) {
-    d1 <- subset(Wsub, W_ID == x)
-    for (ti in t_ind_begin:t_ind_end) {
-      d1 <- f_moveWorkers(Plant, d1, selectW = x, to = sample(T2_location,1), t_ind = ti)
-    }
-    return(d1)
-  }) %>% rbindlist() %>% rbind(Wcomp) -> W
-  
-  W <- f_moveWorkers(Plant, W, selectW = T2_ID, to="Entry hall", t_ind = f_convertTime("time2ind",D,23,55,dt=dt))
+  if (length(T2_ID) >= 1) { # if there is at least one transverse2 worker
+    
+    T2_location <- unique(Plant$L$location)
+    T2_location <- T2_location[!T2_location %in% c("Conveyor1", "Conveyor2", "Equipment 1")]
+    
+    ## 22h
+    W <- f_moveWorkers(Plant, W, selectW=T2_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,22,0,dt=dt))
+    
+    # random moves between different locations 22h05-23h55
+    t_ind_begin <- f_convertTime("time2ind",D,22,5,dt=dt)
+    t_ind_end <- f_convertTime("time2ind",D,23,50,dt=dt)
+    Wsub <- subset(W, W_ID %in% T2_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end)
+    Wcomp <- subset(W, !(W_ID %in% T2_ID & t_ind >= t_ind_begin & t_ind <= t_ind_end))
+    
+    lapply(T2_ID, FUN = function(x) {
+      d1 <- subset(Wsub, W_ID == x)
+      for (ti in t_ind_begin:t_ind_end) {
+        d1 <- f_moveWorkers(Plant, d1, selectW = x, to = sample(T2_location,1), t_ind = ti)
+      }
+      return(d1)
+    }) %>% rbindlist() %>% rbind(Wcomp) -> W
+    
+    W <- f_moveWorkers(Plant, W, selectW = T2_ID, to="Entry hall", t_ind = f_convertTime("time2ind",D,23,55,dt=dt))
+  }
+  else {
+    writeLines(paste("/!\\ warnings: day ", D, ": missing transverse2 worker during the night shift", sep =""))
+  }
   
   return(W)
 }
@@ -414,8 +426,8 @@ f_checkdailyWorkerType <- function(
   
   critical <- all(critical)
   
-  return(W = W,
-         critical = critical)
+  return(list(W = W,
+              critical = critical))
   
 }
 
