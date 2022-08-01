@@ -1,21 +1,18 @@
 # PACKAGES #####
-library(ggplot2)
 library(tibble)
 library(reshape2)
 library(plotly)
-library(stringr)
 library(data.table)
-library(dplyr)
 library(gridExtra)
 library(earlyR)
 library(incidence)
-library(purrr)
 library(EnvStats)
 library(EpiEstim)
 library(viridis)
 library(ggpubr)
+library(tidyverse)
 
-# Combine results from different simulations ####
+# Combine raw results from different simulations ####
 ALLOUTPUT <- list()
 
 ## 10001:10010
@@ -222,6 +219,7 @@ f_plotContaminatedWorkers(IL = IL, IS = IS,
 ## Indicator 1: Cumulative number of infected workers ####
 f_smrzCumulContaWorkers(IL = IL, IS = IS)
 f_smrzCumulContaWorkers(IL = IL, IS = IS)$cumul %>% mean()
+
 f_plotConvCumulContaWorkers(IL = IL, IS = IS,
                             keptsim = c(10, 40, 70, 100, 130, 160),
                             resampling = 20,
@@ -255,6 +253,7 @@ f_plotConvFoodContaRatio(FPS,
 ## Indicator 3: Average surfaces contamination ratio (> 5log) ####
 f_smrzAverageSurfacesContaRatio(SS = SS, plant = MyPlant, detection = 5)
 f_smrzAverageSurfacesContaRatio(SS = SS, plant = MyPlant, detection = 5)$contaratio %>% mean()
+
 f_plotConvSurfacesContaRatio(SS = SS, 
                              plant = MyPlant,
                              detection = 5,
@@ -283,6 +282,7 @@ ggpubr::ggarrange(plotlist = list(g_ConvCumulContaWorkers,
                   top = text_grob("Convergence analysis with different output indicators", face = "bold", size = 20),
                   left = text_grob("Probability density (curves) and mean values (vertical lines)", rot = 90,  face = "bold", size = 12),
                   ) -> g_Convergence
+
 ggsave(filename="simulation_output/plot/g_Convergence.pdf", 
        plot = g_Convergence, 
        device = cairo_pdf, width = 420, height = 297, units = "mm")
