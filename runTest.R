@@ -32,7 +32,7 @@ Parms_Food$worker_rhythm$porcine <- c("logistic1" = 0.025,
 all_seed <- 20001
 
 ## output file name /!\ ####
-output_filename <- "output_runTestbis.RData"
+output_filename <- "output_runTest.RData"
 
 ## RUN ####
 {

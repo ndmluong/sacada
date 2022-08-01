@@ -326,7 +326,8 @@ f_run_4M <- function(
     prm_conta,
     prm_surfaces,
     prm_food,
-    seed
+    seed,
+    fulloutput = FALSE
 ) {
   writeLines("================================= BEGIN =============================================")
   writeLines(paste("Four-module model run - seed ", seed, sep = ""))
@@ -352,9 +353,12 @@ f_run_4M <- function(
                         !Weekday %in% c("Saturday", "Sunday") & Day < max(MyWorkers$Day))$Day %>% unique() %>% sort()
   # OtherDays <- subset(MyWorkers, !Day %in% WorkingDays)$Day %>% unique() %>% sort()
   
-  ## Check worker type composition for each team
-  MyWorkers <- f_checkdailyWorkerType(W = MyWorkers, D = 1)
+  ## Critical days if it happens
+  CriticalDays <- c()
   
+  ## Check worker type composition for each team
+  MyWorkers <- f_checkdailyWorkerType(W = MyWorkers, D = 1)$W
+
   ## Assign location based on schedule for the first day (day 1)
   d1 <- subset(MyWorkers, Day == 1)
   d1 <- f_dailyWork_AllTeams(Plant = MyPlant, W = d1, D = 1, dt = Step, seed = seed+1)
@@ -501,11 +505,14 @@ f_run_4M <- function(
     writeLines(">>> Setting possible absence for symptomatic workers")
     MyWorkers <- f_setAbsence(W = MyWorkers, day = day, prm_workers = prm_workers)
     
-    ## Check if there is any missing logistic workers in every team
-    if (day %in% WorkingDays) {
-      MyWorkers <- f_checkdailyWorkerType(W = MyWorkers, D = day)
-    }
+    ## Check if the current day becomes a critical day
+    checkdaily <- f_checkdailyWorkerType(W = MyWorkers, D = day)
     
+    if (day %in% WorkingDays & checkdaily$critical == TRUE) { ## if the current working day becomes a critical day :
+      WorkingDays <- WorkingDays[WorkingDays != day] ## remove the current day from the workings day: nothing will happen (as a week-end day)
+      CriticalDays <- c(CriticalDays, day)
+    }
+
     ## Assign location based on schedule and the number of active workers for the current day
     if (day %in% WorkingDays) {
       d1 <- subset(MyWorkers, Day == day)
@@ -575,15 +582,24 @@ f_run_4M <- function(
   
   InfectionSummary$Positive <- InfectionSummary$Infected_cumul - InfectionSummary$Recovered_cumul 
   
-  OUTPUT <- list(seed = seed,
+  # Exporting output: by default
+  output <- list(seed = seed,
                  MyPlant = MyPlant,
-                 MyWorkers = MyWorkers,
-                 MyAir = MyAir,
                  S_summary = S_summary,
                  FP_summary = FP_summary,
                  InfectionLog = InfectionLog,
                  InfectionSummary = InfectionSummary,
-                 Expocum = Expocum)
+                 CriticalDays = CriticalDays)
+  
+  # If full output are required, saved MyWorkers, MyAir and Expocum
+  if (fulloutput == TRUE) {
+    output <- append(output,
+                     list(MyWorkers = MyWorkers,
+                          MyAir = MyAir,
+                          Expocum = Expocum))
+  }
+  
+  
   writeLines("=====================================================================================")
   writeLines(paste("Four-module model run - seed ", seed, " - successfully done !", sep = ""))
   writeLines("====================================== END ==========================================")

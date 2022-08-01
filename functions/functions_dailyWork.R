@@ -334,40 +334,89 @@ f_checkdailyWorkerType <- function(
   Wsub <- subset(W, Day == D & Hour == 0 & Min == 0 & W_active == "active")
   compo <- table(Wsub$W_team, Wsub$W_type)[c("teamA", "teamB") , c("cutter1", "cutter2", "logistic1", "logistic2")]
   
+  critical <- c("teamA" = FALSE,
+                "teamB" = FALSE)
+  
   for (team in c("teamA", "teamB")) { ## for each team (A or B / morning or afternoon depending on the week)
     
-    if (compo[team , "logistic1"] < 1 | compo[team, "logistic2"] < 1) { ## if there is any missing logistic1 or logistic2 worker
-      writeLines(paste("/!\\ Missing logistic workers in the ", team, " : randomly choose another from the remaining types", sep = ""))
-      
-      ## if there are at least 2 logistic workers for switching between them
-      if (sum(compo[team , c("logistic1", "logistic2")]) >= 2) { 
-        if (compo[team , "logistic1"] > compo[team , "logistic2"]) { ## if there are more logistic1 workers than logistic2 ones
-          changingWorker_ID <- subset(Wsub, W_team == team & W_type == "logistic1")$W_ID %>% sample(., 1) ## take 1 random logistic1 worker to become logistic2 worker
-          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic2"
-        }
-        if (compo[team , "logistic2"] > compo[team , "logistic1"]) { ## otherwise, if there are more logistic2 workers than logistic1 ones
-          changingWorker_ID <- subset(Wsub, W_team == team & W_type == "logistic2")$W_ID %>% sample(., 1) ## take 1 random logistic2 worker to become logistic1 worker
-          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic1"
-        }
+    # Critical shift if insufficient number of workers !
+    if (sum(compo[team , c("logistic1", "logistic2", "cutter1", "cutter2")]) < 4) {
+      critical[[team]] <- TRUE
+      writeLines("Critical shift: insufficient number of workers (less than 4 workers) for the shift !")
+    } 
+    else { # if it is not a critical shift 
+      ## if there is not a sufficient number of cutters for the shift (at least 2)
+      if (sum(compo[team , c("cutter1", "cutter2")]) < 2) {
+        critical[[team]] <- TRUE
+        writeLines("Critical shift: insufficient number of cutters (less than 2 cutters) for the shift !")
       }
-      
-      ## if there are less than 2 logistic workers for switching between them: take from the cutters group
-      if (sum(compo[team , c("logistic1", "logistic2")]) < 2) {
-        ## take a random cutter worker
-        changingWorker_ID <- subset(Wsub, W_team == team & W_type %in% c("cutter1", "cutter2"))$W_ID %>% sample(., 1)
+      else {
+        ## if there is any missing cutter1 worker
+        if (compo[team , "cutter1"] == 0 ) {
+          ## take 1 random cutter2 worker to become cutter1 worker
+          changingWorker_ID <- subset(Wsub, W_team == team & W_type == "cutter2")$W_ID %>% sample(., 1) 
+          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "cutter1"
+          writeLines(paste("/!\\ Missing cutter1 workers - ", team, " - Transfer : worker ", changingWorker_ID," (cutter2 -> cutter1)", sep = ""))
+        }
         
-        if (compo[team , "logistic1"] < 1) { ## if the missing worker is logistic1
-          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic1" ## the taken cutter worker becomes logistic1
-        } else { ## otherwise
-          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic2" ## the taken cutter worker becomes logistic2
+        ## if there is any missing cutter2 worker
+        if (compo[team , "cutter2"] == 0 ) {
+          ## take 1 random cutter1 worker to become cutter2 worker
+          changingWorker_ID <- subset(Wsub, W_team == team & W_type == "cutter1")$W_ID %>% sample(., 1) ## take 1 random logistic2 worker to become logistic1 worker
+          W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "cutter2"
+          writeLines(paste("/!\\ Missing cutter2 workers - ", team, " - Transfer : worker ", changingWorker_ID," (cutter1 -> cutter2)", sep = ""))
         }
+        
+        ## if there is any missing logistic1 or logistic2 worker
+        if (compo[team , "logistic1"] == 0 | compo[team, "logistic2"] == 0) { 
+          writeLines(paste("/!\\ Missing logistic workers in the ", team, " : randomly choose another from the remaining types", sep = ""))
+          
+          ## if there are at least 2 logistic workers for switching between them
+          if (sum(compo[team , c("logistic1", "logistic2")]) >= 2) { 
+            if (compo[team , "logistic1"] == 0) { ## if the missing worker is logistic1
+              changingWorker_ID <- subset(Wsub, W_team == team & W_type == "logistic2")$W_ID %>% sample(., 1) ## take 1 random logistic2 worker to become logistic1 worker
+              W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic1"
+              writeLines(paste("/!\\ Missing logistic1 workers - ", team, " - Transfer : worker ", changingWorker_ID," (logistic2 -> logistic1)", sep = ""))
+            }
+            else { ## otherwise, if the missing worker is logistic2
+              changingWorker_ID <- subset(Wsub, W_team == team & W_type == "logistic1")$W_ID %>% sample(., 1) ## take 1 random logistic1 worker to become logistic2 worker
+              W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic2"
+              writeLines(paste("/!\\ Missing logistic2 workers - ", team, " - Transfer : worker ", changingWorker_ID," (logistic1 -> logistic2)", sep = ""))
+            }
+          }
+          
+          ## if there are less than 2 logistic workers for switching between them: take from the cutters group
+          if (sum(compo[team , c("logistic1", "logistic2")]) < 2) {
+            
+            ## if the missing worker is logistic1
+            if (compo[team , "logistic1"] == 0) { 
+              ## take a random cutter worker to become logistic1
+              changingWorker_ID <- subset(Wsub, W_team == team & W_type %in% c("cutter1", "cutter2"))$W_ID %>% sample(., 1)
+              W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic1" ## the taken cutter worker becomes logistic1
+              writeLines(paste("/!\\ Missing logistic1 workers - ", team, " - Transfer : worker ", changingWorker_ID," (cutter1/cutter2 -> logistic1)", sep = ""))
+            }
+            
+            ## if the missing worker is logistic2
+            if (compo[team , "logistic2"] == 0) {
+              ## take a random cutter worker to become logistic2
+              changingWorker_ID <- subset(Wsub, W_team == team & W_type %in% c("cutter1", "cutter2"))$W_ID %>% sample(., 1)
+              W$W_type[W$Day == D & W$W_ID == changingWorker_ID] <- "logistic2" ## the taken cutter worker becomes logistic2
+              writeLines(paste("/!\\ Missing logistic1 workers - ", team, " - Transfer : worker ", changingWorker_ID," (cutter1/cutter2 -> logistic2)", sep = ""))
+            }
+          }
+          
+        } ## end (missing logistic1 or logistic2 workers in the current team)
       }
-      
-    } ## end (missing logistic1 or logistic2 workers in the current team)
-    
-  } ## end (missing logistic1 or logistic2 workers in each team) 
 
-  return(W)
+    } # end critical shift 
+    
+  } ## end (each team/shift)
+  
+  critical <- all(critical)
+  
+  return(W = W,
+         critical = critical)
+  
 }
 
 

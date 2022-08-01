@@ -88,8 +88,10 @@ f_initWorkers <- function(
 
   # Replicate the type of workers for all subsequent time indexes
   W_type <- as.factor(rep(W_type0, NTime+1)) ## + 1 (including the time index 0)
-  W_team <- as.factor(c(W_team0, rep(NA, prm$NWorkers * NTime))) ## (including the time index 0)
+  W_type <- factor(W_type, levels = names(prm$pType))
   
+  W_team <- as.factor(c(W_team0, rep(NA, prm$NWorkers * NTime))) ## (including the time index 0)
+  W_team <- factor(W_team, levels = c(names(Parms_Workers$pTeam), "transverse"))
 
   ## Initialize the shift of all workers
   W_shift <- rep(NA, prm$NWorkers * (NTime+1))

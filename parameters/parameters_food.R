@@ -5,10 +5,10 @@ Parms_Food <- list(
   
   ## working rhythm of each type of workers (ratio) expressed by the average number of carcasses processed by each worker per minutes
   worker_rhythm = list( 
-    porcine = c("logistic1" = 0.025, # transfer the equivalent of one carcass per minute from the arrival gate to the conveyor
-                "cutter1" = 0.05, # cut the equivalent 20% of one carcass per minute, one entire carcass every 5 minutes (assumption/experts) 
-                "cutter2" = 0.025,# cut equivalent 10% of one carcass per minute, half-carcass every 5 minutes (assumption/experts) 
-                "logistic2" = 0.125), # process (e.g.) and transfer the equivalent of a half-carcass per minute to the storage area
+    porcine = c("logistic1" = 1, # transfer the equivalent of one carcass per minute from the arrival gate to the conveyor
+                "cutter1" = 0.20, # cut the equivalent 20% of one carcass per minute, one entire carcass every 5 minutes (assumption/experts) 
+                "cutter2" = 0.10,# cut equivalent 10% of one carcass per minute, half-carcass every 5 minutes (assumption/experts) 
+                "logistic2" = 0.5), # process (e.g.) and transfer the equivalent of a half-carcass per minute to the storage area
     bovine = c("logistic1" = 1, # assumptions / experts
                "cutter1" = 0.2, # assumptions / experts
                "cutter2" = 0.2,# assumptions / experts
