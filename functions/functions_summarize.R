@@ -35,7 +35,7 @@ f_plotConvCumulContaWorkers <- function(
   IL,
   IS,
   keptsim = c(10, 50, 100, 150), # number of kept simulations
-  CVmax = 0.25, # acceptable maximum value for the coefficient of variation
+  CVmax = 0.20, # acceptable maximum value for the coefficient of variation
   resampling = 100, # number of keeping iterations
   plotseed = NULL # for traceability purposes
 ) {
@@ -97,7 +97,8 @@ f_plotConvCumulContaWorkers <- function(
   
   g_output <- ggpubr::ggarrange(plotlist = g_all, ncol = 1)
   annotate_figure(g_output,
-                  bottom = text_grob(paste("Indicator - Cumulative number of infections over 100 workers after a period of 28 days\nConvergence analysis based on a total number of ",length(all_seed), " successful independent simulations\nIndicator distributions obtained by repeatedly (", resampling, " times) keeping n independent simulations\nAcceptability range (gray) determined by fixing the maximum coefficient of variation at ", CVmax, "\n (green: indicator within range, red: indicator out of range)" , sep = ""),
+                  bottom = text_grob(paste("Cumulative number of infections over ", length(unique(IL$W_ID)) ,
+                                           " workers after a period of ", max(IS$Day)," days" , sep = ""),
                                   color = "black", size = 7),
                   top = text_grob("Cumulative number of infected workers", face = "bold", size = 14),
                   left = ""
@@ -155,7 +156,7 @@ f_plotConvFoodContaRatio <- function(
     FPS,
     detection = 5,
     keptsim = c(10, 50, 100, 150), # number of kept simulations
-    CVmax = 0.25, # acceptable maximum value for the coefficient of variation
+    CVmax = 0.20, # acceptable maximum value for the coefficient of variation
     resampling = 100, # number of keeping iterations
     plotseed = NULL # for traceability purposes
 ) {
@@ -217,7 +218,8 @@ f_plotConvFoodContaRatio <- function(
   
   g_output <- ggpubr::ggarrange(plotlist = g_all, ncol = 1)
   annotate_figure(g_output,
-                  bottom = text_grob(paste("Indicator - Average food contamination ratio over a period of 28 days (detection threshold: ", detection, " log10 ARN copies)\nConvergence analysis based on a total number of ",length(all_seed), " successful independent simulations\nIndicator distributions obtained by repeatedly (", resampling, " times) keeping n independent simulations\nAcceptability range (gray) determined by fixing the maximum coefficient of variation at ", CVmax, "\n (green: indicator within range, red: indicator out of range)" , sep = ""),
+                  bottom = text_grob(paste("Average food contamination ratio over a period of ", max(FPS$Day)+1,
+                                           " days\n(detection threshold: ", detection, " log10 ARN copies)", sep = ""),
                                   color = "black", size = 7),
                   top = text_grob("Average food contamination ratio", face = "bold", size = 14),
                   left = ""
@@ -281,7 +283,7 @@ f_plotConvSurfacesContaRatio <- function(
     plant,
     detection = 5,
     keptsim = c(10, 50, 100, 150), # number of kept simulations
-    CVmax = 0.25, # acceptable maximum value for the coefficient of variation
+    CVmax = 0.20, # acceptable maximum value for the coefficient of variation
     resampling = 100, # number of keeping iterations
     plotseed = NULL # for traceability purposes
 ) {
@@ -348,7 +350,10 @@ f_plotConvSurfacesContaRatio <- function(
   
   g_output <- ggpubr::ggarrange(plotlist = g_all, ncol = 1)
   annotate_figure(g_output,
-                  bottom = text_grob(paste("Indicator - Average surfaces contamination ratio over a period of 28 days (detection threshold: ", detection, " log10 ARN copies)\n(ratio between the number of contaminated one-square-meter tiles amont a total of ", nb_S, " tiles)\nConvergence analysis based on a total number of ",length(all_seed), " successful independent simulations\nIndicator distributions obtained by repeatedly (", resampling, " times) keeping n independent simulations\nAcceptability range (gray) determined by fixing the maximum coefficient of variation at ", CVmax, "\n (green: indicator within range, red: indicator out of range)" , sep = ""),
+                  bottom = text_grob(paste("Average surfaces contamination ratio over a period of ", max(SS$Day)+1,
+                                           " days\n(detection threshold: ", detection,
+                                           " log10 ARN copies)\n(ratio between the number of contaminated one-square-meter tiles amont a total of ",
+                                           nb_S, " tiles)" , sep = ""),
                                   color = "black", size = 7),
                   top = text_grob(paste("Average surfaces contamination ratio", sep =""), face = "bold", size = 14),
                   left = ""
@@ -469,6 +474,92 @@ f_smrzRt <- function(
 
 
 
+# f_plotConvRt - Plot check - Indicator : average surfaces contamination ratio during the whole simulation period
+f_plotConvRt <- function(
+    IS,
+    prm_conta,
+    prm_workers,
+    keptsim = c(10, 50, 100, 150), # number of kept simulations
+    CVmax = 0.20, # acceptable maximum value for the coefficient of variation
+    resampling = 100, # number of keeping iterations
+    plotseed = NULL # for traceability purposes
+) {
+  if (!is.null(plotseed)) set.seed(plotseed)
+  
+  all_seed <- unique(IS$seed)
+  
+  full <- f_smrzRt(IS = IS, prm_conta = prm_conta, prm_workers = prm_workers)$Rt
+  
+  indicator_sup <- mean(full, na.rm = TRUE) * (1 + CVmax)
+  indicator_inf <- mean(full, na.rm = TRUE) * (1 - CVmax)
+  
+  g0 <- ggplot() +
+    theme(axis.ticks=element_blank(),
+          legend.position = "none",
+          panel.background=element_rect(fill="white"),
+          plot.title = element_text(face = "bold", size=10),
+          axis.title = element_text(size=10),
+          axis.text = element_text(size=10),
+          panel.grid.major.y=element_line(colour="lightgrey"),
+          panel.grid.major.x=element_line(colour="lightgrey"),
+          panel.grid.minor.y=element_line(colour="white"),
+          panel.grid.minor.x=element_line(colour="lightgrey")) +
+    coord_cartesian(xlim = c(0, max(full, na.rm = TRUE))) + 
+    xlab("") + 
+    ylab("")
+  
+  g_all <- list()
+  
+  for (g in 1:length(keptsim)) {
+    g_all <- append(g_all, list(g0))
+  }
+  
+  for (i in 1:resampling) {
+    setTxtProgressBar(txtProgressBar(min = 1, max = resampling, initial = 1,
+                                     char = "-", width = 50, style = 3),
+                      value = i)
+    
+    for (g in 1:length(keptsim)) {
+      dg <- f_smrzRt(IS = IS, prm_conta = prm_conta, prm_workers = prm_workers,
+                     nbsim = keptsim[[g]])
+      
+      while (sum(is.na(dg$Rt)) == length(dg$Rt)) { # if the re-sampling step provides only NA values, re-start
+        dg <- f_smrzRt(IS = IS, prm_conta = prm_conta, prm_workers = prm_workers,
+                       nbsim = keptsim[[g]])
+      }
+      
+      col_dg <- ifelse(test = between(mean(dg$Rt, na.rm = TRUE), indicator_inf, indicator_sup),
+                       yes = "darkgreen",
+                       no = "darkred")
+      
+      g_all[[g]] <- g_all[[g]] +
+        geom_density(data = dg,
+                     mapping = aes(x = Rt),
+                     colour = col_dg) +
+        geom_vline(xintercept = mean(dg$Rt),
+                   size = 0.5, alpha = 0.7, colour = col_dg)
+    }
+  }
+  
+  for (g in 1:length(keptsim)) {
+    g_all[[g]] <- g_all[[g]] +
+      labs(title = paste("n =", keptsim[[g]], "simulations kept")) +
+      geom_vline(xintercept = mean(full, na.rm=T), linetype = "solid", size = 1, colour = "black") +
+      annotate("rect", xmin = indicator_inf, xmax = indicator_sup, ymin = -Inf, ymax = Inf,
+               alpha = 0.3)
+  }
+
+  
+  g_output <- ggpubr::ggarrange(plotlist = g_all, ncol = 1)
+  annotate_figure(g_output,
+                  bottom = text_grob(paste("Average transmisison rate over a period of 28 days\n", sep = ""),
+                                     color = "black", size = 7),
+                  top = text_grob(paste("Average transmisison rate Rt", sep =""), face = "bold", size = 14),
+                  left = ""
+  ) -> g_output
+  
+  return(g_output)
+}
 
 
 
@@ -476,9 +567,71 @@ f_smrzRt <- function(
 
 
 
-
-
-
+# f_plotConvAllIndicators
+f_plotConvAllIndicators <- function(
+    IL,
+    IS,
+    FPS,
+    SS,
+    plant,
+    detection,
+    prm_conta,
+    prm_workers,
+    keptsim = c(10, 50, 100, 150),
+    CVmax = 0.20,
+    resampling = 100,
+    plotseed = NULL  
+) {
+  
+  all_seed <- unique(IS$seed)
+  
+  writeLines(">>> Indicator 1 - Cumulative number of infected workers")
+  f_plotConvCumulContaWorkers(IL = IL, IS = IS,
+                              keptsim = keptsim,
+                              resampling = resampling,
+                              plotseed = plotseed,
+                              CVmax = CVmax) -> g_ConvCumulContaWorkers
+  
+  writeLines(">>> Indicator 2 - Transmission rate")
+  f_plotConvRt(IS = IS, prm_conta = Parms_Conta, prm_workers = Parms_Workers,
+               keptsim = keptsim,
+               CVmax = CVmax,
+               resampling = resampling,
+               plotseed = plotseed) -> g_ConvRt
+  
+  writeLines("\n>>> Indicator 3 - Average food contamination ratio")
+  f_plotConvFoodContaRatio(FPS,
+                           detection = 5,
+                           keptsim = keptsim,
+                           resampling = resampling,
+                           plotseed = plotseed,
+                           CVmax = CVmax) -> g_ConvFoodContaRatio
+  
+  writeLines(">>> Indicator 4 - Average surface contamination ratio")
+  f_plotConvSurfacesContaRatio(SS = SS, 
+                               plant = plant,
+                               detection = detection,
+                               keptsim = keptsim,
+                               resampling = resampling,
+                               plotseed = plotseed,
+                               CVmax = CVmax) -> g_ConvSurfacesContaRatio
+  
+  ggpubr::ggarrange(plotlist = list(g_ConvCumulContaWorkers,
+                                    g_ConvRt,
+                                    g_ConvFoodContaRatio,
+                                    g_ConvSurfacesContaRatio
+  ),
+  nrow = 1) %>%
+    annotate_figure(.,
+                    top = text_grob("Convergence analysis with different output indicators", face = "bold", size = 20),
+                    left = text_grob("Probability density (area under curves), mean values (vertical thick lines) and acceptability band", rot = 90,  face = "bold", size = 12),
+                    bottom = text_grob(paste("Convergence analysis based on a total number of ", length(all_seed), " successful independent simulations\nIndicator distributions obtained by repeatedly (", resampling, " times) keeping n independent simulations\nAcceptability range (gray) determined by fixing the maximum coefficient of variation at ", CVmax, "\n (green: indicator within range, red: indicator out of range)" , sep = ""),
+                                       face = "italic", size = 8)
+    ) -> g_Convergence
+  
+  return(g_Convergence)
+  
+}
 
 
 

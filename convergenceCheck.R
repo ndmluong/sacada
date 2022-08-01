@@ -221,7 +221,7 @@ f_smrzCumulContaWorkers(IL = IL, IS = IS)
 f_smrzCumulContaWorkers(IL = IL, IS = IS)$cumul %>% mean()
 
 f_plotConvCumulContaWorkers(IL = IL, IS = IS,
-                            keptsim = c(10, 40, 70, 100, 130, 160),
+                            keptsim = c(40, 70, 100, 130, 160),
                             resampling = 20,
                             plotseed = 408,
                             CVmax = 0.20) -> g_ConvCumulContaWorkers
@@ -240,7 +240,7 @@ f_smrzAverageFoodContaRatio(FPS = FPS, detection = 5, nbsim = 10, sampleseed = 4
 
 f_plotConvFoodContaRatio(FPS,
                          detection = 5,
-                         keptsim = c(10, 40, 70, 100, 130, 160),
+                         keptsim = c(40, 70, 100, 130, 160),
                          resampling = 20,
                          plotseed = 408,
                          CVmax = 0.20) -> g_ConvFoodContaRatio
@@ -257,7 +257,7 @@ f_smrzAverageSurfacesContaRatio(SS = SS, plant = MyPlant, detection = 5)$contara
 f_plotConvSurfacesContaRatio(SS = SS, 
                              plant = MyPlant,
                              detection = 5,
-                             keptsim = c(10, 40, 70, 100, 130, 160),
+                             keptsim = c(40, 70, 100, 130, 160),
                              resampling = 20,
                              plotseed = 408,
                              CVmax = 0.20) -> g_ConvSurfacesContaRatio
@@ -269,22 +269,28 @@ f_plotConvSurfacesContaRatio(SS = SS,
 f_smrzRt(IS = IS, prm_conta = Parms_conta, prm_workers = Parms_Workers)
 f_smrzRt(IS = IS, prm_conta = Parms_conta, prm_workers = Parms_Workers)$Rt %>% mean(., na.rm = T)
 f_smrzRt(IS = IS, prm_conta = Parms_conta, prm_workers = Parms_Workers, nbsim = 10)$Rt %>% mean(., na.rm = T)
-f_smrzRt(IS = IS, prm_conta = Parms_conta, prm_workers = Parms_Workers, nbsim = 10)$Rt %>% mean(., na.rm = T)
+f_smrzRt(IS = IS, prm_conta = Parms_conta, prm_workers = Parms_Workers, nbsim = 100)$Rt %>% mean(., na.rm = T)
+
+f_plotConvRt(IS = IS, prm_conta = Parms_Conta, prm_workers = Parms_Workers,
+             keptsim = c(40, 70, 100, 130, 160),
+             CVmax = 0.2,
+             resampling = 20,
+             plotseed = 408) -> g_ConvRt
+
 
 
 
 ## All indicators ####
-ggpubr::ggarrange(plotlist = list(g_ConvCumulContaWorkers,
-                                  g_ConvFoodContaRatio,
-                                  g_ConvSurfacesContaRatio),
-                  nrow = 1) %>%
-  annotate_figure(.,
-                  top = text_grob("Convergence analysis with different output indicators", face = "bold", size = 20),
-                  left = text_grob("Probability density (curves) and mean values (vertical lines)", rot = 90,  face = "bold", size = 12),
-                  ) -> g_Convergence
+f_plotConvAllIndicators(IL = IL, IS = IS, FPS = FPS, SS = SS,
+                        plant = MyPlant, prm_conta = Parms_Conta, prm_workers = Parms_Workers,
+                        keptsim = c(40, 70, 100, 130, 160),
+                        detection = 5,
+                        CVmax = 0.2,
+                        resampling = 20,
+                        plotseed = 408) -> g_ConvergenceAllIndicators
 
-ggsave(filename="simulation_output/plot/g_Convergence.pdf", 
-       plot = g_Convergence, 
+ggsave(filename="simulation_output/plot/g_ConvergenceAllIndicators.pdf", 
+       plot = g_ConvergenceAllIndicators, 
        device = cairo_pdf, width = 420, height = 297, units = "mm")
 
 
