@@ -217,22 +217,33 @@ f_assignWorkersTypeTeam <- function(
   
   ## Calculate the proportions of combining the types and team, p_TT
   ## Nomenclature: C1_TA (cutter1, teamA); L2_TB (logistic2, teamB), T1_TR (transverse1, transverse)
-  p_TT <- c("C1_TA" = unname(pType["cutter1"] * pTeam["teamA"]),
-            "C1_TB" = unname(pType["cutter1"] * pTeam["teamB"]),
-            "C2_TA" = unname(pType["cutter2"] * pTeam["teamA"]),
-            "C2_TB" = unname(pType["cutter2"] * pTeam["teamB"]),
-            "L1_TA" = unname(pType["logistic1"] * pTeam["teamA"]),
-            "L1_TB" = unname(pType["logistic1"] * pTeam["teamB"]),
-            "L2_TA" = unname(pType["logistic2"] * pTeam["teamA"]),
-            "L2_TB" = unname(pType["logistic2"] * pTeam["teamB"]),
-            "T1_TR" = unname(pType["transverse1"]),
-            "T2_TR" = unname(pType["transverse2"])
+  p_TT <- c("C1_TA" = pType[["cutter1"]] * pTeam[["teamA"]],
+            "C1_TB" = pType[["cutter1"]] * pTeam[["teamB"]],
+            "C2_TA" = pType[["cutter2"]] * pTeam[["teamA"]],
+            "C2_TB" = pType[["cutter2"]] * pTeam[["teamB"]],
+            "L1_TA" = pType[["logistic1"]] * pTeam[["teamA"]],
+            "L1_TB" = pType[["logistic1"]] * pTeam[["teamB"]],
+            "L2_TA" = pType[["logistic2"]] * pTeam[["teamA"]],
+            "L2_TB" = pType[["logistic2"]] * pTeam[["teamB"]],
+            "T1_TR" = pType[["transverse1"]],
+            "T2_TR" = pType[["transverse2"]]
             )
   
   ## Sampling the workers with combined characteristics (type and team)
   W_TT <- sample(x = names(p_TT),
                  size = prm$NWorkers, replace = T,
                  prob = unname(p_TT))
+  
+  ## Check the composition if there is any category with zero worker
+  compo <- summary(factor(W_TT))
+  
+  while (sum(compo[compo == 0]) >= 1) { # if there is at least one category with zero worker
+    # re-do the sampling
+    W_TT <- sample(x = names(p_TT),
+                   size = prm$NWorkers, replace = T,
+                   prob = unname(p_TT))
+    compo <- summary(factor(W_TT))
+  }
   
   ## Create two distinct columns for type and team of workers
   W_type <- rep(NA, prm$NWorkers)

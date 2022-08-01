@@ -15,7 +15,7 @@ f_initSurfaces <- function(
   ##  - $S_Nv (numeric): viral quantity (log CFU)
 ) {
   #### BEGIN OF FUNCTION
-  writeLines(paste("\n***** Initializing surfaces (beginning of the day ", day, ") *****", sep=""))
+  writeLines(paste("\n***** Initializing surfaces (begin of the day ", day, ") *****", sep=""))
   
   ## The surfaces involving in the infection (objects)
   sapply(prm_plant$Objects, function(x) return(x$label)) %>%

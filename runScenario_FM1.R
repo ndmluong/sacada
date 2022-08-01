@@ -52,7 +52,7 @@ OUTPUT_seedx <- tryCatch(f_run_4M(prm_plant = Parms_Plant,
                                   prm_food = Parms_Food,
                                   seed = MySeed),
                          error = function(e) {
-                           write(paste(Sys.time(),"- seed", My),
+                           write(paste(Sys.time(),"- seed", MySeed),
                                  file = "error_log.txt", append = TRUE)})
 
 

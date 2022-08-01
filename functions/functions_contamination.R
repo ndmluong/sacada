@@ -293,7 +293,7 @@ f_dailyContamination <- function(
   
   
   ################### UPDATING COUNTERS #####################
-  writeLines("\n Updating data")
+  writeLines(paste("\n***** Updating data : end of the day ", day-1, " / begin of the day ", day ," *****", sep =""))
   # By default, copy all status counters from the previous day
   W$W_statusCounter[which(W$Day == day)] <- W$W_statusCounter[which(W$Day == day-1)] 
   # Update the status counters for the infected workers (including the previously and newly infected ones)

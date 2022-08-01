@@ -506,7 +506,9 @@ f_run_4M <- function(
     MyWorkers <- f_setAbsence(W = MyWorkers, day = day, prm_workers = prm_workers)
     
     ## Check if the current day becomes a critical day
-    checkdaily <- f_checkdailyWorkerType(W = MyWorkers, D = day)
+    if (day %in% WorkingDays) {
+      checkdaily <- f_checkdailyWorkerType(W = MyWorkers, D = day)
+    }
     
     if (day %in% WorkingDays & checkdaily$critical == TRUE) { ## if the current working day becomes a critical day :
       WorkingDays <- WorkingDays[WorkingDays != day] ## remove the current day from the workings day: nothing will happen (as a week-end day)

@@ -97,7 +97,6 @@ f_dailyWork_T1 <- function(
   T1_ID <- subset(active, W_type == "transverse1")$W_ID %>% unique()
   
   if (length(T1_ID) >= 1) { # if there is at least one transverse1 worker
-    
     T1_location <- unique(Plant$L$location)
     T1_location <- T1_location[!T1_location %in% c("Entry hall", "W.C.", "Conveyor1", "Conveyor2", "Equipment 1", "Office")]
     
@@ -174,7 +173,9 @@ f_dailyWork_T1 <- function(
     
     W <- f_moveWorkers(Plant, W, selectW = T1_ID, to="Entry hall", t_ind=f_convertTime("time2ind",D,17,0,dt=dt))
   }
-  else { # otherwise, if there is not any transverse1 worker
+  
+  if (length(T1_ID) == 0) { # otherwise, if there is not any transverse1 worker
+    
     writeLines(paste("/!\\ warnings: day ", D, ": missing transverse1 worker during the day shift", sep =""))
   }
   
@@ -381,7 +382,6 @@ f_checkdailyWorkerType <- function(
         
         ## if there is any missing logistic1 or logistic2 worker
         if (compo[team , "logistic1"] == 0 | compo[team, "logistic2"] == 0) { 
-          writeLines(paste("/!\\ Missing logistic workers in the ", team, " : randomly choose another from the remaining types", sep = ""))
           
           ## if there are at least 2 logistic workers for switching between them
           if (sum(compo[team , c("logistic1", "logistic2")]) >= 2) { 
