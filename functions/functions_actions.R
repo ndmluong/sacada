@@ -1,6 +1,6 @@
 ##### f_moveWorkers() FUNCTION TO MOVE THE WORKERS INSIDE THE PLANT #####
 f_moveWorkers <- function(
-  ## Move different types of agents from one location to another inside the pre-created plant
+    ## Move different types of agents from one location to another inside the pre-created plant
   ## INPUT
   Plant, # 'Plant object': list of two objects
   # L (data.frame): different locations of the plant ('entry hall', 'wc'...) and their coordinates X and Y
@@ -21,7 +21,7 @@ f_moveWorkers <- function(
   
   ## change location of the selected workers for the time index t
   W$location[which((W$t_ind == t_ind) & (W$W_ID %in% selectW))] <- to
-
+  
   ############ /!\ Optimized code (begin)
   Wsub <- subset(W, W_ID %in% selectW)
   Wcomp <- subset(W, !(W_ID %in% selectW))
@@ -45,12 +45,12 @@ f_moveWorkers <- function(
 
 ##### f_assignCuttersPosition() FUNCTION TO ASSIGN POSITIONS FOR CUTTERS AT A GIVEN TIME #####
 f_assignCuttersPosition <- function(
-  Plant, ## (data frame) All locations in the plant, including the cutting work spaces
-  W, ## the workers
-  t_ind, ## time index
-  shift,
-  cuttertype=1,
-  ...
+    Plant, ## (data frame) All locations in the plant, including the cutting work spaces
+    W, ## the workers
+    t_ind, ## time index
+    shift,
+    cuttertype=1,
+    ...
 ) {
   ## the active cutter a the given time
   query <-
@@ -71,51 +71,63 @@ f_assignCuttersPosition <- function(
   mean_dist <- N_WS / N
   pos_index <- integer(N) ## the position index
   
-  if (mean_dist %% 1 == 0) {
-    dist_vec <- rep(mean_dist, N-1)
-    ## random position of the first cutter
-    ## between 1 and N_inf to avoid that the first cutter always is at the very beginning of the conveyor
-    pos_index[1] <- sample(1:N, 1)
-  } else {
-    ## distances as an integer (between dist_inf and dist_sup)
-    dist_inf <- floor(mean_dist)
-    dist_sup <- ceiling(mean_dist)
-    
-    ## the number of workers to be assigned following the distances
-    N_assigned <- solve(a = matrix(c(dist_inf, dist_sup,
-                                     1,1),
-                                   nrow = 2, byrow= T),
-                        b = matrix(c(N_WS,
-                                     N),
-                                   nrow= 2, byrow = T))
-    
-    N_inf <- N_assigned[1]
-    N_sup <- N_assigned[2]
-    
-    dist_vec <- c(rep(dist_inf, N_inf-1),
-                  rep(dist_sup, N_sup))
-
-    dist_vec <- sample(dist_vec) ## randomize the order of the distances
-    ## random position of the first cutter
-    ## between 1 and N_inf to avoid that the first cutter always is at the very beginning of the conveyor
-    pos_index[1] <- sample(1:N_inf, 1)
+  if (mean_dist < 1) { # if there are more workers than work spaces
+    pos_index <- c(1:N_WS, ## all work spaces will be occupied and some will be additionally occupied by the remaining worker(s)
+                   sample(1:N_WS, N - N_WS)) 
+    pos_index <- sample(pos_index) ## randomize the position index
   }
-
-  for (wi in 2:N) {
-    pos_index[wi] <- pos_index[wi-1] + dist_vec[wi-1] ## apply the distances between cutters
+  # otherwise if there are more work spaces than workers
+  else { 
+    if (mean_dist %% 1 == 0) { ## if the average distance between worker is an integer
+      dist_vec <- rep(mean_dist, N-1)
+      ## random position of the first cutter
+      ## between 1 and N_inf to avoid that the first cutter always is at the very beginning of the conveyor
+      pos_index[1] <- sample(1:N, 1)
+    } else {
+      ## distances as an integer (between dist_inf and dist_sup)
+      dist_inf <- floor(mean_dist)
+      dist_sup <- ceiling(mean_dist)
+      
+      ## the number of workers to be assigned following the distances
+      N_assigned <- solve(a = matrix(c(dist_inf, dist_sup,
+                                       1,1),
+                                     nrow = 2, byrow= T),
+                          b = matrix(c(N_WS,
+                                       N),
+                                     nrow= 2, byrow = T))
+      
+      N_inf <- round(N_assigned[1])
+      N_sup <- round(N_assigned[2])
+      
+      dist_vec <- c(rep(dist_inf, N_inf),
+                    rep(dist_sup, N_sup))
+      
+      dist_vec <- sample(dist_vec, length(dist_vec)-1) ## randomize the order of the distances
+      
+      ## random position of the first cutter
+      ## between 1 and N_inf to avoid that the first cutter always is at the very beginning of the conveyor
+      pos_index[1] <- sample(1:N_inf, 1)
+    }
+    
+    for (wi in 2:N) {
+      pos_index[wi] <- pos_index[wi-1] + dist_vec[wi-1] ## apply the distances between cutters
+    }
+    
+    ## correction if the assigned position of the last worker exceeds the highest position index
+    pos_index[pos_index > N_WS] <- pos_index[pos_index > N_WS] - N_WS
+    
+    ## randomize the position following the cutters
+    pos_index <- sample(pos_index)
   }
-
-  ## correction if the assigned position of the last worker exceeds the highest position index
-  pos_index[pos_index > N_WS] <- pos_index[pos_index > N_WS] - N_WS
-
-  ## randomize the position following the cutters
-  pos_index <- sample(pos_index)
-
+  
+  
+  
+  
   ## the assigned work spaces for the selected workers
   assigned_WS <- WS_list$location[pos_index]
-
+  
   W_output <- W
-
+  
   # move the selected workers to their respective assigned work spaces
   for (wi in 1:N) {
     W_output <- f_moveWorkers(Plant = Plant,
@@ -131,7 +143,7 @@ f_assignCuttersPosition <- function(
 
 ##### f_moveFood () FUNCTION TO MOVE SOME FOOD PORTIONS INSIDE THE PLANT #####
 f_moveFoodPortion <- function(
-  ## Move different types of agents from one location to another inside the pre-created plant
+    ## Move different types of agents from one location to another inside the pre-created plant
   ## INPUT
   Plant, # 'Plant object': list of two objects
   # L (data.frame): different locations of the plant ('entry hall', 'wc'...) and their coordinates X and Y
@@ -176,17 +188,17 @@ f_moveFoodPortion <- function(
 
 ##### f_circulateCarcass FUNCTION TO CIRCULATE ONE GIVEN CARCASS INSIDE THE PLANT #####
 f_circulateCarcass <- function(
-  Plant, # 'Plant object': list of two objects
-  # L (data.frame): different locations of the plant ('entry hall', 'wc'...) and their coordinates X and Y
-  # P (numeric matrix) : food processing plant
-  FPcarc, ## object containing all attributes of all agents food portions of ONE GIVEN CARCASS
-  carcass_ID, ## (numeric, integer): the number (ID) of the carcass to be processed
-  t_ind, ## the time index corresponding to the beginning of the cutting process (arrival gate)
-  # duration_ti,  # GLOBAL VARIABLE
-  prm_food,
-  prm_time
+    Plant, # 'Plant object': list of two objects
+    # L (data.frame): different locations of the plant ('entry hall', 'wc'...) and their coordinates X and Y
+    # P (numeric matrix) : food processing plant
+    FPcarc, ## object containing all attributes of all agents food portions of ONE GIVEN CARCASS
+    carcass_ID, ## (numeric, integer): the number (ID) of the carcass to be processed
+    t_ind, ## the time index corresponding to the beginning of the cutting process (arrival gate)
+    # duration_ti,  # GLOBAL VARIABLE
+    prm_food,
+    prm_time
 ) {
-
+  
   ## IDs of the portion from the selected carcass to circulate
   selectFP <- unique(FPcarc$FP_ID)
   
@@ -196,24 +208,24 @@ f_circulateCarcass <- function(
           "cutter2" = t_ind + sum(duration_ti[c("logistic1", "cutter1")]),
           "logistic2" = t_ind + sum(duration_ti[c("logistic1", "cutter1", "cutter2")]),
           "storage" = t_ind + sum(duration_ti[c("logistic1", "cutter1", "cutter2", "logistic2")]))
-
+  
   ### CUTTING PROCESS
   ## logistic 1
   FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Arrival gate",
-                   t_ind_vec = ti[["logistic1"]]:(ti[["cutter1"]]-1))
+                              t_ind_vec = ti[["logistic1"]]:(ti[["cutter1"]]-1))
   ## cut 1:
   FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Conveyor1",
-                   t_ind_vec = ti[["cutter1"]]:(ti[["cutter2"]]-1))
+                              t_ind_vec = ti[["cutter1"]]:(ti[["cutter2"]]-1))
   ## cut 2:
   FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Conveyor2",
-                   t_ind_vec = ti[["cutter2"]]:(ti[["logistic2"]]-1))
+                              t_ind_vec = ti[["cutter2"]]:(ti[["logistic2"]]-1))
   ## logistic2:
   FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Equipment 1",
-                   t_ind_vec = ti[["logistic2"]]:(ti[["storage"]]-1))
+                              t_ind_vec = ti[["logistic2"]]:(ti[["storage"]]-1))
   ## storage:
   FPcarc <- f_moveFoodPortion(Plant = Plant, FP = FPcarc, selectFP = selectFP, to = "Cooling area",
-                   t_ind_vec = ti[["storage"]])
-
+                              t_ind_vec = ti[["storage"]])
+  
   return(FPcarc)
 }
 

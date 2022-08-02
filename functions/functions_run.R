@@ -603,6 +603,7 @@ f_run_4M <- function(
   writeLines("=====================================================================================")
   writeLines(paste("Four-module model run - seed ", seed, " - successfully done !", sep = ""))
   writeLines("====================================== END ==========================================")
-  return(OUTPUT)
+  
+  return(output)
   
 }

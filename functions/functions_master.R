@@ -466,7 +466,7 @@ f_Module_Master <- function (
     ...
 ) {
   ## Simulation seed
-  if (!is.null(seed)) {set.seed(seed)}
+  # if (!is.null(seed)) {set.seed(seed)}
   
   ## The cumulative number in different classes of droplets exposed to each worker
   W_droplet_Expos_cumul <- matrix(0, nrow=NWorkers, ncol=length(prm_air$Droplet_class)) %>% `rownames<-`(.,sort(unique(W$W_ID)))

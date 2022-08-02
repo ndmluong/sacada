@@ -77,7 +77,7 @@ f_initStatusCounterDay1 <- function(
     prm_time,
     seed = NULL
 ) {
-  if (!is.null(seed)) {set.seed(seed)}
+  # if (!is.null(seed)) {set.seed(seed)}
   
   W1 <- subset(W, Day == 1)
   Wcomp <- subset(W, Day != 1)
@@ -160,7 +160,7 @@ f_dailyContamination <- function(
 ) {
   W_ID <- unique(W$W_ID) %>% sort()
   
-  if (!is.null(seed)) {set.seed(seed+day)}
+  # if (!is.null(seed)) {set.seed(seed+day)}
   
   writeLines(paste("\n***** Daily contamination : end of the day ", day-1, " *****", sep =""))
   
