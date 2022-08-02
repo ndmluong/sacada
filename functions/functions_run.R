@@ -333,6 +333,8 @@ f_run_4M <- function(
   writeLines(paste("Four-module model run - seed ", seed, sep = ""))
   writeLines("=====================================================================================")
   
+  set.seed(seed)
+  
   ##### PLANT #####
   ## Create the plant
   MyPlant <- f_createPlant(prm = prm_plant)
@@ -340,8 +342,8 @@ f_run_4M <- function(
   ##### WORKERS #####
   ### SCHEDULE ###
   # Create workers : MyWorkers
-  MyWorkers <- f_initWorkers(prm = prm_workers, prm_time = prm_time, seed = seed)
-  MyWorkers <- f_setupSchedule(W = MyWorkers, prm = prm_workers, seed = seed)
+  MyWorkers <- f_initWorkers(prm = prm_workers, prm_time = prm_time)
+  MyWorkers <- f_setupSchedule(W = MyWorkers, prm = prm_workers)
   
   
   ### ASSIGN LOCATION BASED ON SCHEDULE ###

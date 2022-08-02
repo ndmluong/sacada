@@ -326,7 +326,7 @@ f_dailyWork_AllTeams <- function(
   dt,
   seed = NULL
 ) {
-  if (!is.null(seed)) {set.seed(seed)}
+  # if (!is.null(seed)) {set.seed(seed)}
   writeLines(paste(">>> Daily work: Assign positions for all active workers from different teams (day ", D,")", sep=""))
   
   W <- f_dailyWork_AM(Plant, W, D, dt)

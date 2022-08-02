@@ -25,7 +25,7 @@ f_initWorkers <- function(
   ##  - $location (character): location in the plant ("Entry hall", "W.C.",...), initialized as NA
 ) {
   #### BEGIN OF FUNCTION
-  if (!is.null(seed)) {set.seed(seed)}
+  # if (!is.null(seed)) {set.seed(seed)}
 
   ### ID of the workers (value "W001","W002", ..)
   W_ID <- paste("W", stringr::str_pad(seq(1:prm$NWorkers), width=3, pad="0"), sep="")
@@ -56,7 +56,7 @@ f_initWorkers <- function(
   writeLines("\n***** Initializing workers *****")
   writeLines(">>> Assign the first random contaminated worker(s)")
   W_status0 <- rep("susceptible", prm$NWorkers)
-  set.seed(seed)
+
   W_status0[sample(1:prm$NWorkers, prm$nContaminated_Init)] <- "initialised as infected"
   # Initialization for the subsequent time indexes as NA
   W_status <- c(W_status0, rep(NA, prm$NWorkers * NTime))
@@ -82,7 +82,7 @@ f_initWorkers <- function(
   ## Assign the types and teams for all workers
   # at time 0
   writeLines(">>> Assign workers types and teams")
-  W_TT <- f_assignWorkersTypeTeam(prm = prm, seed=seed)  ## check the function f_assignWorkersTypeTeam
+  W_TT <- f_assignWorkersTypeTeam(prm = prm)  ## check the function f_assignWorkersTypeTeam
   W_type0 <- W_TT$W_type
   W_team0 <- W_TT$W_team
 
@@ -108,7 +108,7 @@ f_initWorkers <- function(
   ## Community activities
   ## Assign the workers to the different communes if applicable
   writeLines(">>> Assign workers community")
-  AssignedCommunity <- f_assignCommunes(prm, seed = seed) ## check the (sub)function f_assignCommunes()
+  AssignedCommunity <- f_assignCommunes(prm) ## check the (sub)function f_assignCommunes()
 
   W_communityActivity <- AssignedCommunity$W_communityActivity0 %>% rep(NTime+1)
   W_communes <- AssignedCommunity$W_communes0 %>% rep(NTime+1)
@@ -398,7 +398,7 @@ f_initActiveCounter <- function(
   
   ## Initialize random active counters for each workers at the first time index t_ind
   ## using 5-day gap between their respective counters (-5,0,5,10,15,20,25)
-  set.seed(seed)
+  # if (!is.null(seed)) {set.seed(seed)}
   W$W_activeCounter[which(W$t_ind == 0)] <- sample(x = seq(-5, 25, by=5),
                                             size = NWorkers,
                                             replace = T,
@@ -500,9 +500,8 @@ f_setupSchedule <- function(
   prm,
   seed = NULL
 ) {
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  # if (!is.null(seed)) {set.seed(seed)}
+  
   ## Simulate the weekly team changes
   writeLines(">>> Simulating weekly team changes")
   pb = txtProgressBar(min = 1, max = max(W$Week)-1, initial = 1,
@@ -521,7 +520,7 @@ f_setupSchedule <- function(
   W <- f_assignWorkersShift(W)
   
   ## Calculate the active counter of every workers and fill the case 0h00
-  W <- f_initActiveCounter(W = W, seed=seed+1)
+  W <- f_initActiveCounter(W = W)
   
   W <- f_calculateActiveCounter(W = W)
   
