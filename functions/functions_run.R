@@ -343,10 +343,6 @@ f_run_4M <- function(
   MyWorkers <- f_initWorkers(prm = prm_workers, prm_time = prm_time, seed = seed)
   MyWorkers <- f_setupSchedule(W = MyWorkers, prm = prm_workers, seed = seed)
   
-  # # SCHEDULE VISUALISATION
-  # # Plot schedule with information at one given day
-  # f_plotSchedule(MyWorkers, Dmin = 1, Dmax = 28, SHOW_ID = 1:60, Dfocus = 9)
-  
   
   ### ASSIGN LOCATION BASED ON SCHEDULE ###
   WorkingDays <- subset(MyWorkers,

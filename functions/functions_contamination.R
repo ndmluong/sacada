@@ -98,6 +98,12 @@ f_initStatusCounterDay1 <- function(
   W$W_statusCounter[which(W$Day == 1 & W$W_status == "initialised as infected")] <- 1
   W$W_statusCounter[which(W$Day == 1 & W$W_status == "susceptible")] <- 0
   
+  writeLines(">>> Profile of the first contaminated worker(s)")
+  W %>%
+    dplyr::filter(., Day == 1 & Hour == 0 & Min == 0 & W_status == "initialised as infected") %>%
+    dplyr::select(., W_ID, W_type, W_team, W_shift, W_active, W_activeCounter) %>%
+    print(.)
+  
   W <- f_updateStatusByCounter(W = W, day = 1, prm_workers = prm_workers)
   
   return(W)

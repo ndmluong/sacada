@@ -235,15 +235,17 @@ f_assignWorkersTypeTeam <- function(
                  prob = unname(p_TT))
   
   ## Check the composition if there is any category with zero worker
-  compo <- summary(factor(W_TT))
+  compo <- summary(factor(W_TT, levels = names(p_TT)))
   
-  while (sum(compo[compo == 0]) >= 1) { # if there is at least one category with zero worker
+
+  while (length(compo[compo == 0]) >= 1) { # if there is at least one category with zero worker
     # re-do the sampling
     W_TT <- sample(x = names(p_TT),
                    size = prm$NWorkers, replace = T,
                    prob = unname(p_TT))
-    compo <- summary(factor(W_TT))
+    compo <- summary(factor(W_TT, levels = names(p_TT)))
   }
+  
   
   ## Create two distinct columns for type and team of workers
   W_type <- rep(NA, prm$NWorkers)
@@ -266,7 +268,8 @@ f_assignWorkersTypeTeam <- function(
     )
   }
 
-  return(list(W_type = W_type,
+  return(list(W_TT = W_TT,
+              W_type = W_type,
               W_team = W_team))
 }
 

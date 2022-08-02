@@ -31,7 +31,7 @@ MySeed <- 11001
 output_filename <- paste("output_FM1_", MySeed,".RData", sep ="")
 
 
-
+STbegin <- Sys.time()
 OUTPUT_seedx <- f_run_4M(prm_plant = Parms_Plant,
                          prm_time = Parms_Time,
                          prm_workers = Parms_Workers,
@@ -39,8 +39,9 @@ OUTPUT_seedx <- f_run_4M(prm_plant = Parms_Plant,
                          prm_conta = Parms_Conta,
                          prm_surfaces = Parms_Surfaces,
                          prm_food = Parms_Food,
+                         fulloutput = TRUE,
                          seed = MySeed)
-
+STend <- Sys.time()
 
 ## RUN ####
 OUTPUT_seedx <- tryCatch(f_run_4M(prm_plant = Parms_Plant,
