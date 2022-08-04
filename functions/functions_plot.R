@@ -422,12 +422,14 @@ f_summaryWorkersAtDay <- function(
 
 ##### f_plotContaminatedWorkers() FUNCTION TO PLOT SIMULATION OUTPUT SUMMARY #####
 f_plotContaminatedWorkers <- function(
-  IL,
-  IS,
-  seed_select = NULL,
-  detailed_plot = F,
-  wrap.nrow = 1
+    IL,
+    IS,
+    seed_select = NULL,
+    detailed_plot = F,
+    wrap.nrow = 1
 ) {
+  
+  IL$InfectionSource <- as.factor(IL$InfectionSource)
   
   tapply(IL$InfectionSource, IL$seed, summary) %>%
     sapply(., FUN = function(x) {
@@ -481,11 +483,11 @@ f_plotContaminatedWorkers <- function(
       scale_y_continuous(breaks = seq(0, length(unique(IL$W_ID)), by = 5)) +
       coord_cartesian(ylim = c(0, length(unique(IL$W_ID))),
                       xlim = c(0, max(IS$Day)+1)) +
-      stat_summary(data = IS, aes(x=Day, y=Infected_cumul), fun = mean, geom="line", size = 1.5, colour = "black") + 
+      stat_summary(data = IS, aes(x=Day, y=Infected_cumul), fun = mean, geom="line", size = 1.5, colour = "black") +
       labs(title = "Cumulative number of infected workers over time",
            subtitle = "individual curves and the average trend across independent simulations") +
       xlab("time (day)") + ylab("number of workers") -> g_Output
-  } 
+  }
   else {
     
     pal_viridis <- viridis::viridis(10)
@@ -504,6 +506,8 @@ f_plotContaminatedWorkers <- function(
       # geom_hline(yintercept = 15, colour = "navyblue", linetype = "dashed") +
       theme(axis.ticks=element_blank(),
             panel.background=element_rect(fill="white"),
+            strip.background = element_rect(fill = "white"),
+            strip.text = element_text(face="italic", size=8),
             plot.title = element_text(face="bold", size=15),
             axis.title = element_text(face="bold", size=10),
             axis.text = element_text(size=10),

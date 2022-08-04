@@ -32,23 +32,20 @@ output_filename <- paste("simulation_output/", MySeed, "/", "output_FM1_", MySee
 
 ## > Run ####
 STbegin <- Sys.time()
-OUTPUT_seedx <- tryCatch(f_run_4M(prm_plant = Parms_Plant,
-                                  prm_time = Parms_Time,
-                                  prm_workers = Parms_Workers,
-                                  prm_air = Parms_Air,
-                                  prm_conta = Parms_Conta,
-                                  prm_surfaces = Parms_Surfaces,
-                                  prm_food = Parms_Food,
-                                  fulloutput = FALSE,
-                                  seed = MySeed),
-                         error = function(e) {
-                           write(paste(Sys.time(),"- seed", MySeed),
-                                 file = "error_log.txt", append = TRUE)})
+OUTPUT_seedx <- f_run_4M(prm_plant = Parms_Plant,
+                         prm_time = Parms_Time,
+                         prm_workers = Parms_Workers,
+                         prm_air = Parms_Air,
+                         prm_conta = Parms_Conta,
+                         prm_surfaces = Parms_Surfaces,
+                         prm_food = Parms_Food,
+                         fulloutput = FALSE,
+                         seed = MySeed)
 STend <- Sys.time()
 
 # Clear environment
 gdata::keep(OUTPUT_seedx,
-            output_filename,
+            output_filename, STbegin, STend,
             Parms_Air, Parms_Conta, Parms_Food, Parms_Plant, Parms_Surfaces, Parms_Time, Parms_Workers,
             sure = TRUE)
 

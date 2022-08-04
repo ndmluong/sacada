@@ -1,9 +1,9 @@
 # f_smrzCumulContaWorkers 
 f_smrzCumulContaWorkers <- function(
-  IL,
-  IS,
-  nbsim = NULL,
-  sampleseed = NULL
+    IL,
+    IS,
+    nbsim = NULL,
+    sampleseed = NULL
 ) {
   
   if (!is.null(sampleseed)) set.seed(sampleseed)
@@ -32,12 +32,12 @@ f_smrzCumulContaWorkers <- function(
 
 # f_plotConvCumulContaWorkers - Plot check - Indicator : cumulative number of infected workers
 f_plotConvCumulContaWorkers <- function(
-  IL,
-  IS,
-  keptsim = c(10, 50, 100, 150), # number of kept simulations
-  CVmax = 0.20, # acceptable maximum value for the coefficient of variation
-  resampling = 100, # number of keeping iterations
-  plotseed = NULL # for traceability purposes
+    IL,
+    IS,
+    keptsim = c(10, 50, 100, 150), # number of kept simulations
+    CVmax = 0.20, # acceptable maximum value for the coefficient of variation
+    resampling = 100, # number of keeping iterations
+    plotseed = NULL # for traceability purposes
 ) {
   if (!is.null(plotseed)) set.seed(plotseed)
   
@@ -99,11 +99,11 @@ f_plotConvCumulContaWorkers <- function(
   annotate_figure(g_output,
                   bottom = text_grob(paste("Cumulative number of infections over ", length(unique(IL$W_ID)) ,
                                            " workers after a period of ", max(IS$Day)," days" , sep = ""),
-                                  color = "black", size = 7),
+                                     color = "black", size = 7),
                   top = text_grob("Cumulative number of infected workers", face = "bold", size = 14),
                   left = ""
   ) -> g_output
-
+  
   return(g_output)
 }
 
@@ -112,10 +112,10 @@ f_plotConvCumulContaWorkers <- function(
 
 # f_smrzAverageFoodContaRatio
 f_smrzAverageFoodContaRatio <- function(
-  FPS,
-  detection = 5, # (integer) expressed in log10: the detection detection/quantification for the number of RNA copies
-  nbsim = NULL,
-  sampleseed = NULL
+    FPS,
+    detection = 5, # (integer) expressed in log10: the detection detection/quantification for the number of RNA copies
+    nbsim = NULL,
+    sampleseed = NULL
 ){
   
   if (!detection %in% 3:9) {
@@ -125,7 +125,7 @@ f_smrzAverageFoodContaRatio <- function(
   if (!is.null(sampleseed)) set.seed(sampleseed)
   
   all_seed <- unique(FPS$seed)
-
+  
   if (!is.null(nbsim)) {
     if (nbsim > length(all_seed)) stop(">>> required number of simulations not sufficient !")
     FPS %>%
@@ -220,7 +220,7 @@ f_plotConvFoodContaRatio <- function(
   annotate_figure(g_output,
                   bottom = text_grob(paste("Average food contamination ratio over a period of ", max(FPS$Day)+1,
                                            " days\n(detection threshold: ", detection, " log10 ARN copies)", sep = ""),
-                                  color = "black", size = 7),
+                                     color = "black", size = 7),
                   top = text_grob("Average food contamination ratio", face = "bold", size = 14),
                   left = ""
   ) -> g_output
@@ -354,7 +354,7 @@ f_plotConvSurfacesContaRatio <- function(
                                            " days\n(detection threshold: ", detection,
                                            " log10 ARN copies)\n(ratio between the number of contaminated one-square-meter tiles amont a total of ",
                                            nb_S, " tiles)" , sep = ""),
-                                  color = "black", size = 7),
+                                     color = "black", size = 7),
                   top = text_grob(paste("Average surfaces contamination ratio", sep =""), face = "bold", size = 14),
                   left = ""
   ) -> g_output
@@ -548,7 +548,7 @@ f_plotConvRt <- function(
       annotate("rect", xmin = indicator_inf, xmax = indicator_sup, ymin = -Inf, ymax = Inf,
                alpha = 0.3)
   }
-
+  
   
   g_output <- ggpubr::ggarrange(plotlist = g_all, ncol = 1)
   annotate_figure(g_output,
@@ -641,7 +641,69 @@ f_plotConvAllIndicators <- function(
 
 
 
+# f_checkout : extract raw output from different (sub) directories of simulation_output
+f_checkout <- function(
+    scenario
+) {
+  
+  list.files(path = "simulation_output/", pattern =".RData", recursive = TRUE) %>%
+    .[str_detect(., pattern = scenario)] %>% 
+    paste("simulation_output/", ., sep = "") %>%
+    lapply(., function(x) {
+      load(file = x)
+      return(OUTPUT_seedx)
+    }) %>%
+    `names<-`(., sapply(., function(x) x$seed)) 
+  
+}
 
+
+
+# f_summaryOutput : combine extracted raw output into one object containing multiple simulations
+f_summaryOutput <- function(
+    rawoutput
+) {
+  
+  ## all seed number
+  sapply(rawoutput, function(x) x$seed) %>%
+    as.numeric() -> all_seeds
+  
+  ## summarize infection log for all seeds
+  lapply(rawoutput, function(x) {
+    data.frame(seed = rep(x$seed, nrow(x$InfectionLog)),
+               x$InfectionLog)
+  }) %>%
+    data.table::rbindlist() %>%
+    dplyr::mutate(., seed = as.factor(seed)) -> IL 
+  
+  ## summarize infection summary for all seeds
+  lapply(rawoutput, function(x) x$InfectionSummary) %>%
+    data.table::rbindlist() %>%
+    dplyr::relocate(., seed) %>%
+    dplyr::mutate(., seed = as.factor(seed)) -> IS
+  
+  ## summarize surfaces contamination for all seeds
+  lapply(rawoutput, function(x) {
+    data.frame(seed = rep(x$seed, nrow(x$S_summary)),
+               x$S_summary)
+  }) %>%
+    data.table::rbindlist() %>%
+    dplyr::mutate(., seed = as.factor(seed)) -> SS
+  
+  ## summarize food portions contamination for all seeds
+  lapply(rawoutput, function(x) {
+    data.frame(seed = rep(x$seed, nrow(x$FP_summary)),
+               x$FP_summary)
+  }) %>%
+    data.table::rbindlist() %>%
+    dplyr::mutate(., seed = as.factor(seed)) -> FPS
+  
+  return(list(all_seeds = all_seeds,
+              IL = IL,
+              IS = IS,
+              SS = SS,
+              FPS = FPS))
+}
 
 
 
