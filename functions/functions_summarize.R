@@ -647,7 +647,7 @@ f_checkout <- function(
 ) {
   
   list.files(path = "simulation_output/", pattern =".RData", recursive = TRUE) %>%
-    .[str_detect(., pattern = scenario)] %>% 
+    .[str_detect(., pattern = paste(scenario, "_", sep=""))] %>% 
     paste("simulation_output/", ., sep = "") %>%
     lapply(., function(x) {
       load(file = x)

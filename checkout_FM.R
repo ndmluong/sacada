@@ -40,7 +40,7 @@ source("functions/functions.R")
 # FM3b <- f_summaryOutput(rawoutput = raw_FM3b)
 # FM4b <- f_summaryOutput(rawoutput = raw_FM4b)
 
-# >>>> checkpoint <<<<< ####
+# >>>> checkpoint 1 <<<<< ####
 ## NB: check if the RData is available in the simulation_output directory
 load(file = "simulation_output/output_FM.RData")
 
@@ -58,21 +58,35 @@ f_plotContaminatedWorkers(IL = FM3$IL, IS = FM3$IS, seed_select = sample(FM3$all
 f_plotContaminatedWorkers(IL = FM4$IL, IS = FM4$IS, seed_select = sample(FM4$all_seeds, 20), detailed_plot = TRUE, wrap.nrow = 4)
 
 
-
-
-# SUMMARY TABLE ####
+# INDICATORS SUMMARY ####
 ## Cumulative number of infected workers after the whole period
 f_smrzCumulContaWorkers(IL = FM1$IL, IS = FM1$IS)
 f_smrzCumulContaWorkers(IL = FM1$IL, IS = FM1$IS)$cumul %>% mean()
+
 f_smrzCumulContaWorkers(IL = FM2$IL, IS = FM2$IS)$cumul %>% mean()
 f_smrzCumulContaWorkers(IL = FM3$IL, IS = FM3$IS)$cumul %>% mean()
 f_smrzCumulContaWorkers(IL = FM4$IL, IS = FM4$IS)$cumul %>% mean()
 
 ## Food contamination
+f_smrzAverageFoodContaRatio(FPS = FM1$FPS, detection = 3)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FM2$FPS, detection = 3)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FM3$FPS, detection = 3)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FM4$FPS, detection = 3)$contaratio %>% mean()
+
+f_smrzAverageFoodContaRatio(FPS = FM1$FPS, detection = 4)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FM2$FPS, detection = 4)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FM3$FPS, detection = 4)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FM4$FPS, detection = 4)$contaratio %>% mean()
+
 f_smrzAverageFoodContaRatio(FPS = FM1$FPS, detection = 5)$contaratio %>% mean()
 f_smrzAverageFoodContaRatio(FPS = FM2$FPS, detection = 5)$contaratio %>% mean()
 f_smrzAverageFoodContaRatio(FPS = FM3$FPS, detection = 5)$contaratio %>% mean()
 f_smrzAverageFoodContaRatio(FPS = FM4$FPS, detection = 5)$contaratio %>% mean()
+
+f_smrzAverageFoodContaRatio(FPS = FM1$FPS, detection = 6)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FM2$FPS, detection = 6)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FM3$FPS, detection = 6)$contaratio %>% mean()
+f_smrzAverageFoodContaRatio(FPS = FM4$FPS, detection = 6)$contaratio %>% mean()
 
 
 ## Surfaces contamination
