@@ -459,8 +459,8 @@ f_smrzRt <- function(
   ISsub <- dplyr::filter(IS, seed %in% chosen_seed)
   
   Rt <- sapply(chosen_seed, function(x) (f_estimateRt(ISsub = subset(ISsub, seed == x),
-                                                      prm_conta = Parms_Conta,
-                                                      prm_workers = Parms_Workers)))
+                                                      prm_conta = prm_conta,
+                                                      prm_workers = prm_workers)))
   
   output <- data.frame(seed = chosen_seed,
                        Rt = Rt)
