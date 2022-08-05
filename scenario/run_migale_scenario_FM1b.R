@@ -12,9 +12,6 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 
-# FUNCTIONS #####
-source("functions/functions.R")
-
 # PARAMETERS ####
 ## Values by default #####
 source("parameters/parameters.R")
@@ -25,7 +22,10 @@ scenario <- "FM1b"
 ## Parameters changes for analyses  ####
 ## Scenario FM1b - Decrease the total number of workers
 Parms_Workers$NWorkers <- 65
+NWorkers <- Parms_Workers$NWorkers # replicate because NWorkers was also implemented as a global variable
 
+# FUNCTIONS #####
+source("functions/functions.R")
 
 # SIMULATION ####
 ## > seed number ####

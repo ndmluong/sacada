@@ -12,9 +12,6 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 
-# FUNCTIONS #####
-source("functions/functions.R")
-
 # PARAMETERS ####
 ## Values by default #####
 source("parameters/parameters.R")
@@ -25,8 +22,13 @@ scenario <- "FM4b"
 ## Parameters changes for analyses  ####
 ## Scenario FM4b ## decrease the number of workers and remove air renewal of the cutting room and remove all masks! (check the XLSX file)
 Parms_Workers$NWorkers <- 65
+NWorkers <- Parms_Workers$NWorkers
+
 Parms_Plant$Air_renewal <- 0 
 Parms_Workers$pMaskAcceptability[[Parms_Workers$MaskType]] <- 0
+
+# FUNCTIONS #####
+source("functions/functions.R")
 
 
 # SIMULATION ####

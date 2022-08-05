@@ -12,9 +12,6 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 
-# FUNCTIONS #####
-source("functions/functions.R")
-
 # PARAMETERS ####
 ## Values by default #####
 source("parameters/parameters.R")
@@ -25,8 +22,12 @@ scenario <- "FM2b"
 ## Parameters changes for analyses  ####
 ## Scenario FM2b - Decreased number of workers and without any mask ! (check the XLSX file)
 Parms_Workers$NWorkers <- 65
+NWorkers <- Parms_Workers
+
 Parms_Workers$pMaskAcceptability[[Parms_Workers$MaskType]] <- 0
 
+# FUNCTIONS #####
+source("functions/functions.R")
 
 # SIMULATION ####
 ## > seed number ####

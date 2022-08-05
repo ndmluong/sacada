@@ -12,9 +12,6 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 
-# FUNCTIONS #####
-source("functions/functions.R")
-
 # PARAMETERS ####
 ## Values by default #####
 source("parameters/parameters.R")
@@ -22,6 +19,10 @@ source("parameters/parameters.R")
 ## Parameters changes for analyses  ####
 ## Scenario FM2 - Without any mask ! (check the XLSX file)
 Parms_Workers$pMaskAcceptability[[Parms_Workers$MaskType]] <- 0
+
+
+# FUNCTIONS #####
+source("functions/functions.R")
 
 
 # SIMULATION ####

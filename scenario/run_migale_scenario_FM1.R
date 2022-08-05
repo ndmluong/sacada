@@ -12,8 +12,6 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 
-# FUNCTIONS #####
-source("functions/functions.R")
 
 # PARAMETERS ####
 ## Values by default #####
@@ -21,6 +19,9 @@ source("parameters/parameters.R")
 
 ## Changes for analyses (check the XLSX file)
 ## Scenario FM1 - All values by default
+
+# FUNCTIONS #####
+source("functions/functions.R")
 
 
 # SIMULATION ####

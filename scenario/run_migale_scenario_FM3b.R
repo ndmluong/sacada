@@ -12,9 +12,6 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 
-# FUNCTIONS #####
-source("functions/functions.R")
-
 # PARAMETERS ####
 ## Values by default #####
 source("parameters/parameters.R")
@@ -25,7 +22,12 @@ scenario <- "FM3b"
 ## Parameters changes for analyses  ####
 ## Scenario FM3b ## remove air renewal of the cutting room, with reduced number of workers! (check the XLSX file)
 Parms_Workers$NWorkers <- 65
+NWorkers <- Parms_Workers$NWorkers
+
 Parms_Plant$Air_renewal <- 0
+
+# FUNCTIONS #####
+source("functions/functions.R")
 
 
 # SIMULATION ####

@@ -698,7 +698,28 @@ f_summaryOutput <- function(
     data.table::rbindlist() %>%
     dplyr::mutate(., seed = as.factor(seed)) -> FPS
   
+  ## critical day if applicable
+  sapply(rawoutput, function(x) x$CriticalDays) -> CriticalDays
+  
+  ## extract all the parameters set
+  randomseed <- sample(all_seeds, 1)
+  randomfilename <- paste("simulation_output/",
+                          list.files(path = "simulation_output/",
+                                     pattern = paste("_", randomseed, ".", sep =""),
+                                     recursive = TRUE),
+                          sep = "")
+  load(file = randomfilename)
+  
   return(list(all_seeds = all_seeds,
+              Parms_Air = Parms_Air,
+              Parms_Conta = Parms_Conta,
+              Parms_Food = Parms_Food,
+              Parms_Plant = Parms_Plant,
+              Parms_Surfaces = Parms_Surfaces,
+              Parms_Time = Parms_Time,
+              Parms_Workers = Parms_Workers,
+              MyPlant = OUTPUT_seedx$MyPlant,
+              CriticalDays = CriticalDays,
               IL = IL,
               IS = IS,
               SS = SS,

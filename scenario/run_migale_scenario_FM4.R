@@ -12,8 +12,6 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 
-# FUNCTIONS #####
-source("functions/functions.R")
 
 # PARAMETERS ####
 ## Values by default #####
@@ -24,6 +22,8 @@ source("parameters/parameters.R")
 Parms_Plant$Air_renewal <- 0 
 Parms_Workers$pMaskAcceptability[[Parms_Workers$MaskType]] <- 0
 
+# FUNCTIONS #####
+source("functions/functions.R")
 
 # SIMULATION ####
 ## > seed number ####

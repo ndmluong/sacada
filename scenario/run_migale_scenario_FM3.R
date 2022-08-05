@@ -12,9 +12,6 @@ library(incidence)
 library(purrr)
 library(EnvStats)
 
-# FUNCTIONS #####
-source("functions/functions.R")
-
 # PARAMETERS ####
 ## Values by default #####
 source("parameters/parameters.R")
@@ -23,6 +20,8 @@ source("parameters/parameters.R")
 ## Scenario FM3 ## remove air renewal of the cutting room ! (check the XLSX file)
 Parms_Plant$Air_renewal <- 0 
 
+# FUNCTIONS #####
+source("functions/functions.R")
 
 # SIMULATION ####
 ## > seed number ####
