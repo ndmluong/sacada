@@ -143,9 +143,22 @@ Different types of workers were considered in the model depending on
 their respective activities, including the cutters, the logistic workers
 as well as the ones with transverse activities. The number of workers of
 each type present in the plant and their respective working rhythm and
-timetable condition then the daily meat processing flow of the overall
-plant. This processing flow was described by successive steps (i)
-arrival of the
+timetable condition then the daily meat processing flow (meat quantity,
+processing duration) of the overall plant. This processing flow was
+described as successive transformation steps of the meat products: the
+carcasses/half-carcasses arriving in the plant through the gate are
+transported to the conveyors by logistic workers, become smaller meat
+portions after different cutting steps carried out by cutters around the
+conveyors and eventually packed and stored in the cooling area. Other
+workers with transverse activities such as manager, administrative or
+cleaning workers can also be present in the plant at different moments
+depending on their respective timetable. Based on the overall timetable
+of the plant, one can define rules for generating predefined or random
+movements of every agents (workers, carcasses, meat cuts...) between
+different locations in the plant at different time points. Determining
+these movements over time will allow then to track the possible
+transmission of the virus introduced by one or several infectious
+workers in the plant.
 
 ```{r FIG-abm-processing-plant, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "Illustration : Modeling the meat processing plant"}
 knitr::include_graphics("fig/schema/abm_processing_plant.png")
