@@ -1,7 +1,7 @@
 ---
-title: An agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities
+title: An Agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities
 # author: "SACADA Project"
-# date: "July 1st, 2022"
+# date: "April 2021 - September 2022"
 output:
   bookdown::html_document2:
     theme: paper
@@ -73,35 +73,115 @@ load, or rates of reinfection [@Karim2021].
 This document aims to identify the parameters of interest for building
 the Agent Based Model of the ANR Sacada project.
 
-# **Agent-based model: Description**
+# **Agent-based modeling**
 
 The ABM model is presented in this study according to the
 Overview-Design-Details (ODD) protocol as recommended by @Grimm2010.
 
 ## **Overview**
 
-The general concept of the agent-based modelling workflow developed in
-this study is schematized in Figure \@ref(fig:FIG-abm-concept).
+The outline of the agent-based modelling workflow developed in this
+study is schematized in Figure \@ref(fig:FIG-abm-outline).
 
-```{r FIG-abm-concept, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "General concept of the Agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities"}
-knitr::include_graphics("fig/schema/abm_concept.png")
+```{r FIG-abm-outline, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "Outline of the Agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities"}
+knitr::include_graphics("fig/schema/abm_outline.png")
 ```
 
 **Purpose and patterns**
 
--   predict the contamination of the workers
+The developed model was aimed to predict ...
 
--   predict the contamination of the food portions
+**States variables and scales - Parameters overview**
 
--   predict the contamination of the
-
-**States variables and scales**
+Several parameters were included in the model. On the one hand, some
+parameters... On the other hand, based on multiple industrial and
+epidemiological investigations, other parameters were included to
+describe the behavior of the model in different scenarios. These
+scenarios can be defined by ch as well as the behaviors of the agents
 
 **Process overview and scheduling**
+
+The model was divided in four separate modules describing different
+agents evolving in the processing plant including (i) the workers, (ii)
+the droplets in the air, (iii) the inert surfaces and (iv) the food
+products, respectively. As schematized in Figure
+\@ref(fig:FIG-abm-outline), different possible interactions between
+these agents were described, such as the transmission of the droplets
+probably containing viral particles between infectious workers and the
+air through their respiratory activities (exhalation and inhalation),
+the sedimentation of these droplets from the air onto inert surfaces
+and/or food portions as well as the transfers between surfaces and food,
+etc. Based on prior data or knowledge, spatiotemporal rules were defined
+to simulate the interactions between modules and the properties of every
+agents at successive time points distanced by a predefined short time
+step (minutes). These step-by-step simulations were performed afterwards
+for longer periods (days, weeks, etc.). At the end of these periods,
+balances were calculated for different properties of the agents, e.g.
+the total number of aerosolized or fallen droplets, the number of viral
+gene copies inhaled by each worker, etc. Based on these balances,
+several contamination indicators were estimated such as the total number
+of infected workers, the number of contaminated food portions and
+surfaces in the plant, etc. These estimated indicators could be compared
+with collected epidemiological data for further model validation
+purposes.
 
 ## **Design concept**
 
 **Basic principles**
+
+The different agents integrated into the model for describing the
+functioning of the meat processing plant are illustrated in Figure
+\@ref(fig:FIG-abm-processing-plant). The model was implemented in the
+way that end-users can include by themselves as input data the different
+characteristics of the plant such as its dimensions, structures,
+objects, etc. For instance, as shown in Figure
+\@ref(fig:FIG-abm-processing-plant), the illustrated plant is made up of
+several rooms / spaces including an entry hall for workers, an office, a
+cooling area for food storage, a large area for meat cutting activities
+with two conveyor belts for food transfers and a packaging machine, etc.
+Different types of workers were considered in the model depending on
+their respective activities, including the cutters, the logistic workers
+as well as the ones with transverse activities. The number of workers of
+each type present in the plant and their respective working rhythm and
+timetable condition then the daily meat processing flow of the overall
+plant. This processing flow was described by successive steps (i)
+arrival of the
+
+```{r FIG-abm-processing-plant, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "Illustration : Modeling the meat processing plant"}
+knitr::include_graphics("fig/schema/abm_processing_plant.png")
+```
+
+The transmission of the virus from one or several infectious workers to
+other susceptible workers, surfaces and food products are schematized in
+the Figure \@ref(fig:FIG-abm-transmission). In this study, the duration
+between the different successive infection phases were taken into
+account from new infection to recovery with/without symptoms
+development. The different infectious workers can exhale into the air,
+through their respiratory activities or symptoms such as breathing,
+talking, sneezing or coughing, different amounts of droplets containing
+or not viral particles due to variability between workers and depending
+on their behavior (mask wearing). These droplets of various sizes can be
+aerosolized and/or fall afterwards onto inert surfaces and food products
+depending on the characteristics of the ventilation system in each space
+of the plant. Some high-diameter droplets sent out by the infectious
+workers (e.g. in cases of sneezing or coughing) can also fall directly
+onto surfaces without being aerosolized and/or projected towards nearby
+workers. The total viral loads on different surfaces and/or food
+products (meat cuts) are also enumerated; they are considered as
+contaminated if the viral loads exceed a predefined threshold value. The
+non-infected workers (susceptible workers) can inhale more or less of
+droplets depending on their positions in the plant at different moments.
+The cumulative viral doses inhaled by each susceptible worker at the end
+of the day can then probably trigger an infection following a
+dose-response relationship. At last, in addition of these possible
+infections inside the plant, the model included also other contamination
+sources outside the plant: the susceptible workers can get infected due
+to the outside epidemic situation and or by community activities such as
+co-living with infectious workers.
+
+```{r FIG-abm-transmission, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "Modeling the transmission of SARS-CoV-2 between different agents"}
+knitr::include_graphics("fig/schema/abm_transmission.png")
+```
 
 <!-- **Emergence** -->
 
@@ -119,7 +199,7 @@ knitr::include_graphics("fig/schema/abm_concept.png")
 
 ### **Sub-models**
 
-#### **Characteristics of the food processing plant**
+#### **Food processing plant**
 
 **Dimensions and structures**
 
@@ -129,11 +209,7 @@ principal rooms (spaces) were included herein as an example to define
 the plant structure, including the Cutting room (the main space of the
 plant), Entry hall (for workers), Arrival gate (for food arrival into
 the cutting room), Cooling area (for food storage), Waste area, W.C.,
-and Office (illustration in Figure \@ref(fig:FIG-map-plant)).
-
-```{r FIG-map-plant, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant"}
-knitr::include_graphics("fig/schema/map_of_plant_obj_worker.png")
-```
+and Office (illustration in Figure \@ref(fig:FIG-abm-processing-plant)).
 
 The different characteristics of each room are included as inputs of the
 model :
@@ -149,37 +225,36 @@ model :
     Expansion Coil (DEC) or Air Handing Unit (AHU).
 
 The above characteristics were defined in the model as model parameters
-based on industrial investigations or previous works. The *(associated R
-script: parameters_plant.R)*. For example, as illustrated in Table
-\@ref(tab:TAB-plant-room-parameters), each room needs to be positioned
-on the entire workshop grid using a numerical value between 0 and 1
-indicating the relative position over the axes. The cutting room is the
-main build by subtracting all other rooms. The position of the internal
-and external doors can also be mentioned using the predefined values
-"top", "bottom", "left" or "right" (Table
-\@ref(tab:TAB-plant-room-parameters)).
+based on industrial investigations or previous works. For example, each
+room needs to be positioned on the entire workshop grid using a
+numerical value between 0 and 1 indicating the relative position over
+the axes. The cutting room is the main build by subtracting all other
+rooms. The position of the internal and external doors can also be
+mentioned using the predefined values "top", "bottom", "left" or
+"right".
 
-```{r TAB-plant-room-parameters, echo=FALSE}
+```{r TAB-plant-room-parameters, eval=FALSE, include=FALSE}
 data<-read.csv("csv/parameters_room_plant.csv",sep=";",header = T)
 data<-as.data.frame(data)
 data<-data[,]
 knitr::kable(
   data,
   col.names = gsub("[.]", " ", names(data)),
-  caption = 'Set of parameters for charateryzing the room in the plant. The cutting room is built by subtracting the other room',
+  caption = 'IllustrParameters - Characterization of the multiroom processing plant.',
   table.attr = "style='width:85%;'"
 
-)%>%kable_styling('striped', font_size = 10) %>%
-pack_rows("*Entry hall* : The entry hall, or cloakroom, is located at the bottom left and allows the arrival of workers.", 3, 3)%>%
-pack_rows("*Waste area* :  waste disposal area is at the bottom.", 4, 4)%>%
-pack_rows("*W.C.* : The toilets are located at the bottom left.", 5, 5)%>%
-pack_rows("*Cooling area* : The cooling room is located at the top right.", 6, 6)%>%
-pack_rows("*Office* : The offices are located at the top left.", 7, 7)%>%
-pack_rows("*Arrival gate* : The product arrival gate, allows the supply of products, is located in the middle of the left" , 8, 8)
+) %>% 
+  kable_styling('striped', font_size = 10) %>%
+  pack_rows("*Entry hall* : The entry hall, or cloakroom, is located at the bottom left and allows the arrival of workers.", 3, 3) %>%
+  pack_rows("*Waste area* :  waste disposal area is at the bottom.", 4, 4) %>%
+  pack_rows("*W.C.* : The toilets are located at the bottom left.", 5, 5) %>%
+  pack_rows("*Cooling area* : The cooling room is located at the top right.", 6, 6) %>%
+  pack_rows("*Office* : The offices are located at the top left.", 7, 7) %>%
+  pack_rows("*Arrival gate* : The product arrival gate, allows the supply of products, is located in the middle of the left" , 8, 8)
   
 ```
 
-```{r TAB-plant-parameters, echo=FALSE}
+```{r TAB-plant-parameters, eval=FALSE, include=FALSE}
 data<-read.csv("csv/parameters_plant.csv",sep=";",header = T)
 data<-as.data.frame(data)
 data<-data[,]
@@ -213,12 +288,11 @@ The different objects or equipment can be included inside the plant such
 as conveyors, peeler, etc. In the same ways as for the different rooms,
 their dimensions and their relative position alongside the X and Y axes
 are taken into account as model inputs. As illustrated in Figure
-\@ref(fig:FIG-map-plant-object), two types of objects were included :
-two conveyors allowing to transport the different carcasses or food
+\@ref(fig:FIG-abm-processing-plant), two types of objects were included
+: two conveyors allowing to transport the different carcasses or food
 portions from one point to another, and an equipment that can be shared
 by several operators (e.g.: a peeler, frequently used in meat cutting
-plant). The parameters associated with these objects are gathered in
-Table \@ref(tab:TAB-plant-object-parameters).
+plant).
 
 ```{r TAB-plant-object-parameters, echo=FALSE}
 data<-read.csv("csv/parameters_object_plant.csv",sep=";",header = T)
@@ -233,14 +307,14 @@ knitr::kable(
 
 ```
 
-#### **Module 1 - Workers**
+#### **Workers**
 
 ##### Characteristics
 
 Different principal types of workers were taken into account in the
 model depending on the their daily tasks inside the plant. According to
 industrial investigations and expert knowledge, six types of workers
-were included as following:
+were included as following (Figure \@ref(fig:FIG-abm-processing-plant)):
 
 -   *logistic1* : the workers in charge of bringing carcasses (or
     half-carcasses), arriving in the cutting room through the arrival
@@ -250,7 +324,6 @@ were included as following:
     carcasses into large pieces;
 -   *cutter2* : workers in charge of cutting larges pieces from
     *cutter1* into smaller food portions;
--   
 -   *logistic2* : the workers in charge of transferring food portions
     from the cutting tables to the packaging or supplementary treatment
     equipment and storing packed products in the cooling area;
@@ -259,23 +332,20 @@ were included as following:
     work day;
 -   *transverse2*: people from the cleaning team.
 
-```{r FIG-map-plant-object-worker, echo=F, fig.align = 'center', out.width = "65%", fig.cap = "Plan of the processing plant with worker"}
-knitr::include_graphics("fig/schema/map_of_plant_obj_worker.png")
-```
-
 The total number of employees is defined as shown is Table
 \@ref(tab:TAB-workers-parameters).
 
 ```{r TAB-workers-parameters, echo=FALSE}
-data<-read.csv("csv/parameters_worker.csv",sep=";",header = T)
-data<-as.data.frame(data)
-data<-data[,-6]
+data <- read.csv("csv/parameters_worker.csv",sep=";",header = T)
+data <- as.data.frame(data)
+data <- data[,-6]
 knitr::kable(
   data,col.names = gsub("[.]", " ", names(data)),
   table.attr = "style='width:85%;'",
-  caption = 'Table 3. Set of parameters used for charateryzing the worker of the plant.'
-)%>%kable_styling('striped', font_size = 10)%>%
-pack_rows("*Overall proportion for different types of workers *" , 5, 10)
+  caption = 'Set of parameters used for charateryzing the worker of the plant.'
+) %>% 
+  kable_styling('striped', font_size = 10) %>%
+  pack_rows("*Overall proportion for different types of workers *" , 5, 10)
 
 ```
 
@@ -290,63 +360,25 @@ distributed as described above. The two teams A and B alternatively
 change their shift (morning/afternoon) from one week to another.
 Finally, the workers change the team (between the teams A and B) from
 one week to another using a probability defined as model parameter,
-denoted *pChangeTeam*, (value between 0 and 1), set as 0.05 by default
-([Sources]{style="color:red"}).
+denoted *pChangeTeam*, (value between 0 and 1), arbitrarily set as 0.05.
 
 ##### Rules
 
-#### **Module 2 - Air**
+#### **Air**
 
 ##### Circulation of the droplets
 
-```{r FIG-abm-infection-air, echo=F, fig.align = 'center', out.width = "85%", fig.cap = "The circulation of the droplets between workers through the air in the room"}
-knitr::include_graphics("fig/schema/abm_infection_4M.png")
-```
-
 ##### Processing rules
 
-#### **Module 3 - Surfaces**
-
-#### **Module 4 - Food**
-
-##### Characteristics
-
-<!-- *(associated R script : parameters_food.R) * -->
-
--   The type of meat
--   Ncarcass_daily
--   carcass_weight
--   net_weight
--   CSU
-
-##### Rules
-
--   All characteristics of the agents "food portions" were initialized
-    daily. The food portions came from different carcasses. The total
-    number of carcasses (and agents) was calculated each day depending
-    on the expected total meat quantity produced by the establishment
-    (expressed as number of carcasses per day or per week). Each
-    initialized agent had a unique ID (e.g: B_12_028_004 corresponds to
-    the 4th portion of the 28th carcass of the 12th day, "B" stands for
-    "bovine").
-
--   The duration (expressed in minutes) corresponding to different
-    cutting steps for each carcass and for separating food portions at
-    different locations in the plant were estimated/assumed based on
-    information from industrial interviews. Hence, knowing this
-    duration, the carcasses could arrive sequentially and/or
-    simultaneously in the cutting room depending on the expected number
-    of carcasses per day.
-
-#### **Infection by SARS-CoV-2**
+#### **Workers contamination**
 
 ##### *Infection phases*
 
 The parameters associated with the duration of different infections
 phases were considered as fixed. These phases are schematized in Figure
-\@ref(fig:FIG-infection-status). The uncertainty ranges of the different
-values have been identified for sensitivity analysis of the hypothesis
-of the model (Table \@ref(tab:TAB-infection-duration)).
+\@ref(fig:FIG-infection-status)). The uncertainty ranges of the
+different values have been identified for sensitivity analysis of the
+hypothesis of the model (Table \@ref(tab:TAB-infection-duration)).
 
 After contamination, individuals remain in a pre-symptomatic state. The
 presymptomactic period is composed of two sub-periods. There is first a
@@ -362,13 +394,13 @@ the pre-symptomactic period, one fraction of the individual will develop
 symptoms. Several studies are available for estimating this proportion
 [@He2021; @Alene2021; @Ma2021; @Sah2021]. @Alene2021 estimated the
 pooled proportion of asymptomatic COVID-19 cases throughout the course
-of infection was 25% (with 95%CI: 16%â€"38%). @Ma2021 estimated that the
+of infection was 25% (with 95%CI: 16%-38%). @Ma2021 estimated that the
 pooled percentage of asymptomatic infections among the confirmed
 population was 40.50% (with 95%CI: 33.50%-47.50%). @Sah2021 estimated
 that percentage at 35.1% (with 95% CI: 30.7-39.9%) For the ABM model,
 the mean of these three percentages has been used, i.e. 33.5%. The range
 of possible values was also derived from the 95%CI of these studies. The
-range of values for that proortion was set between 16% and 47.5%.
+range of values for that proportion was set between 16% and 47.5%.
 
 For the symptomatic population, the mean duration of symptoms has been
 found uncertain according to studies [@Byrne2020]. The durations of the
@@ -379,9 +411,9 @@ During that period, virus can be detected but it as estimated that
 infectiousness is usually low after 7 days [@He2020]. The uncertainty
 range for the infectiousness period can be estimated from @Byrne2020.
 They stated that virus detection overestimates the infectious period on
-average by 2â€"6 days. @vanKampen2021 provide another estimation of the
+average by 2-6 days. @vanKampen2021 provide another estimation of the
 uncertainty range of infectiousness period. They considered the duration
-between 5 and 11 days.The value of 8 days [@vanKampen2021] was used in
+between 5 and 11 days. The value of 8 days [@vanKampen2021] was used in
 the model .
 
 ```{r FIG-infection-status, echo=FALSE, fig.align = 'center', out.width = "65%", fig.cap="Representation of the stage of infection for SARS-CoV2"}
@@ -500,9 +532,42 @@ knitr::kable(
 
 Principles of the dose-response modelling approaches
 
-### **Input data**
+#### **Surfaces**
 
-#### Parameters values set for default scenario
+#### **Food**
+
+##### Characteristics
+
+<!-- *(associated R script : parameters_food.R) * -->
+
+-   The type of meat
+-   Ncarcass_daily
+-   carcass_weight
+-   net_weight
+-   CSU
+
+##### Rules
+
+-   All characteristics of the agents "food portions" were initialized
+    daily. The food portions came from different carcasses. The total
+    number of carcasses (and agents) was calculated each day depending
+    on the expected total meat quantity produced by the establishment
+    (expressed as number of carcasses per day or per week). Each
+    initialized agent had a unique ID (e.g: B_12_028_004 corresponds to
+    the 4th portion of the 28th carcass of the 12th day, "B" stands for
+    "bovine").
+
+-   The duration (expressed in minutes) corresponding to different
+    cutting steps for each carcass and for separating food portions at
+    different locations in the plant were estimated/assumed based on
+    information from industrial interviews. Hence, knowing this
+    duration, the carcasses could arrive sequentially and/or
+    simultaneously in the cutting room depending on the expected number
+    of carcasses per day.
+
+#### 
+
+### **Input data - Reference scenario**
 
 Scenario chosen based on an epidemiological investigation on several
 SARS-CoV-2 clusters in France during the period between May 2020 and
@@ -523,8 +588,6 @@ R package parallel
 
 regional data in France (SpF) : ex. Bretagne / volume de
 l'établissement, ...
-
-# **Scenarios**
 
 # **Supplementary materials**
 

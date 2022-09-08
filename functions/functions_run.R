@@ -582,6 +582,9 @@ f_run_4M <- function(
   
   InfectionSummary$Positive <- InfectionSummary$Infected_cumul - InfectionSummary$Recovered_cumul 
   
+  # Workers daily status for output
+  WorkingSchedule <- subset(MyWorkers, Hour == 0 & Min == 0)[, c("W_ID", "Day", "W_active", "W_status")]
+  
   # Exporting output: by default
   output <- list(seed = seed,
                  MyPlant = MyPlant,
@@ -589,6 +592,7 @@ f_run_4M <- function(
                  FP_summary = FP_summary,
                  InfectionLog = InfectionLog,
                  InfectionSummary = InfectionSummary,
+                 WorkingSchedule = WorkingSchedule,
                  CriticalDays = CriticalDays)
   
   # If full output are required, saved MyWorkers, MyAir and Expocum
