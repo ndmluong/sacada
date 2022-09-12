@@ -206,7 +206,11 @@ knitr::include_graphics("fig/schema/abm_transmission.png")
 
 **Prediction** <!-- **Sensing** --> <!-- **Interaction** -->
 
+The parameters
+
 **Stochasticity** <!-- **Collectives** --> <!-- **Observation** -->
+
+The stochasticity
 
 ## **Details**
 
@@ -225,7 +229,7 @@ the cutting room), Cooling area (for food storage), Waste area, W.C.,
 and Office (illustration in Figure \@ref(fig:FIG-abm-processing-plant)).
 
 The different characteristics of each room are included as inputs of the
-model :
+model:
 
 -   dimensions of the plant and dimensions of the different rooms,
     expressed in *m* (the length and width on two axes, denoted X and Y
@@ -379,9 +383,27 @@ denoted *pChangeTeam*, (value between 0 and 1), arbitrarily set as 0.05.
 
 #### **Air**
 
+##### Source of contamination
+
+##### Droplet contamination
+
+##### Criteria for aerosolized droplets
+
 ##### Circulation of the droplets
 
-##### Processing rules
+###### Exhalation (source of contamination)
+
+The initial source of sars-cov transfer in the food plant environment is
+through the exhalation of infected
+workers. The droplet rate is expressed as :
+
+###### Sedimentation
+
+###### Direct falling / Projection
+
+###### Inhalation
+
+###### Transfers by contact
 
 #### **Workers contamination**
 
@@ -580,27 +602,26 @@ Principles of the dose-response modelling approaches
 
 #### 
 
-### **Input data - Reference scenario**
+### **Input data: Reference scenario**
+
+#### Scenario
 
 Scenario chosen based on an epidemiological investigation on several
 SARS-CoV-2 clusters in France during the period between May 2020 and
 April 2021.
 
 For each simulation, the model was initialized at the first day with an
-initial number of infected workers $n_{Contaminated-Init} = 5$
+initial number of infected workers $n_{Contaminated-Init} = 1$
+
+#### **Parameters values**
 
 ### **Parallel computing**
 
-R package parallel
+Calculation / technical requirements
 
 ### **Convergence check**
 
-### **Uncertainty analyses**
-
-### **Model validation**
-
-regional data in France (SpF) : ex. Bretagne / volume de
-l'établissement, ...
+approach for convergence
 
 # **Supplementary materials**
 
