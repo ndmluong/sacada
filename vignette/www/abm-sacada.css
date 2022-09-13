@@ -3,3 +3,11 @@ body {
   margin: auto;
   text-align: justify;
 }
+
+
+
+<style>
+#TOC {
+  width: 200%;
+}
+</style>
