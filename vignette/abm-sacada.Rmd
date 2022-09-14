@@ -56,8 +56,8 @@ library(fitdistrplus)
 
 This modelling study aimed to...
 
-The Agent Based Model considered three sources of contaminations: the
-exposition to Sars-CoV2 througout working activities (aerosol and/or
+The Agent Based Model considered three sources of contamination: the
+exposition to SARS-CoV-2 througout working activities (aerosol and/or
 fomites), the contamination throught the exposition outside the
 processing plant for employees having shared activities in community
 (transport and/or living).
@@ -201,27 +201,11 @@ co-living with infectious workers.
 knitr::include_graphics("fig/schema/abm_transmission.png")
 ```
 
-<!-- **Emergence** -->
-
-<!-- **Adaptation**  -->
-
-<!-- **Objectives** -->
-
-<!-- **Learning** -->
-
 ### Prediction
-
-<!-- **Sensing** -->
-
-<!-- **Interaction** -->
 
 The parameters
 
 ### Stochasticity
-
-<!-- **Collectives** -->
-
-<!-- **Observation** -->
 
 The stochasticity
 
@@ -260,8 +244,8 @@ room needs to be positioned on the entire workshop grid using a
 numerical value between 0 and 1 indicating the relative position over
 the axes. The cutting room is the main build by subtracting all other
 rooms. The position of the internal and external doors can also be
-mentioned using the predefined values "top", "bottom", "left" or
-"right".
+mentioned using the predefined values *"top"*, *"bottom"*, *"left"* or
+*"right"*.
 
 ```{r TAB-plant-room-parameters, eval=FALSE, include=FALSE}
 data<-read.csv("csv/parameters_room_plant.csv",sep=";",header = T)
@@ -312,7 +296,7 @@ row_spec(29:30, color = "red")
      
 ```
 
-##### Equipment & Objects
+##### Objects
 
 The different objects or equipment can be included inside the plant such
 as conveyors, peeler, etc. In the same ways as for the different rooms,
@@ -489,10 +473,23 @@ corresponds to the *alpha* variant (that is B.1.1.7). The viral load of
 the alpha variant was found to be 1 $\log_{10}$ higher than the original
 SARS-CoV-2 strain [@Teyssou2021].
 
-```{r FIG-triangular, warning = FALSE, echo=FALSE, fig.align='center', fig.cap="Fitting of triangular distribution to virus load measurements in log10 (copy/ml). Data from Jones et al (2021) "}
+```{r FIG-triangular, warning = FALSE, echo=FALSE, fig.align='center', fig.cap="Fitting of a triangular distribution to virus load measurements (expressed in log10 copy/ml) on data obtained by Jones et al (2021)."}
 load<-read.csv("csv/viral_load.csv",sep=";",header = T)
 f1<-fitdist(load$log10Load, "triang", method="mge", start = list(min=2, mode=6,max=9), gof="CvM")
 plot(f1)
+```
+
+```{r TAB-load-VoC, echo=FALSE}
+data <- read.csv("csv/parameters_vload.csv",sep=";",header = T)
+data <- as.data.frame(data)
+data <- data[,-7]
+knitr::kable(
+  data, col.names = gsub("[.]", " ", names(data)),
+  table.attr = "style='width:85%;'",
+  caption = 'Fitted triangular distribution for charaterizing the individual variability of viral loads in log10 (copy/ml) in stupum.'
+) %>%
+  kable_styling('striped', font_size = 10)
+
 ```
 
 The parameters of the triangular distribution used to describe
@@ -510,21 +507,9 @@ uncertainty range between 0.3 and 1 $\log_{10}$. Finally, the level of
 viral load for *omicron* VoC was found to be similar to *delta*
 [@Lyngse2021].
 
-```{r TAB-load-VoC, echo=FALSE}
-data<-read.csv("csv/parameters_vload.csv",sep=";",header = T)
-data<-as.data.frame(data)
-data<-data[,-7]
-knitr::kable(
-  data,col.names = gsub("[.]", " ", names(data)),
-  table.attr = "style='width:85%;'",
-  caption = 'Set of parameters used for triangular distribution used for charateryzing variability of VoC viral loads in log10 (copy/ml) in stupum.'
-)%>%kable_styling('striped', font_size = 10)
-
-```
-
 ##### Secondary attack rate
 
-The secondary attack rate (SAR) is the parameter used to estimate the
+The secondary attack rate (SAR) parameter used to estimate the
 probability of contraction SARS-CoV-2 for the workers having community
 activities outside the plant such as co-living. The SAR of the original
 and *alpha* VoCs has been found by @Fung2021 to be equal to 17.1% (95%CI
@@ -535,14 +520,15 @@ respectively 1.2 for vaccinated and 2.6 times more important than for
 delta [@Lyngse2021].
 
 ```{r TAB-SAR, echo=FALSE}
-data<-read.csv("csv/parameters_sar.csv",sep=";",header = T)
-data<-as.data.frame(data)
-data<-data[,-8]
+data <- read.csv("csv/parameters_sar.csv",sep=";",header = T)
+data <- as.data.frame(data)
+data <- data[,-8]
 knitr::kable(
   data,col.names = gsub("[.]", " ", names(data)),
   table.attr = "style='width:85%;'",
-  caption = 'Set of parameters used for secondary attack rate in household according to VoC and vaccination status.'
-)%>%kable_styling('striped', font_size = 12)
+  caption = 'Secondary attack rates in household for different variants of concern and vaccination statuses.'
+) %>%
+  kable_styling('striped', font_size = 12)
 
 ```
 
@@ -576,19 +562,84 @@ and 1000.
 
 #### Air
 
-##### Aerosolization criteria
+##### Exhalation
 
-The initial source of sars-cov transfer in the food plant environment is
-through the exhalation of infected workers. The droplet rate is
-expressed as
+The initial source of SARS-CoV-2 was considered through different
+respiratory activities of the infectious workers emitting droplets of
+various sizes. The number of droplets (expressed as $s^{-1}$ )
+(containing or not viral particles) emitted over time was modeled as
+follows :
+
+$$
+\dot N_{exh, d} = \dot Q\upsilon_{exh} * C_d * (1-eff_m), 
+$$
+
+where $\dot Q\upsilon_{exh}$ ($m^3.h^{-1}$) corresponds to the exhaled
+volumetric air flow rate, $C_d$ ($\#.m^{-3}$ ) is the concentration of
+droplets of diameter $d$ and $eff_m$ corresponds to the efficacy of the
+mask if correctly worn (otherwise, \$eff_m = 0 \$). The correct mask
+wearing was described using a parameter called the mask acceptability,
+denoted $p_{mask}$, corresponding to the proportion of the workers
+constantly wearing a mask during their working day. Several types of
+mask can be included as input of the model such as surgical mask or
+FFP2, with their respective efficacy and acceptability.
+
+The volumetric airflow rate was assumed to vary between the different
+workers depending on their physiology and the intensity of their
+activities. Based on data obtained by @Buonanno2020, the ABM model
+considered six size classes for the droplets with the midpoint diameters
+$d$ at 0.8, 1.8, 3.5, 5.5, 20 and 100 $\mu m$, respectively. Several
+respiratory activities (events) were taken into account in the model,
+including *breathing*, *talking*, *talking loud* (based on study by
+@Morawska2009), *coughing* and *sneezing* (SARS-CoV-2 symptoms). The
+concentrations $C_d$ associated with each droplet class emitted during
+each respiratory activity (event) estimated from studies by
+@Morawska2009, [Kennedy2009, Duguid1946]{.underline} are gathered below:
+
+| Respiratory activity | d = 0.8 $\mu m$ | d = 1.8 $\mu m$ | d = 3.5 $\mu m$ | d = 5.5 $\mu m$ | d = 20 $\mu m$ | d = 100 $\mu m$ |
+|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+| breathing            | $0.084 * 10^6$  | $0.009* 10^6$   | $0.003 * 10^6$  | $0.002 * 10^6$  | $0$            | $0$             |
+| talking              | $0.236 * 10^6$  | $0.068 * 10^6$  | $0.007 * 10^6$  | $0.011 * 10^6$  | $0$            | $0$             |
+| talking loud         | $0.751 * 10^6$  | $0.139 * 10^6$  | $0.139 * 10^6$  | $0.059 * 10^6$  | $0$            | $0$             |
+| coughing             | $0$             | $0.025 * 10^6$  | $0.145 * 10^6$  | $0.48 * 10^6$   | $2.51 * 10^6$  | $6.65 * 10^6$   |
+| sneezing             | $0$             | $13 * 10^6$     | $80 * 10^6$     | $175 * 10^6$    | $230 * 10^6$   | $489 * 10^6$    |
+
+: Droplet concentrations during different respiratory activities
+
+The occurrence frequency of the above respiratory activities during a
+time step varied from one worker to another, depending on their working
+activities as well as their infection phases. For example, [Birring2006
+and Hsu1994]{.underline} suggested average coughing frequencies at 2
+coughs per hour for healthy patients and 47 coughs per hour for
+symptomatic patients. Such variability between infection statuses was
+also suggested for the sneezing frequencies ([Hansen&Mygind2002,
+Musch2021]{.underline}). These SARS-CoV-2 symptoms frequencies
+$f_{cough/sneeze}$ (expressed in $\#.min^{-1}$) included in the model
+are gathered below:
+
+| Symptoms | Infectious presymptomatic | Asymptomatic | Symptomatic |
+|----------|---------------------------|--------------|-------------|
+| Coughing | 0.033                     | 0.033        | 0.783       |
+| Sneezing | 0.002                     | 0.08         | 0.017       |
+
+: Frequencies of different SARS-CoV-2 symptoms (expressed as the number
+of occurrences per minutes).
+
+Therefore, during a given several-minute time step $d_t$, the
+probability to have a coughing/sneezing for a worker was calculated by
+$p_{cough/sneeze} = f_{cough/sneeze} * d_t$. If no symptoms are observed
+during this time step, the worker was considered to have one of the
+three remaining respiratory activities, i.e. breathing, talking or
+talking loud, with supposedly equal probability.
 
 ##### Droplet contamination
 
-##### Exhalation
+##### Aerosolization criteria
 
-The initial source of sars-cov transfer in the food plant environment is
-through the exhalation of infected workers. The droplet rate is
-expressed as :
+The different droplets emitted by the workers can be aerosolized
+(suspended in the air) [@BazantBush2021] or fall directly onto the
+nearby environments (including nearby workers, inert surfaces or food
+products) . This possible aerosolization was determined using the
 
 ##### Sedimentation
 
@@ -654,15 +705,15 @@ initial number of infected workers $n_{Contaminated-Init} = 1$
 
 #### Model parameter values
 
-### Parallel computing
+## Parallel computing
 
 Calculation / technical requirements / Migale
 
-### Convergence check
+## Convergence check
 
 approach for convergence /
 
-# Supplementary materials
+# Appendices
 
 ## Dose-response model parameters
 
@@ -807,11 +858,10 @@ g3<-ggplot(data=data,aes(x=log10(dose),y=p,group=tag))+geom_line(aes(x=log10(dos
 g3
 ```
 
-The Wanabe's model provide a conservative estimate of the probability of
-infection. At this stage the exponential dose response and the best fit
-value for *r* (**0.00246**) is used in the SACADA_ABM model. The 95% CI
-are used in the sensitivity analysis of the model (**0.00128** and
-**0.00527**).
+The Watanabe's model provided a conservative estimate of the infection
+probability. The best fit value for $r = 0.00246$ was used in the
+SACADA_ABM model. The 95% CI are used in the sensitivity analysis of the
+model (**0.00128** and **0.00527**).
 
 -   **Expression of dose to assess probability of infection**
 
