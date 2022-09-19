@@ -23,7 +23,7 @@ editor_options:
 ---
 
 ```{=html}
-<style> div.main-container { max-width: 1400px; } </style>
+<style> div.main-container { max-width: 1200px; } </style>
 ```
 <img src="fig/logo/logo_anses.png" width="60px"/>
 <img src="fig/logo/logo_inrae.png" width="60px"/>
@@ -217,26 +217,27 @@ The stochasticity
 
 ##### Structures
 
-The plan of the multi-room food processing plant can be taken into
-account in the model. Based on industrial investigations, seven
-principal rooms (spaces) were included herein as an example to define
-the plant structure, including the Cutting room (the main space of the
-plant), Entry hall (for workers), Arrival gate (for food arrival into
-the cutting room), Cooling area (for food storage), Waste area, W.C.,
-and Office (illustration in Figure \@ref(fig:FIG-abm-processing-plant)).
+The structure of the multi-room food processing plant can be included as
+inputs of the model. Based on industrial investigations / interviews,
+seven principal rooms (spaces) were included herein as an example to
+define the plant structure, including the *Cutting room* (the main space
+of the plant), *Entry hall* (for workers), *Arrival gate* (for food
+arrival into the cutting room), *Cooling area* (for food storage),
+*Waste area*, *W.C.*, and *Office* (illustration in Figure
+\@ref(fig:FIG-abm-processing-plant)).
 
 The different characteristics of each room are included as inputs of the
 model:
 
 -   dimensions of the plant and dimensions of the different rooms,
-    expressed in *m* (the length and width on two axes, denoted X and Y
-    axes, respectively, and height on a 3rd axis, denoted Z axis);
+    expressed in $m$ (the length and width on two axes, denoted *X* and
+    *Y* axes, respectively, and height on a 3rd axis, denoted *Z* axis);
 -   positions of the room in the plant;
 -   presence and relative positions of internal/external door for each
     room;
 -   ventilation specifications: several air conditioning types can be
-    indicated such as Controlled Mechanical Ventilation (CMV), Direct
-    Expansion Coil (DEC) or Air Handing Unit (AHU).
+    indicated such as *Controlled Mechanical Ventilation* (CMV), *Direct
+    Expansion Coil* (DEC) or *Air Handing Unit* (AHU).
 
 The above characteristics were defined in the model as model parameters
 based on industrial investigations or previous works. For example, each
@@ -244,8 +245,8 @@ room needs to be positioned on the entire workshop grid using a
 numerical value between 0 and 1 indicating the relative position over
 the axes. The cutting room is the main build by subtracting all other
 rooms. The position of the internal and external doors can also be
-mentioned using the predefined values *"top"*, *"bottom"*, *"left"* or
-*"right"*.
+mentioned using the predefined values *top*, *bottom*, *left* or
+*right*.
 
 ```{r TAB-plant-room-parameters, eval=FALSE, include=FALSE}
 data<-read.csv("csv/parameters_room_plant.csv",sep=";",header = T)
@@ -300,8 +301,8 @@ row_spec(29:30, color = "red")
 
 The different objects or equipment can be included inside the plant such
 as conveyors, peeler, etc. In the same ways as for the different rooms,
-their dimensions and their relative position alongside the X and Y axes
-are taken into account as model inputs. As illustrated in Figure
+their dimensions and their relative position alongside the *X* and *Y*
+axes are included as model inputs. As illustrated in Figure
 \@ref(fig:FIG-abm-processing-plant), two types of objects were included
 : two conveyor belts allowing to transport the different carcasses or
 food portions from one point to another and an equipment that can be
@@ -366,15 +367,16 @@ knitr::kable(
 The workers were split afterwards into two teams, denoted *"team A"* and
 *"team B"* according to their working shift (morning or afternoon) and
 to their weekly schedule. In the model, this team dividing was included
-by the parameters *pTeam* (value between 0 and 1 representing the
-proportion of each team) and set by default at 0.5 (equal distribution
-between the two teams A and B). In each team, the types of workers
-(cutters, transverse and logistic workers) were proportionally
+by the parameters $p_{Team}$ (value between 0 and 1 representing the
+proportion of each team) and set by default at $p_{Team}=0.5$ (equal
+distribution between the two teams A and B). In each team, the types of
+workers (cutters, transverse and logistic workers) were proportionally
 distributed as described above. The two teams A and B alternatively
 change their shift (morning/afternoon) from one week to another.
-Finally, the workers change the team (between the teams A and B) from
-one week to another using a probability defined as model parameter,
-denoted *pChangeTeam*, (value between 0 and 1), arbitrarily set as 0.05.
+Finally, the workerschange the team (between the teams A and B) from one
+week to another using a probability defined as model parameter, denoted
+$p_{changeTeam}$, (value between 0 and 1), arbitrarily set at
+$p_{changeTeam} = 0.05$.
 
 ##### Infection phases
 
@@ -383,6 +385,32 @@ the model and are schematized in Figure
 \@ref(fig:FIG-infection-status)). The uncertainty ranges of the
 different values have been identified for sensitivity analysis of the
 hypothesis of the model (Table \@ref(tab:TAB-infection-duration)).
+
+```{r FIG-infection-status, echo=FALSE, fig.align = 'center', out.width = "65%", fig.cap="Representation of the stage of infection for SARS-CoV2"}
+g_InfectionPhases <- grViz("     
+digraph Status{
+node [shape=box]
+
+Contamination[label='Newly infected']; 
+Presymptomatic[style=filled, fillcolor=bisque4, fontcolor=white, label='Possible development of symptoms']; 
+Infectious[style=filled, fillcolor=bisque4, fontcolor=white, label='Infectious'];
+Symptomatic[style=filled, fillcolor=bisque4, fontcolor=white, label='Symptomatic']; 
+Asymptomatic[style=filled, fillcolor=bisque4, fontcolor=white, label='Asymptomatic'];
+Non_infectious[style=filled, fillcolor=bisque4, fontcolor=white, label='Non infectious'];
+Recovery[label='Recovered'];
+
+Contamination -> Infectious [label=' Latent phase (non-infectious)'];
+Infectious -> Presymptomatic [label=' Presymptomatic phase (infectious)'];
+Presymptomatic -> Symptomatic[label=' p(symp)',style = dotted];
+Presymptomatic -> Asymptomatic[label=' 1 - p(symp)',style=dotted];
+Asymptomatic -> Non_infectious[label=' Symptomatic phase (infectious)'];
+Symptomatic -> Non_infectious[label=''];
+Non_infectious -> Recovery[label=' Pre-recovery phase (non infectious)']
+
+}
+")
+g_InfectionPhases
+```
 
 Once infected, individuals enter firstly into a presymptomatic phase
 including (i) a latent period during which no virus can be detected and
@@ -420,32 +448,6 @@ detection overestimates the infectious period on average by 2-6 days.
 infectiousness period. They considered the duration between 5 and 11
 days. The value of 8 days [@vanKampen2021] was used in the model .
 
-```{r FIG-infection-status, echo=FALSE, fig.align = 'center', out.width = "65%", fig.cap="Representation of the stage of infection for SARS-CoV2"}
-test<-grViz("     
-digraph Status{
-node [shape=box]
-
-Contamination[label='Newly infected']; 
-Presymptomatic[style=filled, fillcolor=bisque4, fontcolor=white, label='Possible development of symptoms']; 
-Infectious[style=filled, fillcolor=bisque4, fontcolor=white, label='Infectious'];
-Symptomatic[style=filled, fillcolor=bisque4, fontcolor=white, label='Symptomatic']; 
-Asymptomatic[style=filled, fillcolor=bisque4, fontcolor=white, label='Asymptomatic'];
-Non_infectious[style=filled, fillcolor=bisque4, fontcolor=white, label='Non infectious'];
-Recovery[label='Recovered'];
-
-Contamination -> Infectious [label=' Latent phase (non-infectious)'];
-Infectious -> Presymptomatic [label=' Presymptomatic phase (infectious)'];
-Presymptomatic -> Symptomatic[label=' p(symp)',style = dotted];
-Presymptomatic -> Asymptomatic[label=' 1 - p(symp)',style=dotted];
-Asymptomatic -> Non_infectious[label=' Symptomatic phase (infectious)'];
-Symptomatic -> Non_infectious[label=''];
-Non_infectious -> Recovery[label=' Pre-recovery phase (non infectious)']
-
-}
-")
-test
-```
-
 ```{r TAB-infection-duration, echo=FALSE}
 data<-read.csv("csv/parameters_duration.csv",sep=";",header = T)
 data<-as.data.frame(data)
@@ -465,19 +467,12 @@ the viral load emitted by the different workers only during their
 infectiousness period. Viral loads were considered to be similar between
 asymptomatic and symptomatic persons according to a study of @Walsh2020
 and assumed to be constant during the whole infectiousness period. The
-Agent-Based model takes into account the inter-individual variability of
-virus load in sputum and the VoC. Data obtained by @Jones2021 on
-presymptomatic, asymptomatic, and mildly symptomatic (PAMS) cases were
-used to estimated this inter-individual variability. The latter
-corresponds to the *alpha* variant (that is B.1.1.7). The viral load of
-the alpha variant was found to be 1 $\log_{10}$ higher than the original
-SARS-CoV-2 strain [@Teyssou2021].
-
-```{r FIG-triangular, warning = FALSE, echo=FALSE, fig.align='center', fig.cap="Fitting of a triangular distribution to virus load measurements (expressed in log10 copy/ml) on data obtained by Jones et al (2021)."}
-load<-read.csv("csv/viral_load.csv",sep=";",header = T)
-f1<-fitdist(load$log10Load, "triang", method="mge", start = list(min=2, mode=6,max=9), gof="CvM")
-plot(f1)
-```
+inter-individual variability of virus load in sputum and the VoC was
+taken into account in the ABM model: parameters characterizing this
+variability were estimated by fitting triangular probability
+distributions on literature [@Jones2021; @Teyssou2021; @Luo2021;
+@Wang2021] (see Appendices... ). Estimated values of these parameters
+are gathered in Table \@ref(tab:TAB-load-VoC).
 
 ```{r TAB-load-VoC, echo=FALSE}
 data <- read.csv("csv/parameters_vload.csv",sep=";",header = T)
@@ -485,27 +480,12 @@ data <- as.data.frame(data)
 data <- data[,-7]
 knitr::kable(
   data, col.names = gsub("[.]", " ", names(data)),
-  table.attr = "style='width:85%;'",
-  caption = 'Fitted triangular distribution for charaterizing the individual variability of viral loads in log10 (copy/ml) in stupum.'
+  table.attr = "style='width:90%;'",
+  caption = "Parameters characterizing inter-individual variability of viral loads (expressed in log10 copy/ml) in sputum."
 ) %>%
   kable_styling('striped', font_size = 10)
 
 ```
-
-The parameters of the triangular distribution used to describe
-variability of viral load are respectively,
-min=`r round(f1$estimate[1],1)`, mode=`r round(f1$estimate[2],1)` and
-max=`r round(f1$estimate[3],1)`.
-
-The *delta* VoC is associated with higher viral load [@Luo2021;
-@Wang2021; @Teyssou2021]. The concentration of delta VoC was found to be
-2 times more important than for *alpha* [@Teyssou2021]. Other
-differences observed in *Ct* values suggest that the difference could be
-higher [@Luo2021; @Wang2021]. Therefore, the distribution of viral load
-was considered to be shifted by 0.5 $\log_{10}$ from *delta* with an
-uncertainty range between 0.3 and 1 $\log_{10}$. Finally, the level of
-viral load for *omicron* VoC was found to be similar to *delta*
-[@Lyngse2021].
 
 ##### Secondary attack rate
 
@@ -517,18 +497,21 @@ and *alpha* VoCs has been found by @Fung2021 to be equal to 17.1% (95%CI
 *delta* variant (with 95%CI 24-53%) in case of unvaccinated people, and
 25% (with 95%CI 18-33%) for vaccinated people. The SAR for *omicron* is
 respectively 1.2 for vaccinated and 2.6 times more important than for
-delta [@Lyngse2021].
+delta [@Lyngse2021]. These different SAR parameter values included in
+the model are shown in Table \@ref(tab:TAB-SAR).
 
 ```{r TAB-SAR, echo=FALSE}
-data <- read.csv("csv/parameters_sar.csv",sep=";",header = T)
-data <- as.data.frame(data)
-data <- data[,-8]
+data <- read.csv("csv/parameters_sar.csv",sep=";",header = F)
+tabcolnames <- data[1,-8]
+data <- as.data.frame(data[-1,-8])
+row.names(data) <- 1:nrow(data)
 knitr::kable(
-  data,col.names = gsub("[.]", " ", names(data)),
-  table.attr = "style='width:85%;'",
+  data,
+  col.names = tabcolnames,
+  table.attr = "style='width:100%;'",
   caption = 'Secondary attack rates in household for different variants of concern and vaccination statuses.'
 ) %>%
-  kable_styling('striped', font_size = 12)
+  kable_styling('striped', font_size = 10)
 
 ```
 
@@ -541,24 +524,27 @@ proposed in the literature (see more details in the section
 \@ref(dose-response-model-parameters) ), the Watanabe model
 [@Watanabe2010] was chosen herein to describe, for each worker, the
 probability to get infected as function of the number of inhaled virions
-(infectious virus), denoted $dose$, as follows:
+(infectious virus), denoted \$dose\$, as follows:
 
 $$
 P(infection) = 1 - \exp(-r * dose)
 $$
 
 where $r$ is the shape parameter defining the exponential form of the
-no-threshold model is a no-threshold model. The value of $r$, estimated
-at 0.00246 [95%CI 0.00128-0.00527] based on literature data (cf. section
-\@ref(dose-response-model-parameters)) was used herein in the ABM model.
-It is also worth noting that the concentration of SARS-CoV-2 expressed
-in gene copies (e.g. RNA copies) or in infectious virus are strongly
-different. Important ratios between these concentrations have been
-suggested in the literature, varying from a factor of 100 to 1000
-between the number of genes copies and the infectious viral particles
-[@Miller2021; @Pitol2021]. This factor was included in the ABM model
-with a arbitrarily chosen value of 500 as well as the 95%CI between 100
-and 1000.
+no-threshold model is a no-threshold model. The value of \$r\$,
+estimated at $r=0.00246$ [95%CI 0.00128-0.00527] based on literature
+data (cf. section \@ref(dose-response-model-parameters)) was used herein
+in the ABM model. It is also worth noting that the concentration of
+SARS-CoV-2 expressed in gene copies (e.g. RNA copies) or in infectious
+virus are strongly different. Important ratios between these
+concentrations have been suggested in the literature, varying from a
+factor of 100 to 1000 between the number of genes copies and the
+infectious viral particles [@Miller2021; @Pitol2021]. This factor,
+denoted $f_{RNA/virion}$, was included in the ABM model with a
+arbitrarily chosen value of 500 as well as the 95%CI between 100 and
+1000.
+
+##### Working days
 
 #### Air
 
@@ -575,14 +561,14 @@ $$
 $$
 
 where $\dot Q\upsilon_{exh}$ ($m^3.h^{-1}$) corresponds to the exhaled
-volumetric air flow rate, $C_d$ ($\#.m^{-3}$ ) is the concentration of
-droplets of diameter $d$ and $eff_m$ corresponds to the efficacy of the
-mask if correctly worn (otherwise, \$eff_m = 0 \$). The correct mask
-wearing was described using a parameter called the mask acceptability,
-denoted $p_{mask}$, corresponding to the proportion of the workers
-constantly wearing a mask during their working day. Several types of
-mask can be included as input of the model such as surgical mask or
-FFP2, with their respective efficacy and acceptability.
+volumetric air flow rate, $C_d$ ($\#.m^{-3}$ ) is the viral
+concentration of droplets of diameter $d$ and $eff_m$ corresponds to the
+efficacy of the mask if correctly worn (otherwise, $eff_m = 0$). The
+correct mask wearing was described using a parameter called the mask
+acceptability, denoted $p_{mask}$, corresponding to the proportion of
+the workers constantly wearing a mask during their working day. Several
+types of mask can be included as input of the model such as surgical
+mask or FFP2, with their respective efficacy and acceptability.
 
 The volumetric airflow rate was assumed to vary between the different
 workers depending on their physiology and the intensity of their
@@ -591,20 +577,28 @@ considered six size classes for the droplets with the midpoint diameters
 $d$ at 0.8, 1.8, 3.5, 5.5, 20 and 100 $\mu m$, respectively. Several
 respiratory activities (events) were taken into account in the model,
 including *breathing*, *talking*, *talking loud* (based on study by
-@Morawska2009), *coughing* and *sneezing* (SARS-CoV-2 symptoms). The
+@Morawska2009), *coughing* and *sneezing* (SARS-CoV-2 symptoms). In this
+study, based on estimations from literature data, we assumed that each
+droplet contained one viral RNA copy (cf. section Appendices
+\@ref(assumption-for-droplets-contamination)). The droplet
 concentrations $C_d$ associated with each droplet class emitted during
 each respiratory activity (event) estimated from studies by
-@Morawska2009, [Kennedy2009, Duguid1946]{.underline} are gathered below:
+@Morawska2009, [Kennedy2009, Duguid1946]{.underline} are gathered in
+Table \@ref(tab:TAB-air-Cd).
 
-| Respiratory activity | d = 0.8 $\mu m$ | d = 1.8 $\mu m$ | d = 3.5 $\mu m$ | d = 5.5 $\mu m$ | d = 20 $\mu m$ | d = 100 $\mu m$ |
-|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
-| breathing            | $0.084 * 10^6$  | $0.009* 10^6$   | $0.003 * 10^6$  | $0.002 * 10^6$  | $0$            | $0$             |
-| talking              | $0.236 * 10^6$  | $0.068 * 10^6$  | $0.007 * 10^6$  | $0.011 * 10^6$  | $0$            | $0$             |
-| talking loud         | $0.751 * 10^6$  | $0.139 * 10^6$  | $0.139 * 10^6$  | $0.059 * 10^6$  | $0$            | $0$             |
-| coughing             | $0$             | $0.025 * 10^6$  | $0.145 * 10^6$  | $0.48 * 10^6$   | $2.51 * 10^6$  | $6.65 * 10^6$   |
-| sneezing             | $0$             | $13 * 10^6$     | $80 * 10^6$     | $175 * 10^6$    | $230 * 10^6$   | $489 * 10^6$    |
-
-: Droplet concentrations during different respiratory activities
+```{r TAB-air-Cd, echo=FALSE}
+data <- read.csv("csv/parameters_air_Cd.csv",sep=";",header = F)
+tabcolnames <- data[1, ]
+data <- as.data.frame(data[-1,])
+row.names(data) <- 1:nrow(data)
+knitr::kable(
+ data,
+ col.names = tabcolnames,
+ table.attr = "style='width:85%;'",
+ caption = 'Droplets concentration emitted during different respiratory activities and for different droplet size classes.'
+) %>%
+ kable_styling('striped', font_size = 10)
+```
 
 The occurrence frequency of the above respiratory activities during a
 time step varied from one worker to another, depending on their working
@@ -615,76 +609,233 @@ symptomatic patients. Such variability between infection statuses was
 also suggested for the sneezing frequencies ([Hansen&Mygind2002,
 Musch2021]{.underline}). These SARS-CoV-2 symptoms frequencies
 $f_{cough/sneeze}$ (expressed in $\#.min^{-1}$) included in the model
-are gathered below:
+are gathered in Table \@ref(tab:TAB-air-freq).
 
-| Symptoms | Infectious presymptomatic | Asymptomatic | Symptomatic |
-|----------|---------------------------|--------------|-------------|
-| Coughing | 0.033                     | 0.033        | 0.783       |
-| Sneezing | 0.002                     | 0.08         | 0.017       |
+```{r TAB-air-freq, echo=FALSE}
+data <- read.csv("csv/parameters_air_freq.csv",sep=";",header = F)
+tabcolnames <- data[1, ]
+data <- as.data.frame(data[-1,])
+row.names(data) <- 1:nrow(data)
+knitr::kable(
+ data,
+ col.names = tabcolnames,
+ table.attr = "style='width:65%;'",
+ caption = 'Frequency of different SARS-CoV-2 symptoms (expressed as the number of occurrences per minutes).'
+) %>%
+ kable_styling('striped', font_size = 10)
+```
 
-: Frequencies of different SARS-CoV-2 symptoms (expressed as the number
-of occurrences per minutes).
-
-Therefore, during a given several-minute time step $d_t$, the
-probability to have a coughing/sneezing for a worker was calculated by
-$p_{cough/sneeze} = f_{cough/sneeze} * d_t$. If no symptoms are observed
-during this time step, the worker was considered to have one of the
-three remaining respiratory activities, i.e. breathing, talking or
-talking loud, with supposedly equal probability.
-
-##### Droplet contamination
+Based on the frequencies below, during a given several-minute time step
+$dt$, the probability to have a coughing/sneezing event for a worker was
+calculated by $p_{cough/sneeze} = f_{cough/sneeze} * dt$. If no symptoms
+are observed during this time step, the worker was considered to have
+one of the three remaining respiratory activities, i.e. breathing,
+talking or talking loud, with supposedly equal probability.
 
 ##### Aerosolization criteria
 
 The different droplets emitted by the workers can be aerosolized
 (suspended in the air) [@BazantBush2021] or fall directly onto the
 nearby environments (including nearby workers, inert surfaces or food
-products) . This possible aerosolization was determined using the
+products) depending on the size of the droplets and the ventilation
+system in the room. In this study, a criterion was used to determine if
+in a given room $r$ a droplet of diameter $D_d$ (size class $d$) will be
+aerosolized by comparing its sedimentation time, denoted $t_{sed,r,d}$,
+with the circulation time of the airflow in the room, denoted
+$t_{circ,r}$.
 
-##### Sedimentation
+On the one hand, assuming that all droplets were uniformly distributed
+in the air, their sedimentation time was calculated as follows:
 
-##### Falling & Projection
+$$
+t_{sed,r,d}= \frac{H_r}{\upsilon_{sed,d}},
+$$
 
-```{r FIG-abm-pzone, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "Distribution of the falling and projected droplets onto nearby environments and workers"}
+with $H_r$ (in $m$) corresponds to the height of the room and
+$\upsilon_{sed,d}$ (in $m.s^{-1}$) is the settling velocity of the
+droplets. The velocity was calculated using the Stokes law:
+
+$$
+\upsilon_{sed,d} = \frac{g*(\rho_{water}-\rho_{air})*D_d^2}{18*\mu},
+$$
+
+where $g$ (in $m.s^{-2}$) is the gravity acceleration; $\rho_{water}$
+and $\rho_{air}$ (in $kg.m^{-3}$) are the mass density of the droplets
+and the air, respectively and $\mu$ is the dynamic viscosity
+($kg.m^{-1}.s^{-1}$).
+
+On the other hand, the circulation time of the airflow in the room $r$
+was calculated as the ratio between the volume of the room $V_r$ ($m^3$)
+and the volumetric airflow rate $\dot Q\upsilon_r$ ($m^3.h^{-1}$):
+
+$$
+t_{circ,r} = \frac{V_r}{\dot Q \upsilon_r},
+$$
+
+with the value of $\dot Q \upsilon_r$ depending on the user-defined
+ventilation characteristics of the room. This airflow rate was
+equivalent to (i) the air mixing rate for Air Handing Unit and Direct
+Expansion Coil systems or (ii) the renew airflow rate for Controlled
+Mechanical Ventilation (CMV) systems. Droplets of diameter $D_d$ in the
+room $r$ were then considered as aerosolized under the following if:
+
+$$
+t_{sed,r,d} > 10 * t_{circ,r},
+$$
+
+otherwise, they were considered as sedimented onto nearby environments.
+The total number of droplets sedimented in the room was then calculated
+as follows:
+
+$$
+\dot N_{sed,d,r} =\upsilon_{sed,d} * S_r, 
+$$
+
+with $S_r$ (in $m^2$) corresponding to the area of the room.
+
+##### Falling & projection
+
+As previously mentioned, the droplets of various sizes were considered
+in the model from emission by infectious workers through their
+respiratory activities (breathing, talking, etc.). Besides aerosolized
+or sedimented droplets after a given time step described above, one also
+considered a fraction of the emitted droplets (mostly the ones with
+high-diameters) that could possibly fall directly onto nearby
+environments and/or in the direction of nearby workers following
+coughing/sneezing events. These events, when they occurs (cf.
+frequencies in Table \@ref(tab:TAB-air-freq)), gave then three different
+paths for the circulation of the droplets emitted by an infectious
+worker, including (i) a fraction going to the aerosol and sedimented
+afterwards as described in the previous sections, (ii) a variable
+fraction projected in the direction of nearby susceptible workers
+depending on the distance between them and the infectious one and (iii)
+a variable fraction fallen / dropped directly on nearby environments
+(see Figure \@ref(fig:FIG-abm-pzone)).
+
+```{r FIG-abm-pzone, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "Distribution of the falling and projected droplets onto nearby environments and workers due to coughing or sneezing events."}
 knitr::include_graphics("fig/schema/abm_pzone.png")
 ```
 
+In this study, for simplification purposes, the spatial environments in
+the plant were divided into one-square-meter tiles where different
+agents (workers, inert surfaces or food products) can be present at a
+same given time. The fractions of falling / projected droplets (paths ii
+and iii) were spatially distributed afterwards into sub-fractions for
+the nearby square tiles depending on the distances separating them and
+the infectious worker. These spatial distributions were estimated based
+on data obtained previously by [Duguid1946, Nicas2005, Li2021, Lie2020
+and Jung2022]{.underline} and shown in Figure \@ref(fig:FIG-abm-pzone)
+(for more details, see Appendices
+\@ref(distribution-of-the-projected-droplets)).
+
 ##### Inhalation
+
+The total number of droplets (containing viral RNA copies) inhaled by
+each worker (by breathing in small droplets from the air or by being
+exposed to direct droplets projections) was tracked for each time point.
+The total exposure to the virus of each worker was calculated as the
+cumulative number of RNA copies inhaled at the end of the day. This
+exposure, converted afterwards as a number of infectious virions using
+the conversion factor $f_{RNA/virion}$, was included in the
+dose-modelling step to determine if a possible infection may occur (cf.
+section \@ref(infection-probability)).
 
 #### Surfaces
 
-inert surfaces
+As previously described in the section \@ref(falling-projection),
+droplets can sediment or fall onto different areas that were divided
+into one-square-meter tiles. In the study, all inert surfaces (e.g.
+surfaces of the conveyor belts and the equipment) located on those tiles
+were considered as agents of the ABM model with their own spatial
+coordinates. During the working day, the quantity of contaminated
+droplets could be accumulated and probably transferred from or to
+aerosol or food portions present on these inert surfaces. These droplet
+accumulations were calculated at the end of the day to determine the
+contamination level of each inert surface tiles, expressed as the total
+number of viral RNA copies per $m^2$. Considering a possible factor
+between this total of RNA copies and the estimated quantity of virions
+as well as an experimental limit of detection, a surface tile was
+considered as contaminated by infectious viruses (*positive*
+contamination) if its droplet accumulation exceeded a predefined
+threshold values. In this study, the contamination was computed for
+several threshold levels varying from 3 to 9 $\log_{}10$ viral RNA
+copies in order to deal with possible uncertainties in the RNA/virions
+factor and the limit of detection. At the end of the day, once the total
+number of contaminated surfaces as well as their corresponding spatial
+coordinates were determined, all droplet accumulations were reset at 0
+since all inert surfaces were assumed to be daily cleaned by the
+*transverse2* workers.
 
 #### Food
 
-##### Characteristics
+##### Food processing
 
-<!-- *(associated R script : parameters_food.R) * -->
+The meat cutting process was described herein accordingly to the module
+Workers (cf. \@ref(type-of-workers)) as a multi-step process from the
+arrival gate to the storage area. The agents *food portions* were
+computed with a flexible flow:
 
--   The type of meat
--   Ncarcass_daily
--   carcass_weight
--   net_weight
--   CSU
+-   Firstly, two principal input parameters were used to describe the
+    quantity of processed meats depending on the type of meat processed
+    in the plant (e.g. *porcine, bovine,* etc.), including (i) the
+    average weight of the carcasses arriving at the begin of the cutting
+    process and (ii) the net weight ratio describing the yield obtained
+    at the end of the process by excluding other non-consumable parts of
+    the carcasses;
 
-##### Rules
+-   After all cutting steps, the final food portions could be various
+    sizes and weights depending on the market/consumers demand. For
+    simplification purposes, an agent *food portion* was defined as a
+    portion with a given *consumer sales unit* (CSU), i.e. the average
+    weight of the final portion (expressed in $kg$) obtained at the end
+    of the cutting process;
 
--   All characteristics of the agents "food portions" were initialized
-    daily. The food portions came from different carcasses. The total
-    number of carcasses (and agents) was calculated each day depending
-    on the expected total meat quantity produced by the establishment
-    (expressed as number of carcasses per day or per week). Each
-    initialized agent had a unique ID (e.g: B_12_028_004 corresponds to
-    the 4th portion of the 28th carcass of the 12th day, "B" stands for
-    "bovine").
+-   Based on expert knowledge and interviews with industrial factories,
+    the quantity of meat processed during a period was assumed to the
+    depend to the working rhythm of each worker type (*logistic,
+    cutter1, cutter2*, etc.). These rhythms were included as parameters,
+    for each type of meat and type of workers, expressed at a ratio
+    corresponding to the expected weight proportion of the carcass
+    processed during a given period. For example, the working rhythm of
+    the *cutter1* workers in a porcine processing plant equal to 0.2
+    $min^{-1}$ correspond to their capacity to cut 20% of a pork carcass
+    during one minute into different portions ready to go to the
+    subsequent processing steps;
 
--   The duration (expressed in minutes) corresponding to different
-    cutting steps for each carcass and for separating food portions at
-    different locations in the plant were estimated/assumed based on
-    information from industrial interviews. Hence, knowing this
-    duration, the carcasses could arrive sequentially and/or
-    simultaneously in the cutting room depending on the expected number
-    of carcasses per day.
+-   The working rhythm can be different from one worker category to
+    another, therefore, different food portions can be accumulated over
+    time on the same working surfaces (conveyor belts or equipment).
+    This accumulation will condition then the duration of every meat
+    portions spatially distributed in the plant during the different
+    cutting steps: for example, several meat portions can stay 5 minutes
+    in the first cutting step (deboning) but 10 minutes in the second
+    one (slicing, chopping, etc.) requiring more time to be done;
+
+-   Knowing the above duration for each cutting step, the different food
+    portionswere spatially distributed at different step-dependent
+    locations in the plant (e.g. *cutting1-conveyor1-5minutes*). It is
+    worth noting that locations such as the conveyor belts may represent
+    several spatial *X-Y* coordinates depending on their dimensions. The
+    spatial distribution of the meat portions on the conveyors was
+    computed in the way that the different portions from the same
+    carcass were at the same location during a given period but could
+    possibly have different random coordinates (simplification purposes
+    for modeling the movement of the conveyor belts);
+
+-   Finally, depending the total number of workers present in the plant
+    at a given working day, the total number of agents *food portions*
+    as well as their spatiotemporal distributions were accordingly
+    computed.
+
+As for the inert surfaces (cf. section \@ref(surfaces)), the
+contamination of the meat products was considered if the viral RNA
+accumulation in each portion (through sedimentation, projection or
+transfers by contact) exceeds pre-defined threshold levels. This
+accumulation was calculated for each portion at the entry of storage
+area (end of cutting process). Based on the chosen threshold level, the
+contamination percentage was calculated at the end of each day as the
+ratio of the number of contaminated portions over the total number of
+processed ones during the considered day.
 
 ##### Transfers by contact
 
@@ -714,6 +865,41 @@ Calculation / technical requirements / Migale
 approach for convergence /
 
 # Appendices
+
+## Individual variability in viral load
+
+Among the infection phases described previously, the model considered
+the viral load emitted by the different workers only during their
+infectiousness period. Viral loads were considered to be similar between
+asymptomatic and symptomatic persons according to a study of @Walsh2020
+and assumed to be constant during the whole infectiousness period.
+Parameters characterizing inter-individual variability (min, mode and
+max values) were estimated by fitting triangular probability
+distributions on data collected by @Jones2021 on presymptomatic,
+asymptomatic, and mildly symptomatic (PAMS) cases. The latter
+corresponds to the *alpha* variant (that is B.1.1.7). The viral load of
+the alpha variant was found to be 1 $\log_{10}$ higher than the original
+SARS-CoV-2 strain [@Teyssou2021].
+
+```{r FIG-triangular, warning = FALSE, echo=FALSE, fig.align='center', fig.cap="Fitting of a triangular distribution to virus load measurements (expressed in log10 copy/ml) on data obtained by Jones et al (2021)."}
+load <- read.csv("csv/viral_load.csv",sep=";",header = T)
+f1<-fitdist(load$log10Load, "triang", method="mge", start = list(min=2, mode=6,max=9), gof="CvM")
+plot(f1)
+```
+
+The parameters of the triangular distribution used to describe
+variability of viral load are respectively,
+min=`r round(f1$estimate[1],1)`, mode=`r round(f1$estimate[2],1)` and
+max=`r round(f1$estimate[3],1)`. The *delta* VoC is associated with
+higher viral load [@Luo2021; @Wang2021; @Teyssou2021]. The concentration
+of delta VoC was found to be 2 times more important than for *alpha*
+[@Teyssou2021]. Other differences observed in *Ct* values suggest that
+the difference could be higher [@Luo2021; @Wang2021]. Therefore, the
+distribution of viral load was considered to be shifted by 0.5
+$\log_{10}$ from *delta* with an uncertainty range between 0.3 and 1
+$\log_{10}$. Finally, the level of viral load for *omicron* VoC was
+found to be similar to *delta* [@Lyngse2021]. All estimated parameters
+are gathered in Table \@ref(tab:TAB-load-VoC).
 
 ## Dose-response model parameters
 
@@ -871,5 +1057,13 @@ have been proposed to account of this difference. Infective virus are
 though to be from 100 to 1000 lower than gene copies [@Miller2021;
 @Pitol2021]. The value of 500 is used in SACADA_ABM. The values of 100
 to 1000 will be used in the sensitivity analysis.
+
+## Assumption for droplets contamination
+
+(SD)
+
+## Distribution of the projected droplets
+
+(SD)
 
 # References

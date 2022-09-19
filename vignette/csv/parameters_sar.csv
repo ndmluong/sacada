@@ -1,5 +1,5 @@
-VoC;Unvaccinated;95%CI range;Vaccinated;95%CI range;Multiplication factor toward a reference;Reference;justification
-original ;17%;[14%-21%];;;;[@Fung2021];
-alpha;17%;[14%-21%];;;;[@Fung2021];
-delta;38%;[24%-53%];25%;[18%-33%];;[@Singanayagam2021];
-omicron;57%;;37.5%;;1.5 more than delta;[@Lyngse2021];"""The SAR was 31% and 21% in households with the Omicron and Delta VOC, respectively"""
+VoC;Unvaccinated;95% CI range;Vaccinated;95% CI range;Multiplication factor toward a reference;Reference;justification
+original ;17%;[14%-21%];;;;@Fung2021;
+alpha;17%;[14%-21%];;;;@Fung2021;
+delta;38%;[24%-53%];25%;[18%-33%];;@Singanayagam2021;
+omicron;57%;;37.50%;;1.5 more than delta;@Lyngse2021;"""The SAR was 31% and 21% in households with the Omicron and Delta VOC, respectively"""
