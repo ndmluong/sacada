@@ -23,7 +23,7 @@ editor_options:
 ---
 
 ```{=html}
-<style> div.main-container { max-width: 1200px; } </style>
+<style> div.main-container { max-width: 1400px; } </style>
 ```
 <img src="fig/logo/logo_anses.png" width="60px"/>
 <img src="fig/logo/logo_inrae.png" width="60px"/>
@@ -54,29 +54,7 @@ library(fitdistrplus)
 
 ## Background
 
-This modelling study aimed to...
-
-The Agent Based Model considered three sources of contamination: the
-exposition to SARS-CoV-2 througout working activities (aerosol and/or
-fomites), the contamination throught the exposition outside the
-processing plant for employees having shared activities in community
-(transport and/or living).
-
 ## Objectives
-
-In order to consider the first source of contamination (in the factory),
-the durations of the stages of infections and the Viral load (viral RNA
-concentration) exhaled by infected people have to be quantified. For
-assessing the possibility of transmission in community the secondary
-attack rate have to be quantified.
-
-The different waves of Sars-CoV2 outbreaks that have occurred show that
-each Variants of Concern, i.e. VoC (alpha, beta, delta and omicron
-SARS-CoV-2 VoCs) have their own characteistics, e.g. different viral
-load, or rates of reinfection [@Karim2021].
-
-This document aims to identify the parameters of interest for building
-the Agent Based Model of the ANR Sacada project.
 
 # Agent-based modeling
 
@@ -839,28 +817,91 @@ processed ones during the considered day.
 
 ##### Transfers by contact
 
+As described in the section \@ref(falling-projection), contaminated
+droplets can be accumulated after sedimentation/projection on different
+areas where inert surfaces and food portions are located at a given
+time, suggesting then possible droplet transfers by contact between
+them. These transfers are schematized in Figure
+\@ref(fig:FIG-abm-transfers).
+
 ```{r FIG-abm-transfers, echo=F, fig.align = 'center', out.width = "85%",fig.cap = "Tranfers of the droplets between the different inert surfaces and food portions"}
 knitr::include_graphics("fig/schema/abm_transfers.png")
 ```
+
+Considering a quantity $N_t$ of RNA copies contaminated by
+sedimentation/project onto the a given one-square-meter tile at the time
+$t$:
+
+-   the model computed firstly a fraction $prop_{inert}$ of $N_t$
+    accumulated directly on the corresponding inert surface. The
+    remaining droplets $(1-prop_{inert}) * N_t$ were distributed equally
+    on $N_{FP_{expo}}$ random food portions present on the surface while
+    assuming that the remaining portions were not exposed to droplets at
+    this time point $t$ in reason of the vertical stacking of the
+    pieces.
+
+-   Afterwards, from the time $t$ to $t+1$:
+
+    -   the droplets present on the inert surface the time $t$ were
+        partially transferred (transfer rate $T_{surfaces-food}$) to
+        $N_{FP_{expo}}$ random meat portions present on the surface at
+        the time $t+1$ due to direct contact with equal droplets
+        distribution on each portions;
+
+    -   a fraction of $T_{food-surfaces}$ of the droplets were
+        transferred from the exposed food portions at the time $t$ to
+        their respective inert surface on which there were located at
+        the time $t+1$;
+
+    -   as for the time \$t\$, possible additional contamination from
+        sedimentation/projection was computed for the time $t+1$ on the
+        inert surface and exposed food portions.
+
+The contamination balances were calculated for all inert surfaces and
+food portions at different time points. As previously described, the
+contamination of the surfaces and food portions were determined at the
+end of the day or at the begin of the food storage.
 
 ### Input data
 
 #### Reference scenario
 
-Scenario chosen based on an epidemiological investigation on several
-SARS-CoV-2 clusters in France during the period between May 2020 and
-April 2021.
-
-For each simulation, the model was initialized at the first day with an
-initial number of infected workers $n_{Contaminated-Init} = 1$
+In view of the all parameters described above, based on literature data,
+expert knowledge and investigations, a set of the most likely parameter
+values was set to define a reference scenario. These parameter values,
+set by default as input of all model computations, constitutes then
+references for further comparative analyses such as simulation
+convergence check, parameter sensitivity analyses or scenario
+simulations. All default values are gathering in ..... This reference
+scenario was characterized by computing the virus transmission between
+workers, surfaces and meat portions in a processing plant from one
+initial infected worker during 42 days with five-minute time steps.
 
 #### Model parameter values
+
+```{r TAB-parameters-references, echo=FALSE}
+data <- read.csv("csv/parameters_reference.csv",sep=";",header = F)
+tabcolnames <- data[1, ]
+data <- as.data.frame(data[-1,])
+row.names(data) <- 1:nrow(data)
+knitr::kable(
+ data,
+ col.names = tabcolnames,
+ table.attr = "style='width:100%;'",
+ caption = 'Parameters values implemented for the reference scenario.'
+) %>%
+ kable_styling('striped', font_size = 10)
+```
+
+### Output indicators
 
 ## Parallel computing
 
 Calculation / technical requirements / Migale
 
 ## Convergence check
+
+# Utilisation
 
 approach for convergence /
 
@@ -1066,4 +1107,4 @@ to 1000 will be used in the sensitivity analysis.
 
 (SD)
 
-# References
+# Bibliographic references

@@ -1,0 +1,208 @@
+class;definition;sub-category;symbol;unit;default;range;references
+Workers;Total number of workers;;$N_{workers}$;# persons;100;-;Input
+;Ratio between the total number of workers and the daily one;;$r_{N_t/ N_{per day}}$;ratio;1.25;-;French legislation
+;Proportion of each type of workers;;;;;;
+;;cutter1;$p_{type-cutter1}$;ratio;0.36;-;Mallet et al., 2021
+;;cutter2;$p_{type-cutter2}$;ratio;0.47;-;Mallet et al., 2021
+;;logistic1;$p_{type-logistic1}$;ratio;0.04;-;Gunther et al., 2020
+;;logistic2;$p_{type-logistic2}$;ratio;0.04;-;Mallet et al., 2021
+;;transverse1;$p_{type-transverse1}$;ratio;0.045;-;Mallet et al., 2021
+;;transverse2;$p_{type-transverse2}$;ratio;0.045;-;Mallet et al., 2021
+;Proportion of workers in each team ;;;;;;
+;;team A;$p_{teamA}$;ratio;0.5;-;Assumption/Expert
+;;team B;$p_{teamB}$;ratio;0.5;-;Assumption/Expert
+;Proportion of workers which change the team weekly;;$p_{ChangeTeam}$;ratio;0.05;0 - 0.10;Assumption
+;Proportion of workers having community activities;;$p_{CommunityActivity}$;ratio;0.21;-;Mallet et al., 2021
+;Average number of workers per community;;$N_{perCommunityActivity}$;persons;5;-;Assumption
+;Secondary attack rate;situation by default;$SAR_{sim}$;;unvaccinated-delta;;
+;;Unvaccinated - Original CoV;$SAR_{unvaccinated-original}$;rate;0.17;0.14 - 0.21;Fung et al., 2021
+;;Unvaccinated - alpha;$SAR_{unvaccinated-alpha}$;rate;0.17;0.14 - 0.21;Fung et al., 2021
+;;Unvaccinated - delta;$SAR_{unvaccinated-delta$;rate;0.38;0.24 - 0.53;Singanayagam et al. 2021
+;;Unvaccinated - omicron;$SAR_{unvaccinated-omicron}$;rate;0.57;NA;Lyngse et al. 2021
+;;Vaccinated - Original CoV;$SAR_{vaccinated-original}$;rate;NA;-;
+;;Vaccinated - alpha;$SAR_{vaccinated-alpha}$;rate;NA;-;
+;;Vaccinated - delta;$SAR_{vaccinated-delta}$;rate;0.25;0.18 - 0.33;Singanayagam et al. 2021
+;;Vaccinated - omicron;$SAR_{vaccinated-omicron}$;rate;0.375;NA;Lyngse et al. 2021
+;Daily secondary attack rate;Unvaccinated - Original CoV;$SAR_{unvaccinated-original-daily}$;rate;0.017;-;Estimated from SAR
+;;Unvaccinated - alpha;$SAR_{unvaccinated-alpha-daily}$;rate;0.017;-;Estimated from SAR
+;;Unvaccinated - delta;$SAR_{unvaccinated-delta$;rate;0.038;-;Estimated from SAR
+;;Unvaccinated - omicron;$SAR_{unvaccinated-omicron-daily}$;rate;0.057;-;Estimated from SAR
+;;Vaccinated - Original CoV;$SAR_{vaccinated-original-daily}$;rate;NA;-;Estimated from SAR
+;;Vaccinated - alpha;$SAR_{vaccinated-alpha-daily}$;rate;NA;-;Estimated from SAR
+;;Vaccinated - delta;$SAR_{vaccinated-delta}$;rate;0.025;-;Estimated from SAR
+;;Vaccinated - omicron;$SAR_{vaccinated-omicron-daily}$;rate;0.0375;-;Estimated from SAR
+;Mask wearing;;;;;;
+;;situation by default;;;surgical mask;;
+;Mask acceptability;surgical mask;$p_{MaskAcceptability-surgical}$;ratio;0.8;0 - 1;Input
+;;FFP2;$p_{MaskAcceptability-FFP2}$;ratio;0.6;0 - 1;Input
+;Mask efficacy;surgical mask;$p_{MaskEfficacy-surgical}$;ratio;0.9;range (SD);
+;;FFP2;$p_{MaskEfficacy-FFP2}$;ratio;0,95;[0,8 0,99];
+;Number of initial infected workers;;$n_{contaminated_init}$;#;1;-;Input
+;Regional prevalence;;$prev$;rate;100/100000;-;Input
+;Duration of the infection phases;Latent phase;LatentPhaseDuration;day;3;0-8;
+;;Presymptomatic;PresympDuration;day;2;01-avr;
+;;Symptomatic;SympDuration;day;8;05-nov;
+;;Asymptomatic;AsymDuration;day;8;05-nov;
+;;Non infectious - Symptomatic;NonInfectiousDurationSymp;day;4;02-juin;
+;;Non infectious - Asymptomatic;NonInfectiousDurationASymp;day;4;02-juin;
+;Probability of symptoms develpment;;$p_{ssymptom}$;rate;0.335;;
+;Probability to be absent if symptomatic;;pPresenceSymp;ratio;24/140;;
+;Duration of the absence period;;AbsenceDuration;day;10;-;Assumption/Fixed by authorities
+Time;Duration of simulation period;;Ndays;day;42;;
+;Time step;;Step;minutes;5;;
+Virus;Variant of concern;;VoC;predefined values;"""delta""";;
+;Variability of viral loads;situation by default;;delta;;;
+;;delta (min - mode - max);"RNA_dist (""delta"") min";log10 RNA/ml;1.6;+/- 0.3;
+;;;"RNA_dist (""delta"") mode";log10 RNA/ml;8.6;+/- 0.3;
+;;;"RNA_dist (""delta"") max";log10 RNA/ml;10.4;+/- 0.3;
+;;original VoC (min - mode - max);"RNA_dist (""original"") min";log10 RNA/ml;0.6;+/- 0.3;
+;;;"RNA_dist (""original"") mode";log10 RNA/ml;7.6;+/- 0.3;
+;;;"RNA_dist (""original"") max";log10 RNA/ml;9.4;+/- 0.3;
+;;alpha (min - mode - max);"RNA_dist (""alpha"") min";log10 RNA/ml;1.3;+/- 0.3;
+;;;"RNA_dist (""alpha"") mode";log10 RNA/ml;8.3;+/- 0.3;
+;;;"RNA_dist (""alpha"") max";log10 RNA/ml;10.1;+/- 0.3;
+;;omicron (min - mode - max);"RNA_dist (""omicron"") min";log10 RNA/ml;1.6;+/- 0.3;
+;;;"RNA_dist (""omicron"") mode";log10 RNA/ml;8.6;+/- 0.3;
+;;;"RNA_dist (""omicron"") max";log10 RNA/ml;10.4;+/- 0.3;
+;Dose-response parameters;r (Watanabe model) ;"DRM1_r (""Watanabe model"")";rate;0.00246;0.00128 - 0.00527;
+;Ratio between the number of RNA copies and virions;;RNA_virion_ratio;ratio;500;100-1000;
+Food;Type of meat;situation by default;meat;;porcine;;
+;Worker rhythm;porcine - logistic1;worker_rhythm_porcine_logistic1;carcasses/min;1;+/- 10%;Assumption/Expert/Data
+;;porcine - cutter1;worker_rhythm_porcine_cutter1;carcasses/min;0.2;+/- 10%;Assumption/Expert/Data
+;;porcine - cutter2;worker_rhythm_porcine_cutter2;carcasses/min;0.1;+/- 10%;Assumption/Expert/Data
+;;porcine - logistic2;worker_rhythm_porcine_logistic2;carcasses/min;0.5;+/- 10%;Assumption/Expert/Data
+;;bovine - logistic1;worker_rhythm_bovine_logistic1;carcasses/min;1;+/- 10%;Assumption/Expert/Data
+;;bovine - cutter1;worker_rhythm_bovine_cutter1;carcasses/min;0.2;+/- 10%;Assumption/Expert/Data
+;;bovine - cutter2;worker_rhythm_bovine_cutter2;carcasses/min;0.2;+/- 10%;Assumption/Expert/Data
+;;bovine - logistic2;worker_rhythm_bovine_logistic2;carcasses/min;2;+/- 10%;Assumption/Expert/Data
+;;veal - logistic1;worker_rhythm_veal_logistic1;carcasses/min;1;+/- 10%;Assumption/Expert/Data
+;;veal - cutter1;worker_rhythm_veal_cutter1;carcasses/min;0.2;+/- 10%;Assumption/Expert/Data
+;;veal - cutter2;worker_rhythm_veal_cutter2;carcasses/min;0.1;+/- 10%;Assumption/Expert/Data
+;;veal - logistic2;worker_rhythm_veal_logistic2;carcasses/min;0.5;+/- 10%;Assumption/Expert/Data
+;;lamb - logistic1;worker_rhythm_lamb_logistic1;carcasses/min;1;+/- 10%;Assumption/Expert/Data
+;;lamb - cutter1;worker_rhythm_lamb_cutter1;carcasses/min;0.2;+/- 10%;Assumption/Expert/Data
+;;lamb - cutter2;worker_rhythm_lamb_cutter2;carcasses/min;0.1;+/- 10%;Assumption/Expert/Data
+;;lamb - logistic2;worker_rhythm_lamb_logistic2;carcasses/min;0.5;+/- 10%;Assumption/Expert/Data
+;Raw carcass weight;bovine;carcass_weight_bovine;kg;286 (NDL);-;Expert/Data (OFIVAL 1985)
+;;porcine;carcass_weight_porcine;kg;75 (NDL);-;Expert/Data (OFIVAL 1985)
+;;veal;carcass_weight_veal;kg;102 (NDL);-;Expert/Data (OFIVAL 1985)
+;;lamb;carcass_weight_lamb;kg;17 (NDL);-;Expert/Data (OFIVAL 1985)
+;Net weight ratio;bovine;net_weight_ratio_bovine;ratio;0.6;-;Expert/Data (OFIVAL 1985)
+;;porcine;net_weight_ratio_porcine;ratio;0.59;-;Expert/Data (OFIVAL 1985)
+;;veal;net_weight_ratio_veal;ratio;0.75;-;Expert/Data (OFIVAL 1985)
+;;lab;net_weight_ratio_lamb;ratio;0.585;-;Expert/Data (OFIVAL 1985)
+;Consumer sales unit ;bovine;CSU_bovine;kg;0.5;-;Assumption
+;;porcine;CSU_porcine;kg;0.5;-;Assumption
+;;veal;CSU_veal;kg;0.5;-;Assumption
+;;lamb;CSU_lamb;kg;0.5;-;Assumption
+Plant structure;Dimensions of the plant;width;dim.X;m;26;-;Input
+;;length;dim.Y;m;21;-;Input
+;;height;dim.Z;m;5;-;Input
+;;name;label;predefined values;"""Cutting room""";-;Input
+;;air conditioner type;Air_Cond_Type;predefined values;"""AHU""";-;Input
+;;;Air_renewal;m3/h;2400;-[0- 4800];Regulation
+;;;Airflowrate;m3/h;90000;+/- 20% ;Assumption
+;;;"""Entry hall"" dim.X";m;5;-;
+;;;"""Entry hall"" dim.Y";m;4;-;
+;;;"""Entry hall"" dim.Z";m;3;-;
+;;;"""Entry hall"" pos.X";ratio;0;-;Input
+;;;"""Entry hall"" pos.Y";ratio;1;-;Input
+;;;"""Entry hall"" indoor.side";predefined values;"""bottom""";-;Input
+;;;"""Entry hall"" extdoor.side";predefined values;"""left""";-;Input
+;;;"""Entry hall"" Air_Cond_Type";predefined values;"""CMV""";-;Input
+;;;"""Entry hall"" Air_renewal";m3/h;90 (SD);[60 - 120];Input
+;;;"""Entry hall"" Airflowrate";m3/h;90 (SD);non inclus;Input
+;;;"""W.C."" dim.X";m;2;-;Input
+;;;"""W.C."" dim.Y";m;2;-;Input
+;;;"""W.C."" dim.Z";m;2.5;-;Input
+;;;"""W.C."" pos.X";ratio;1;-;Input
+;;;"""W.C."" pos.Y";ratio;1;-;Input
+;;;"""W.C."" indoor.side";predefined values;"""left""";-;Input
+;;;"""W.C."" extdoor.side";predefined values;NA;-;Input
+;;;"""W.C."" Air_Cond_Type";predefined values;"""CMV""";-;Input
+;;;"""W.C."" Air_renewal";m3/h;30 (SD);-;
+;;;"""W.C."" Airflowrate";m3/h;30 (SD);-;
+;;;"""Cooling area"" dim.X";m;5;-;Input
+;;;"""Cooling area"" dim.Y";m;5;-;Input
+;;;"""Cooling area"" dim.Z";m;3;-;Input
+;;;"""Cooling area"" pos.X";ratio;1;-;Input
+;;;"""Cooling area"" pos.Y";ratio;0;-;Input
+;;;"""Cooling area"" indoor.side";predefined values;"""left""";-;Input
+;;;"""Cooling area"" extdoor.side";predefined values;NA;-;Input
+;;;"""Cooling area"" Air_Cond_Type";predefined values;"""DEC""";-;Input
+;;;"""Cooling area"" Air_renewal";m3/h;120 (SD);-;
+;;;"""Cooling area"" Airflowrate";m3/h;500 (SD);non inclus;
+;;;"""Arrival gate"" dim.X";m;2;;Input
+;;;"""Arrival gate"" dim.Y";m;2;;Input
+;;;"""Arrival gate"" dim.Z";m;3;;Input
+;;;"""Arrival gate"" pos.X";ratio;0;;Input
+;;;"""Arrival gate"" pos.Y";ratio;0.4;;Input
+;;;"""Arrival gate"" indoor.side";predefined values;"""right""";;Input
+;;;"""Arrival gate"" extdoor.side";predefined values;"""left""";;Input
+;;;"""Arrival gate"" Air_Cond_Type";predefined values;"""DEC""";;Input
+;;;"""Arrival gate"" Air_renewal";m3/h;30 (SD);;
+;;;"""Arrival gate"" Airflowrate";m3/h;200 (SD);;
+;;;"""Waste area"" dim.X";m;2;-;Input
+;;;"""Waste area"" dim.Y";m;3;-;Input
+;;;"""Waste area"" dim.Z";m;3;-;Input
+;;;"""Waste area"" pos.X";ratio;0.7;-;Input
+;;;"""Waste area"" pos.Y";ratio;0;-;Input
+;;;"""Waste area"" indoor.side";predefined values;"""bottom""";-;Input
+;;;"""Waste area"" extdoor.side";predefined values;"""top""";-;Input
+;;;"""Waste area"" Air_Cond_Type";predefined values;"""DEC""";-;Input
+;;;"""Waste area"" Air_renewal";m3/h;30 (SD);-;
+;;;"""Waste area"" Airflowrate";m3/h;200 (SD);-;
+;;;"""Office"" dim.X";m;5;-;Input
+;;;"""Office"" dim.Y";m;4;-;Input
+;;;"""Office"" dim.Z";m;3;-;Input
+;;;"""Office"" pos.X";ratio;1;-;Input
+;;;"""Office"" pos.Y";ratio;0.5;-;Input
+;;;"""Office"" indoor.side";predefined values;"""left""";-;Input
+;;;"""Office"" extdoor.side";predefined values;NA;-;Input
+;;;"""Office"" Air_Cond_Type";predefined values;"""CMV""";-;Input
+;;;"""Office"" Air_renewal";m3/h;120 (SD);-;
+;;;"""Office"" Airflowrate";m3/h;200 (SD);-;
+;;;"""Conveyor1"" dim.X";m;14;-;Input
+;;;"""Conveyor1"" dim.Y";m;1;-;Input
+;;;"""Conveyor1"" pos.X";ratio;0.2;-;Input
+;;;"""Conveyor1"" pos.Y";ratio;0.45;-;Input
+;;;"""Conveyor2"" dim.X";m;14;-;Input
+;;;"""Conveyor2"" dim.Y";m;1;-;Input
+;;;"""Conveyor2"" pos.X";ratio;0.25;-;Input
+;;;"""Conveyor2"" pos.Y";ratio;0.25;-;Input
+;;;"""Equipment1"" dim.X";m;1;-;Input
+;;;"""Equipment1"" dim.Y";m;1;-;Input
+;;;"""Equipment1"" pos.X";ratio;0.75;-;Input
+;;;"""Equipment1"" pos.Y";ratio;0.35;-;Input
+Surfaces;Inert_prop;;inert_prop;ratio;01-mars;0 - 0.5;Assumption
+;;;food_prop;ratio;02-mars;0.5 - 1;Assumption
+;;;nFP_expo;# portions;10;janv-20;Assumption
+;;;transfer_S2F;rate;0.99;0.64 - 1;Duret et al., 2017
+;;;transfer_F2S;rate;0.28;0.01 - 0.95;Duret et al., 2017
+;;;;;;;
+;;;pos_threshold;RNA copies;5log (LG);;Estimation (LG)
+Air;;;Droplet classes;µm;0.8/ 1.8/ 3.5/ 5.5/ 20/ 100;;Buonnanno et al., 2020
+;;;Cd_exp (Breathing);m-3;0.084/0.009/0.003/0.002/ 0/ 0 * 1E6;20%;Morawska et al., 2009, Kenedy et al. 2020
+;;;"Cd_exp (Voiced counting ""talking"")";m-3;0.236/ 0.068/ 0.007/ 0.011/ 0/ 0 * 1E6;20%;Morawska et al., 2009, Kenedy et al. 2020
+;;;"Cd_exp (Unmodulated vocalization ""talking loud"")";m-3;0.751/ 0.139/ 0.139/ 0.059/ 0/ 0 * 1E6;20%;Morawska et al., 2009, Kenedy et al. 2020
+;;;Cd_cough (Coughing);m-3;0/ 0.025/ 0.145/ 0.48/ 2.51/ 6.65 * 1E6;20%;Duguid 1946
+;;;Cd_sneeze (Sneezing);m-3;0/ 13/ 80/ 175/ 230/ 489 * 1E6;20%;Duguid 1946
+;;;RespRate (Resting);m3/min;0.49 / 60;-;Adams 1993
+;;;RespRate (Standing);m3/min;0.54 / 60;-;Adams 1994
+;;;RespRate (Light exercise);m3/min;1.38 / 60;-;Adams 1995
+;;;RespRate (Moderate exercise);m3/min;2.35 / 60;-;Adams 1996
+;;;RespRate (Heavy exercise);m3/min;3.3 / 60;-;Adams 1997
+;;;p_cough (infectious);freq/minutes;févr-60;;Birrong et al., 2006
+;;;p_cough (symptomatic);freq/minutes;47 / 60;-;Birrong et al., 2006
+;;;p_cough (asymptomatic);freq/minutes;févr-60;-;Birrong et al., 2006
+;;;p_sneeze (infectious);freq/minutes;0,002;[0 0,004] max 4 fois par jour;Hansen and Mygind 2002
+;;;p_sneeze (symptomatic);freq/minutes;janv-60;"[ 0; 5/60]"; Musch et al 2021
+;;;p_sneeze (asymptomatic);freq/minutes;0,08;[0 0,16];Hansen and Mygind 2002
+;;;p_zone (ctr);ratio;0.2;-;Estimation based on Li et al., 2021
+;;;p_zone (adj1);ratio;0.05;-;Estimation based on Li et al., 2021
+;;;p_zone (adj2);ratio;0.03;-;Estimation based on Li et al., 2021
+;;;p_zone (adj3);ratio;0.015;-;Estimation based on Li et al., 2021
+;;;p_zone_air (ctr);ratio;1;-;Estimation based on Li et al., 2021
+;;;p_zone_air (adj1);ratio;0.11;-;Estimation based on Li et al., 2021
+;;;p_zone_air (adj2);ratio;0.045;-;Estimation based on Li et al., 2021
+;;;p_zone_air (adj3);ratio;0.015;-;Estimation based on Li et al., 2021
