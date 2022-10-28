@@ -1,0 +1,3311 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ngoc-Du Martin Luong">
+<meta name="author" content="Laurent Guillier">
+<meta name="dcterms.date" content="2022-10-28">
+
+<title>An agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="model_descriptor_files/libs/clipboard/clipboard.min.js"></script>
+<script src="model_descriptor_files/libs/quarto-html/quarto.js"></script>
+<script src="model_descriptor_files/libs/quarto-html/popper.min.js"></script>
+<script src="model_descriptor_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="model_descriptor_files/libs/quarto-html/anchor.min.js"></script>
+<link href="model_descriptor_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="model_descriptor_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="model_descriptor_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="model_descriptor_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="model_descriptor_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+<script src="model_descriptor_files/libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="model_descriptor_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script src="model_descriptor_files/libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<script src="model_descriptor_files/libs/viz-1.8.2/viz.js"></script>
+<link href="model_descriptor_files/libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="model_descriptor_files/libs/grViz-binding-1.0.9/grViz.js"></script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+<link rel="stylesheet" href="www/abm-sacada.css">
+</head>
+
+<body>
+
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-left">
+      <h1 class="title">An agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Authors</div>
+      <div class="quarto-title-meta-contents">
+               <p>Ngoc-Du Martin Luong <a href="https://orcid.org/0000-0003-0714-136X" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+               <p>Laurent Guillier <a href="https://orcid.org/0000-0002-7867-2937" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 28, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background-and-objectives" id="toc-background-and-objectives" class="nav-link active" data-scroll-target="#background-and-objectives"><span class="toc-section-number">1</span>  Background and objectives</a></li>
+  <li><a href="#model-description" id="toc-model-description" class="nav-link" data-scroll-target="#model-description"><span class="toc-section-number">2</span>  Model description</a>
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview"><span class="toc-section-number">2.1</span>  Overview</a></li>
+  <li><a href="#design-concept" id="toc-design-concept" class="nav-link" data-scroll-target="#design-concept"><span class="toc-section-number">2.2</span>  Design concept</a>
+  <ul>
+  <li><a href="#basic-principles" id="toc-basic-principles" class="nav-link" data-scroll-target="#basic-principles"><span class="toc-section-number">2.2.1</span>  Basic principles</a></li>
+  <li><a href="#prediction" id="toc-prediction" class="nav-link" data-scroll-target="#prediction"><span class="toc-section-number">2.2.2</span>  Prediction</a></li>
+  <li><a href="#stochasticity" id="toc-stochasticity" class="nav-link" data-scroll-target="#stochasticity"><span class="toc-section-number">2.2.3</span>  Stochasticity</a></li>
+  </ul></li>
+  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details"><span class="toc-section-number">2.3</span>  Details</a>
+  <ul>
+  <li><a href="#modules---sub-models" id="toc-modules---sub-models" class="nav-link" data-scroll-target="#modules---sub-models"><span class="toc-section-number">2.3.1</span>  Modules - Sub-models</a>
+  <ul class="collapse">
+  <li><a href="#food-processing-plant" id="toc-food-processing-plant" class="nav-link" data-scroll-target="#food-processing-plant"><span class="toc-section-number">2.3.1.1</span>  Food processing plant</a>
+  <ul class="collapse">
+  <li><a href="#structures" id="toc-structures" class="nav-link" data-scroll-target="#structures">Structures</a></li>
+  <li><a href="#objects" id="toc-objects" class="nav-link" data-scroll-target="#objects">Objects</a></li>
+  </ul></li>
+  <li><a href="#workers" id="toc-workers" class="nav-link" data-scroll-target="#workers"><span class="toc-section-number">2.3.1.2</span>  Workers</a>
+  <ul class="collapse">
+  <li><a href="#sec-type-of-workers" id="toc-sec-type-of-workers" class="nav-link" data-scroll-target="#sec-type-of-workers">Type of workers</a></li>
+  <li><a href="#infection-phases" id="toc-infection-phases" class="nav-link" data-scroll-target="#infection-phases">Infection phases</a></li>
+  <li><a href="#individual-variability" id="toc-individual-variability" class="nav-link" data-scroll-target="#individual-variability">Individual variability</a></li>
+  <li><a href="#secondary-attack-rate" id="toc-secondary-attack-rate" class="nav-link" data-scroll-target="#secondary-attack-rate">Secondary attack rate</a></li>
+  <li><a href="#infection-probability" id="toc-infection-probability" class="nav-link" data-scroll-target="#infection-probability">Infection probability</a></li>
+  <li><a href="#working-days" id="toc-working-days" class="nav-link" data-scroll-target="#working-days">Working days</a></li>
+  </ul></li>
+  <li><a href="#air" id="toc-air" class="nav-link" data-scroll-target="#air"><span class="toc-section-number">2.3.1.3</span>  Air</a>
+  <ul class="collapse">
+  <li><a href="#exhalation" id="toc-exhalation" class="nav-link" data-scroll-target="#exhalation">Exhalation</a></li>
+  <li><a href="#aerosolization-criteria" id="toc-aerosolization-criteria" class="nav-link" data-scroll-target="#aerosolization-criteria">Aerosolization criteria</a></li>
+  <li><a href="#sec-falling-projection" id="toc-sec-falling-projection" class="nav-link" data-scroll-target="#sec-falling-projection">Falling &amp; projection</a></li>
+  <li><a href="#inhalation" id="toc-inhalation" class="nav-link" data-scroll-target="#inhalation">Inhalation</a></li>
+  </ul></li>
+  <li><a href="#sec-surfaces" id="toc-sec-surfaces" class="nav-link" data-scroll-target="#sec-surfaces"><span class="toc-section-number">2.3.1.4</span>  Surfaces</a></li>
+  <li><a href="#food" id="toc-food" class="nav-link" data-scroll-target="#food"><span class="toc-section-number">2.3.1.5</span>  Food</a>
+  <ul class="collapse">
+  <li><a href="#food-processing" id="toc-food-processing" class="nav-link" data-scroll-target="#food-processing">Food processing</a></li>
+  <li><a href="#transfers-by-contact" id="toc-transfers-by-contact" class="nav-link" data-scroll-target="#transfers-by-contact">Transfers by contact</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#input-data" id="toc-input-data" class="nav-link" data-scroll-target="#input-data"><span class="toc-section-number">2.3.2</span>  Input data</a>
+  <ul class="collapse">
+  <li><a href="#reference-scenario" id="toc-reference-scenario" class="nav-link" data-scroll-target="#reference-scenario"><span class="toc-section-number">2.3.2.1</span>  Reference scenario</a></li>
+  <li><a href="#model-parameter-values" id="toc-model-parameter-values" class="nav-link" data-scroll-target="#model-parameter-values"><span class="toc-section-number">2.3.2.2</span>  Model parameter values</a></li>
+  </ul></li>
+  <li><a href="#output-indicators" id="toc-output-indicators" class="nav-link" data-scroll-target="#output-indicators"><span class="toc-section-number">2.3.3</span>  Output indicators</a></li>
+  </ul></li>
+  <li><a href="#parallel-computing" id="toc-parallel-computing" class="nav-link" data-scroll-target="#parallel-computing"><span class="toc-section-number">2.4</span>  Parallel computing</a></li>
+  <li><a href="#convergence-check" id="toc-convergence-check" class="nav-link" data-scroll-target="#convergence-check"><span class="toc-section-number">2.5</span>  Convergence check</a></li>
+  </ul></li>
+  <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage"><span class="toc-section-number">3</span>  Usage</a></li>
+  <li><a href="#appendices" id="toc-appendices" class="nav-link" data-scroll-target="#appendices"><span class="toc-section-number">4</span>  Appendices</a>
+  <ul>
+  <li><a href="#individual-variability-in-viral-load" id="toc-individual-variability-in-viral-load" class="nav-link" data-scroll-target="#individual-variability-in-viral-load"><span class="toc-section-number">4.1</span>  Individual variability in viral load</a></li>
+  <li><a href="#dose-response-model-parameters" id="toc-dose-response-model-parameters" class="nav-link" data-scroll-target="#dose-response-model-parameters"><span class="toc-section-number">4.2</span>  Dose-response model parameters</a></li>
+  <li><a href="#assumption-for-droplets-contamination" id="toc-assumption-for-droplets-contamination" class="nav-link" data-scroll-target="#assumption-for-droplets-contamination"><span class="toc-section-number">4.3</span>  Assumption for droplets contamination</a></li>
+  <li><a href="#sec-distribution-of-the-projected-droplets" id="toc-sec-distribution-of-the-projected-droplets" class="nav-link" data-scroll-target="#sec-distribution-of-the-projected-droplets"><span class="toc-section-number">4.4</span>  Distribution of the projected droplets</a></li>
+  </ul></li>
+  <li><a href="#bibliographic-references" id="toc-bibliographic-references" class="nav-link" data-scroll-target="#bibliographic-references"><span class="toc-section-number">5</span>  Bibliographic references</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+
+
+
+
+<section id="background-and-objectives" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Background and objectives</h1>
+</section>
+<section id="model-description" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Model description</h1>
+<p>The ABM model is presented in this study according to the Overview-Design-Details (ODD) protocol as recommended by <span class="citation" data-cites="Grimm2010">Grimm et al. (<a href="#ref-Grimm2010" role="doc-biblioref">2010</a>)</span>.</p>
+<section id="overview" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">2.1</span> Overview</h2>
+<p>The outline of the agent-based modelling workflow developed in this study is schematized in <a href="#fig-abm-outline">Figure&nbsp;1</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-abm-outline" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="fig/schema/abm_outline.png" class="img-fluid figure-img" width="640"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: Outline of the Agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Purpose and patterns</strong></li>
+</ul>
+<p>The developed model was aimed to predict …</p>
+<ul>
+<li><strong>States variables and scales - Parameters overview</strong></li>
+</ul>
+<p>Several parameters were included in the model. On the one hand, some parameters… On the other hand, based on multiple industrial and epidemiological investigations, other parameters were included to describe the behavior of the model in different scenarios. These scenarios can be defined by ch as well as the behaviors of the agents</p>
+<ul>
+<li><strong>Process overview and scheduling</strong></li>
+</ul>
+<p>The model was divided in four separate modules describing different agents evolving in the processing plant including (i) the workers, (ii) the droplets in the air, (iii) the inert surfaces and (iv) the food products, respectively. As schematized in @ref(fig:fig-abm-outline), different possible interactions between these agents were described, such as the transmission of the droplets probably containing viral particles between infectious workers and the air through their respiratory activities (exhalation and inhalation), the sedimentation of these droplets from the air onto inert surfaces and/or food portions as well as the transfers between surfaces and food, etc. Based on prior data or knowledge, spatiotemporal rules were defined to simulate the interactions between modules and the properties of every agents at successive time points distanced by a predefined short time step (minutes). These step-by-step simulations were performed afterwards for longer periods (days, weeks, etc.). At the end of these periods, balances were calculated for different properties of the agents, e.g.&nbsp;the total number of aerosolized or fallen droplets, the number of viral gene copies inhaled by each worker, etc. Based on these balances, several contamination indicators were estimated such as the total number of infected workers, the number of contaminated food portions and surfaces in the plant, etc. These estimated indicators could be compared with collected epidemiological data for further model validation purposes.</p>
+</section>
+<section id="design-concept" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="design-concept"><span class="header-section-number">2.2</span> Design concept</h2>
+<section id="basic-principles" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="basic-principles"><span class="header-section-number">2.2.1</span> Basic principles</h3>
+<p>The different agents integrated into the model for describing the functioning of the meat processing plant are illustrated in <a href="#fig-abm-processing-plant">Figure&nbsp;2</a>. The model was implemented in the way that end-users can include by themselves as input data the different characteristics of the plant such as its dimensions, structures, objects, etc. For instance, as shown in <a href="#fig-abm-processing-plant">Figure&nbsp;2</a>, the illustrated plant is made up of several rooms / spaces including an entry hall for workers, an office, a cooling area for food storage, a large area for meat cutting activities with two conveyor belts for food transfers and a packaging machine, etc. Different types of workers were considered in the model depending on their respective activities, including the cutters, the logistic workers as well as the ones with transverse activities. The number of workers of each type present in the plant and their respective working rhythm and timetable condition then the daily meat processing flow (meat quantity, processing duration) of the overall plant. This processing flow was described as successive transformation steps of the meat products: the carcasses/half-carcasses arriving in the plant through the gate are transported to the conveyors by logistic workers, become smaller meat portions after different cutting steps carried out by cutters around the conveyors and eventually packed and stored in the cooling area. Other workers with transverse activities such as manager, administrative or cleaning workers can also be present in the plant at different moments depending on their respective timetable. Based on the overall timetable of the plant, one can define rules for generating predefined or random movements of every agents (workers, carcasses, meat cuts…) between different locations in the plant at different time points. Determining these movements over time will allow then to track the possible transmission of the virus introduced by one or several infectious workers in the plant.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-abm-processing-plant" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="fig/schema/abm_processing_plant.png" class="img-fluid figure-img" width="640"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: Illustration : Modeling the meat processing plant</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The transmission of the virus from one or several infectious workers to other susceptible workers, surfaces and food products are schematized in the <a href="#fig-abm-transmission">Figure&nbsp;3</a>. In this study, the duration between the different successive infection phases were taken into account from new infection to recovery with/without symptoms development. The different infectious workers can exhale into the air, through their respiratory activities or symptoms such as breathing, talking, sneezing or coughing, different amounts of droplets containing or not viral particles due to variability between workers and depending on their behavior (mask wearing). These droplets of various sizes can be aerosolized and/or fall afterwards onto inert surfaces and food products depending on the characteristics of the ventilation system in each space of the plant. Some high-diameter droplets sent out by the infectious workers (e.g.&nbsp;in cases of sneezing or coughing) can also fall directly onto surfaces without being aerosolized and/or projected towards nearby workers. The total viral loads on different surfaces and/or food products (meat cuts) are also enumerated; they are considered as contaminated if the viral loads exceed a predefined threshold value. The non-infected workers (susceptible workers) can inhale more or less of droplets depending on their positions in the plant at different moments. The cumulative viral doses inhaled by each susceptible worker at the end of the day can then probably trigger an infection following a dose-response relationship. At last, in addition of these possible infections inside the plant, the model included also other contamination sources outside the plant: the susceptible workers can get infected due to the outside epidemic situation and or by community activities such as co-living with infectious workers.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-abm-transmission" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="fig/schema/abm_transmission.png" class="img-fluid figure-img" width="640"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: Modeling the transmission of SARS-CoV-2 between different agents</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="prediction" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="prediction"><span class="header-section-number">2.2.2</span> Prediction</h3>
+<p>The parameters</p>
+</section>
+<section id="stochasticity" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="stochasticity"><span class="header-section-number">2.2.3</span> Stochasticity</h3>
+<p>The stochasticity</p>
+</section>
+</section>
+<section id="details" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="details"><span class="header-section-number">2.3</span> Details</h2>
+<section id="modules---sub-models" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="modules---sub-models"><span class="header-section-number">2.3.1</span> Modules - Sub-models</h3>
+<section id="food-processing-plant" class="level4" data-number="2.3.1.1">
+<h4 data-number="2.3.1.1" class="anchored" data-anchor-id="food-processing-plant"><span class="header-section-number">2.3.1.1</span> Food processing plant</h4>
+<section id="structures" class="level5">
+<h5 class="anchored" data-anchor-id="structures">Structures</h5>
+<p>The structure of the multi-room food processing plant can be included as inputs of the model. Based on industrial investigations / interviews, seven principal rooms (spaces) were included herein as an example to define the plant structure, including the <em>Cutting room</em> (the main space of the plant), <em>Entry hall</em> (for workers), <em>Arrival gate</em> (for food arrival into the cutting room), <em>Cooling area</em> (for food storage), <em>Waste area</em>, <em>W.C.</em>, and <em>Office</em> (illustration in <a href="#fig-abm-processing-plant">Figure&nbsp;2</a>).</p>
+<p>The different characteristics of each room are included as inputs of the model:</p>
+<ul>
+<li>dimensions of the plant and dimensions of the different rooms, expressed in <span class="math inline">m</span> (the length and width on two axes, denoted <em>X</em> and <em>Y</em> axes, respectively, and height on a 3rd axis, denoted <em>Z</em> axis);</li>
+<li>positions of the room in the plant;</li>
+<li>presence and relative positions of internal/external door for each room;</li>
+<li>ventilation specifications: several air conditioning types can be indicated such as <em>Controlled Mechanical Ventilation</em> (CMV), <em>Direct Expansion Coil</em> (DEC) or <em>Air Handing Unit</em> (AHU).</li>
+</ul>
+<p>The above characteristics were defined in the model as model parameters based on industrial investigations or previous works. For example, each room needs to be positioned on the entire workshop grid using a numerical value between 0 and 1 indicating the relative position over the axes. The cutting room is the main build by subtracting all other rooms. The position of the internal and external doors can also be mentioned using the predefined values <em>top</em>, <em>bottom</em>, <em>left</em> or <em>right</em>.</p>
+</section>
+<section id="objects" class="level5">
+<h5 class="anchored" data-anchor-id="objects">Objects</h5>
+<p>The different objects or equipment can be included inside the plant such as conveyors, peeler, etc. In the same ways as for the different rooms, their dimensions and their relative position alongside the <em>X</em> and <em>Y</em> axes are included as model inputs. As illustrated in <a href="#fig-abm-processing-plant">Figure&nbsp;2</a>, two types of objects were included : two conveyor belts allowing to transport the different carcasses or food portions from one point to another and an equipment that can be shared by several operators (e.g.: a peeler, frequently used in meat cutting plant). Some parameters values characterizing these objects are illustrated in <a href="#tbl-plant-object-parameters">Table&nbsp;1</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-plant-object-parameters" class="anchored">
+
+<table class="table table-striped" style="font-size: 11px; margin-left: auto; margin-right: auto;"><caption>Table&nbsp;1:  Parameters characterizing the different objects in the plant. </caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Parameters </th>
+   <th style="text-align:left;"> name of the object </th>
+   <th style="text-align:left;"> length of the object </th>
+   <th style="text-align:left;"> width of the object </th>
+   <th style="text-align:left;"> Position of regarding the X axis of the plant </th>
+   <th style="text-align:left;"> Position regarding the Y axis of the plant </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Label in ABM script </td>
+   <td style="text-align:left;"> label </td>
+   <td style="text-align:left;"> dim.X </td>
+   <td style="text-align:left;"> dim.Y </td>
+   <td style="text-align:left;"> pos.X </td>
+   <td style="text-align:left;"> pos.Y </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> unit </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> meter </td>
+   <td style="text-align:left;"> meter </td>
+   <td style="text-align:left;"> 0 to 1 (0: left, 0.5: middle, 1:right) </td>
+   <td style="text-align:left;"> 0 to 1 (0: bottom, 0.5: middle, 1:top) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> cvy </td>
+   <td style="text-align:left;"> Conveyor1 </td>
+   <td style="text-align:left;"> 13 </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> 0.2 </td>
+   <td style="text-align:left;"> 0.5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> cvy2 </td>
+   <td style="text-align:left;"> Conveyor2 </td>
+   <td style="text-align:left;"> 18 </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> 0.5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> epmA </td>
+   <td style="text-align:left;"> Equipment 1 </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> 0.85 </td>
+   <td style="text-align:left;"> 0.7 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="workers" class="level4" data-number="2.3.1.2">
+<h4 data-number="2.3.1.2" class="anchored" data-anchor-id="workers"><span class="header-section-number">2.3.1.2</span> Workers</h4>
+<section id="sec-type-of-workers" class="level5">
+<h5 class="anchored" data-anchor-id="sec-type-of-workers">Type of workers</h5>
+<p>Different principal types of workers were taken into account in the model depending on the their daily tasks inside the plant. According to industrial investigations and expert knowledge, six types of workers were included as following (<a href="#fig-abm-processing-plant">Figure&nbsp;2</a>)</p>
+<ul>
+<li><em>logistic1</em> : the workers in charge of bringing carcasses (or half-carcasses), arriving in the cutting room through the arrival gate, to the begin of the conveyor for cutting.</li>
+<li><em>cutter1</em> : positioned around the first section of the conveyor, denoted <em>conveyor1</em>, in charge of deboning, trimming and cutting carcasses into large pieces;</li>
+<li><em>cutter2</em> : workers in charge of cutting larges pieces from <em>cutter1</em> into smaller food portions;</li>
+<li><em>logistic2</em> : the workers in charge of transferring food portions from the cutting tables to the packaging or supplementary treatment equipment and storing packed products in the cooling area;</li>
+<li><em>transverse1</em>: administrative workers such as manager, chief or maintenance staff who mainly stay out of the cutting room during the work day;</li>
+<li><em>transverse2</em>: workers from the cleaning team.</li>
+</ul>
+<p>The total number of employees is defined as shown in <a href="#tbl-workers-parameters">Table&nbsp;2</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-workers-parameters" class="anchored">
+
+<table class="table table-striped" style="font-size: 11px; margin-left: auto; margin-right: auto;"><caption>Table&nbsp;2:  Parameters characterizing the different types of worker. </caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Parameters </th>
+   <th style="text-align:left;"> Label in ABM script </th>
+   <th style="text-align:right;"> Value </th>
+   <th style="text-align:left;"> Unit </th>
+   <th style="text-align:left;"> Uncertainty range </th>
+   <th style="text-align:left;"> References </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Total number of worker </td>
+   <td style="text-align:left;"> Nworkers </td>
+   <td style="text-align:right;"> 100.000 </td>
+   <td style="text-align:left;"> N/A </td>
+   <td style="text-align:left;"> [??-??] </td>
+   <td style="text-align:left;"> [interviews] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Number of regular worker </td>
+   <td style="text-align:left;"> Nworkers_ext </td>
+   <td style="text-align:right;"> 15.000 </td>
+   <td style="text-align:left;"> N/A </td>
+   <td style="text-align:left;"> [1-4] </td>
+   <td style="text-align:left;"> [interviews] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Number of temporary worker </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Number of subcontract worker </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr grouplength="6"><td colspan="6" style="border-bottom: 1px solid;"><strong>*Overall proportion for different types of workers *</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Cutter </td>
+   <td style="text-align:left;"> cutter1 </td>
+   <td style="text-align:right;"> 0.360 </td>
+   <td style="text-align:left;"> ratio (0 to 1) </td>
+   <td style="text-align:left;"> [5-11] </td>
+   <td style="text-align:left;"> [@Mallet2021] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Cutter </td>
+   <td style="text-align:left;"> cutter2 </td>
+   <td style="text-align:right;"> 0.470 </td>
+   <td style="text-align:left;"> ratio (0 to 1) </td>
+   <td style="text-align:left;"> [5-11] </td>
+   <td style="text-align:left;"> [@Mallet2021] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Logistic </td>
+   <td style="text-align:left;"> logistic1 </td>
+   <td style="text-align:right;"> 0.040 </td>
+   <td style="text-align:left;"> ratio (0 to 1) </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> [@Gunther2020] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Logistic </td>
+   <td style="text-align:left;"> logistic2 </td>
+   <td style="text-align:right;"> 0.040 </td>
+   <td style="text-align:left;"> ratio (0 to 1) </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> [@Gunther2020] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Transverse </td>
+   <td style="text-align:left;"> transverse1 </td>
+   <td style="text-align:right;"> 0.045 </td>
+   <td style="text-align:left;"> ratio (0 to 1) </td>
+   <td style="text-align:left;"> [0.18-0.475] </td>
+   <td style="text-align:left;"> [@Mallet2021] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Transverse </td>
+   <td style="text-align:left;"> transverse2 </td>
+   <td style="text-align:right;"> 0.045 </td>
+   <td style="text-align:left;"> ratio (0 to 1) </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> [@Mallet2021] </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The workers were split afterwards into two teams, denoted <em>“team A”</em> and <em>“team B”</em> according to their working shift (morning or afternoon) and to their weekly schedule. In the model, this team dividing was included by the parameters <span class="math inline">p_{Team}</span> (value between 0 and 1 representing the proportion of each team) and set by default at <span class="math inline">p_{Team}=0.5</span> (equal distribution between the two teams A and B). In each team, the types of workers (cutters, transverse and logistic workers) were proportionally distributed as described above. The two teams A and B alternatively change their shift (morning/afternoon) from one week to another. Finally, the workerschange the team (between the teams A and B) from one week to another using a probability defined as model parameter, denoted <span class="math inline">p_{changeTeam}</span>, (value between 0 and 1), arbitrarily set at <span class="math inline">p_{changeTeam} = 0.05</span>.</p>
+</section>
+<section id="infection-phases" class="level5">
+<h5 class="anchored" data-anchor-id="infection-phases">Infection phases</h5>
+<p>The duration of different infections phases were taken into account in the model and are schematized in <a href="#fig-infection-status">Figure&nbsp;4</a>. The uncertainty ranges of the different values have been identified for sensitivity analysis of the hypothesis of the model (<a href="#tbl-infection-duration">Table&nbsp;3</a>).</p>
+<div class="cell" data-layout-align="center">
+<div id="fig-infection-status" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<div id="htmlwidget-b66f8553167e007187c1" style="width:65%;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b66f8553167e007187c1">{"x":{"diagram":"digraph Status{\n  node [shape=box]\n\n  Contamination[label=\"Newly infected\"]; \n  Presymptomatic[style=filled, fillcolor=bisque4, fontcolor=white, label=\"Possible development of symptoms\"]; \n  Infectious[style=filled, fillcolor=bisque4, fontcolor=white, label=\"Infectious\"];\n  Symptomatic[style=filled, fillcolor=bisque4, fontcolor=white, label=\"Symptomatic\"]; \n  Asymptomatic[style=filled, fillcolor=bisque4, fontcolor=white, label=\"Asymptomatic\"];\n  Non_infectious[style=filled, fillcolor=bisque4, fontcolor=white, label=\"Non infectious\"];\n  Recovery[label=\"Recovered\"];\n\n  Contamination -> Infectious [label=\" Latent phase (non-infectious)\"];\n  Infectious -> Presymptomatic [label=\" Presymptomatic phase (infectious)\"];\n  Presymptomatic -> Symptomatic[label=\" p(symp)\",style = dotted];\n  Presymptomatic -> Asymptomatic[label=\" 1 - p(symp)\",style=dotted];\n  Asymptomatic -> Non_infectious[label=\" Symptomatic phase (infectious)\"];\n  Symptomatic -> Non_infectious[label=\"\"];\n  Non_infectious -> Recovery[label=\" Pre-recovery phase (non infectious)\"]\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4: Representation of the stage of infection for SARS-CoV2</figcaption><p></p>
+</figure>
+</div>
+</div>
+<p>Once infected, individuals enter firstly into a presymptomatic phase including (i) a latent period during which no virus can be detected and (ii) individuals become infectious before symptom onset <span class="citation" data-cites="Lau2020">(<a href="#ref-Lau2020" role="doc-biblioref">Lau &amp; Leung, 2020</a>)</span>. The duration of the latent period has been estimated to 3.3 days with 95% CI [0.2-7.9] <span class="citation" data-cites="Zhao2021">(<a href="#ref-Zhao2021" role="doc-biblioref">Zhao et al., 2021</a>)</span>. The infectious period of the presymtomatic period has a length duration of 2 days (with an uncertainty range between 1 and 4 days) <span class="citation" data-cites="Byrne2020">(<a href="#ref-Byrne2020" role="doc-biblioref">Byrne et al., 2020</a>)</span>. Considering the data available for the delta VoC <span class="citation" data-cites="Kang2021 Grant2021">(<a href="#ref-Grant2021" role="doc-biblioref">Grant et al., 2021</a>; <a href="#ref-Kang2021" role="doc-biblioref">Kang et al., 2021</a>)</span>, the presymptomatic period duration was considered to be equivalent for every VoCs. At the end of the presymptomatic period, a proportion of the individual will develop symptoms. Several studies are available for estimating this proportion <span class="citation" data-cites="He2021 Alene2021 Ma2021 Sah2021">(<a href="#ref-Alene2021" role="doc-biblioref">Alene et al., 2021</a>; <a href="#ref-He2021" role="doc-biblioref">J. He, Guo, Mao, &amp; Zhang, 2021</a>; <a href="#ref-Ma2021" role="doc-biblioref">Ma et al., 2021</a>; <a href="#ref-Sah2021" role="doc-biblioref">Sah et al., 2021</a>)</span>. <span class="citation" data-cites="Alene2021">Alene et al. (<a href="#ref-Alene2021" role="doc-biblioref">2021</a>)</span> estimated the pooled proportion of asymptomatic COVID-19 cases throughout the course of infection was 25% (with 95%CI: 16%-38%). <span class="citation" data-cites="Ma2021">Ma et al. (<a href="#ref-Ma2021" role="doc-biblioref">2021</a>)</span> estimated that the pooled percentage of asymptomatic infections among the confirmed population was 40.50% (with 95%CI: 33.50%-47.50%). <span class="citation" data-cites="Sah2021">Sah et al. (<a href="#ref-Sah2021" role="doc-biblioref">2021</a>)</span> estimated that percentage at 35.1% (with 95% CI: 30.7-39.9%). In our study, the mean of these three percentages has been used as model parameter, <em>pAsymptom</em>, i.e.&nbsp;33.5%. The range of possible values was also derived from the 95%CI of these studies and set between 16% and 47.5% in our study.</p>
+<p>For the sub-population who develops symptoms, the duration of their symptomatic period has been found uncertain according to studies <span class="citation" data-cites="Byrne2020">(<a href="#ref-Byrne2020" role="doc-biblioref">Byrne et al., 2020</a>)</span>. The duration of the different symptoms differ according to their nature <span class="citation" data-cites="Santos2021">(<a href="#ref-Santos2021" role="doc-biblioref">Santos et al., 2021</a>)</span>. From the onset of symptoms to recovery, a period of 13 days can be considered with an uncertainty range comprise between 11 and 16 days <span class="citation" data-cites="Byrne2020">(<a href="#ref-Byrne2020" role="doc-biblioref">Byrne et al., 2020</a>)</span>. During that period, virus can be detected but it as estimated that infectiousness becomes usually low after 7 days <span class="citation" data-cites="He2020">(<a href="#ref-He2020" role="doc-biblioref">X. He et al., 2020</a>)</span>. The uncertainty range for the infectiousness period can be estimated from <span class="citation" data-cites="Byrne2020">Byrne et al. (<a href="#ref-Byrne2020" role="doc-biblioref">2020</a>)</span>. They stated that virus detection overestimates the infectious period on average by 2-6 days. <span class="citation" data-cites="vanKampen2021">Kampen et al. (<a href="#ref-vanKampen2021" role="doc-biblioref">2021</a>)</span> provide another estimation of the uncertainty range of infectiousness period. They considered the duration between 5 and 11 days. The value of 8 days <span class="citation" data-cites="vanKampen2021">(<a href="#ref-vanKampen2021" role="doc-biblioref">Kampen et al., 2021</a>)</span> was used in the model .</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-infection-duration" class="anchored">
+
+<table class="table table-striped" style="font-size: 11px; margin-left: auto; margin-right: auto;"><caption>Table&nbsp;3:  Set of parameters used for charaterizing the durations of the SARS-CoV2 infection. </caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Parameters </th>
+   <th style="text-align:left;"> Label in ABM script </th>
+   <th style="text-align:left;"> Value </th>
+   <th style="text-align:left;"> Unit </th>
+   <th style="text-align:left;"> Uncertainty range </th>
+   <th style="text-align:left;"> References </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Latent phase of presymptomatic period </td>
+   <td style="text-align:left;"> InfectiousBeginDay </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> days </td>
+   <td style="text-align:left;"> [0-8] </td>
+   <td style="text-align:left;"> [@Zhao2021] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Infectious phase of presymtomatic period </td>
+   <td style="text-align:left;"> xx </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> days </td>
+   <td style="text-align:left;"> [1-4] </td>
+   <td style="text-align:left;"> [@Byrne2020] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Duration of the presymtomatic period </td>
+   <td style="text-align:left;"> PossibleSymptomeBeginDay </td>
+   <td style="text-align:left;"> InfectiousBeginDay+XX </td>
+   <td style="text-align:left;"> days </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Infectious phase after presymptomatic period for symptomatic people </td>
+   <td style="text-align:left;"> yy </td>
+   <td style="text-align:left;"> 8 </td>
+   <td style="text-align:left;"> days </td>
+   <td style="text-align:left;"> [5-11] </td>
+   <td style="text-align:left;"> [@Byrne2020;@vanKampen2021] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Infectious phase after presymptomatic period for asymptomatic people </td>
+   <td style="text-align:left;"> zz </td>
+   <td style="text-align:left;"> 8 </td>
+   <td style="text-align:left;"> days </td>
+   <td style="text-align:left;"> [5-11] </td>
+   <td style="text-align:left;"> [@Byrne2020] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> End of the infectious period for symtomactic </td>
+   <td style="text-align:left;"> NonInfectiousBeginDay </td>
+   <td style="text-align:left;"> PossibleSymptomBegin+yy </td>
+   <td style="text-align:left;"> days </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> End of the infectious period for asymtomactic </td>
+   <td style="text-align:left;"> NonInfectiousBeginDayAS (Du) </td>
+   <td style="text-align:left;"> PossibleSymptomBegin+zz </td>
+   <td style="text-align:left;"> days </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Proportion of asymptomatic </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> 0.335 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> [0.18-0.475] </td>
+   <td style="text-align:left;"> [@Alene2021;@Ma2021;@Sah2021] </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="individual-variability" class="level5">
+<h5 class="anchored" data-anchor-id="individual-variability">Individual variability</h5>
+<p>Among the infection phases described previously, the model considered the viral load emitted by the different workers only during their infectiousness period. Viral loads were considered to be similar between asymptomatic and symptomatic persons according to a study of <span class="citation" data-cites="Walsh2020">Walsh et al. (<a href="#ref-Walsh2020" role="doc-biblioref">2020</a>)</span> and assumed to be constant during the whole infectiousness period. The inter-individual variability of virus load in sputum and the VoC was taken into account in the ABM model: parameters characterizing this variability were estimated by fitting triangular probability distributions on literature <span class="citation" data-cites="Jones2021 Teyssou2021 Luo2021 Wang2021">(<a href="#ref-Jones2021" role="doc-biblioref">Jones et al., 2021</a>; <a href="#ref-Luo2021" role="doc-biblioref">Luo et al., 2021</a>; <a href="#ref-Teyssou2021" role="doc-biblioref">Teyssou et al., 2021</a>; <a href="#ref-Wang2021" role="doc-biblioref">Wang et al., 2021</a>)</span> (see Appendices… ). Estimated values of these parameters are gathered in <a href="#tbl-load-VoC">Table&nbsp;4</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-load-VoC" class="anchored">
+
+<table style="width:90%; font-size: 11px; margin-left: auto; margin-right: auto;" class="table table-striped"><caption>Table&nbsp;4:  Parameters characterizing inter-individual variability of viral loads (expressed in log10 copy/ml) in sputum. </caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> VoC </th>
+   <th style="text-align:right;"> Min </th>
+   <th style="text-align:right;"> Mode </th>
+   <th style="text-align:right;"> Max </th>
+   <th style="text-align:right;"> Shift compared to delta </th>
+   <th style="text-align:left;"> Reference </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> delta </td>
+   <td style="text-align:right;"> 1.6 </td>
+   <td style="text-align:right;"> 8.6 </td>
+   <td style="text-align:right;"> 10.4 </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;"> @Jones2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> original </td>
+   <td style="text-align:right;"> 0.6 </td>
+   <td style="text-align:right;"> 7.6 </td>
+   <td style="text-align:right;"> 9.4 </td>
+   <td style="text-align:right;"> -1.0 </td>
+   <td style="text-align:left;"> @Teyssou2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> alpha </td>
+   <td style="text-align:right;"> 1.1 </td>
+   <td style="text-align:right;"> 8.1 </td>
+   <td style="text-align:right;"> 9.9 </td>
+   <td style="text-align:right;"> -0.5 </td>
+   <td style="text-align:left;"> @Luo2021; @Wang2021; @Teyssou2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> omicron </td>
+   <td style="text-align:right;"> 1.6 </td>
+   <td style="text-align:right;"> 8.6 </td>
+   <td style="text-align:right;"> 10.4 </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:left;"> @Lyngse2021 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="secondary-attack-rate" class="level5">
+<h5 class="anchored" data-anchor-id="secondary-attack-rate">Secondary attack rate</h5>
+<p>The secondary attack rate (SAR) parameter used to estimate the probability of contraction SARS-CoV-2 for the workers having community activities outside the plant such as co-living. The SAR of the original and <em>alpha</em> VoCs has been found by <span class="citation" data-cites="Fung2021">Fung et al. (<a href="#ref-Fung2021" role="doc-biblioref">2021</a>)</span> to be equal to 17.1% (95%CI 13-21%). According to <span class="citation" data-cites="Singanayagam2021">Singanayagam et al. (<a href="#ref-Singanayagam2021" role="doc-biblioref">2021</a>)</span>, the SAR was found to be 38% for <em>delta</em> variant (with 95%CI 24-53%) in case of unvaccinated people, and 25% (with 95%CI 18-33%) for vaccinated people. The SAR for <em>omicron</em> is respectively 1.2 for vaccinated and 2.6 times more important than for delta <span class="citation" data-cites="Lyngse2021">(<a href="#ref-Lyngse2021" role="doc-biblioref">Lyngse et al., 2021</a>)</span>. These different SAR parameter values included in the model are shown in Table @ref(tab:TAB-SAR).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-SAR" class="anchored">
+
+<table style="width:75%; font-size: 11px; margin-left: auto; margin-right: auto;" class="table table-striped"><caption>Table&nbsp;5:  Secondary attack rates in household for different variants of concern and vaccination statuses. </caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> VoC </th>
+   <th style="text-align:left;"> Unvaccinated </th>
+   <th style="text-align:left;"> Vaccinated </th>
+   <th style="text-align:left;"> Multiplication factor toward a reference </th>
+   <th style="text-align:left;"> Reference </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> original </td>
+   <td style="text-align:left;"> 17% [14%-21%] </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> @Fung2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> alpha </td>
+   <td style="text-align:left;"> 17% [14%-21%] </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> @Fung2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> delta </td>
+   <td style="text-align:left;"> 38% [24%-53%] </td>
+   <td style="text-align:left;"> 25% [18%-33%] </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> @Singanayagam2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> omicron </td>
+   <td style="text-align:left;"> 57% </td>
+   <td style="text-align:left;"> 37.50% </td>
+   <td style="text-align:left;"> 1.5 more than delta </td>
+   <td style="text-align:left;"> @Lyngse2021 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="infection-probability" class="level5">
+<h5 class="anchored" data-anchor-id="infection-probability">Infection probability</h5>
+<p>The possible triggering of the first infection phase for each worker was modeled using a dose-response modelling approach, considering the viral quantity inhaled by each one. Among different dose-response models proposed in the literature (see more details in the section @ref(dose-response-model-parameters) ), the Watanabe model <span class="citation" data-cites="Watanabe2010">(<a href="#ref-Watanabe2010" role="doc-biblioref">Watanabe, Bartrand, Weir, Omura, &amp; Haas, 2010</a>)</span> was chosen herein to describe, for each worker, the probability to get infected as function of the number of inhaled virions (infectious virus), denoted $dose$, as follows:</p>
+<p><span class="math display">
+P(infection) = 1 - \exp(-r * dose)
+</span></p>
+<p>where <span class="math inline">r</span> is the shape parameter defining the exponential form of the no-threshold model is a no-threshold model. The value of $r$, estimated at <span class="math inline">r=0.00246</span> [95%CI 0.00128-0.00527] based on literature data (cf.&nbsp;section @ref(dose-response-model-parameters)) was used herein in the ABM model. It is also worth noting that the concentration of SARS-CoV-2 expressed in gene copies (e.g.&nbsp;RNA copies) or in infectious virus are strongly different. Important ratios between these concentrations have been suggested in the literature, varying from a factor of 100 to 1000 between the number of genes copies and the infectious viral particles <span class="citation" data-cites="Miller2021 Pitol2021">(<a href="#ref-Miller2021" role="doc-biblioref">Miller et al., 2021</a>; <a href="#ref-Pitol2021" role="doc-biblioref">Pitol &amp; Julian, 2021</a>)</span>. This factor, denoted <span class="math inline">f_{RNA/virion}</span>, was included in the ABM model with a arbitrarily chosen value of 500 as well as the 95%CI between 100 and 1000.</p>
+</section>
+<section id="working-days" class="level5">
+<h5 class="anchored" data-anchor-id="working-days">Working days</h5>
+</section>
+</section>
+<section id="air" class="level4" data-number="2.3.1.3">
+<h4 data-number="2.3.1.3" class="anchored" data-anchor-id="air"><span class="header-section-number">2.3.1.3</span> Air</h4>
+<section id="exhalation" class="level5">
+<h5 class="anchored" data-anchor-id="exhalation">Exhalation</h5>
+<p>The initial source of SARS-CoV-2 was considered through different respiratory activities of the infectious workers emitting droplets of various sizes. The number of droplets (expressed as <span class="math inline">s^{-1}</span> ) (containing or not viral particles) emitted over time was modeled as follows :</p>
+<p><span class="math display">
+\dot N_{exh, d} = \dot Q\upsilon_{exh} * C_d * (1-eff_m),
+</span></p>
+<p>where <span class="math inline">\dot Q\upsilon_{exh}</span> (<span class="math inline">m^3.h^{-1}</span>) corresponds to the exhaled volumetric air flow rate, <span class="math inline">C_d</span> (<span class="math inline">\#.m^{-3}</span> ) is the viral concentration of droplets of diameter <span class="math inline">d</span> and <span class="math inline">eff_m</span> corresponds to the efficacy of the mask if correctly worn (otherwise, <span class="math inline">eff_m = 0</span>). The correct mask wearing was described using a parameter called the mask acceptability, denoted <span class="math inline">p_{mask}</span>, corresponding to the proportion of the workers constantly wearing a mask during their working day. Several types of mask can be included as input of the model such as surgical mask or FFP2, with their respective efficacy and acceptability.</p>
+<p>The volumetric airflow rate was assumed to vary between the different workers depending on their physiology and the intensity of their activities. Based on data obtained by <span class="citation" data-cites="Buonanno2020">Buonanno, Morawska, &amp; Stabile (<a href="#ref-Buonanno2020" role="doc-biblioref">2020</a>)</span>, the ABM model considered six size classes for the droplets with the midpoint diameters <span class="math inline">d</span> at 0.8, 1.8, 3.5, 5.5, 20 and 100 <span class="math inline">\mu m</span>, respectively. Several respiratory activities (events) were taken into account in the model, including <em>breathing</em>, <em>talking</em>, <em>talking loud</em> (based on study by <span class="citation" data-cites="Morawska2009">Morawska et al. (<a href="#ref-Morawska2009" role="doc-biblioref">2009</a>)</span>), <em>coughing</em> and <em>sneezing</em> (SARS-CoV-2 symptoms). In this study, based on estimations from literature data, we assumed that each droplet contained one viral RNA copy (cf.&nbsp;section Appendices @ref(assumption-for-droplets-contamination)). The droplet concentrations <span class="math inline">C_d</span> associated with each droplet class emitted during each respiratory activity (event) estimated from studies by <span class="citation" data-cites="Morawska2009">Morawska et al. (<a href="#ref-Morawska2009" role="doc-biblioref">2009</a>)</span>, <u>Kennedy2009, Duguid1946</u> are gathered in <a href="#tbl-air-Cd">Table&nbsp;6</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-air-Cd" class="anchored">
+
+<table style="width:85%; font-size: 11px; margin-left: auto; margin-right: auto;" class="table table-striped"><caption>Table&nbsp;6:  Droplets concentration emitted during different respiratory activities and for different droplet size classes. </caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Respiratory activity </th>
+   <th style="text-align:left;"> $d = 0.8 \mu m$ </th>
+   <th style="text-align:left;"> $d = 1.8 \mu m$ </th>
+   <th style="text-align:left;"> $d = 3.5 \mu m$ </th>
+   <th style="text-align:left;"> $d = 5.5 \mu m$ </th>
+   <th style="text-align:left;"> $d = 20 \mu m$ </th>
+   <th style="text-align:left;"> $d = 100 \mu m$ </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> breathing </td>
+   <td style="text-align:left;"> $0.084 * 10^6$ </td>
+   <td style="text-align:left;"> $0.009  * 10^6$ </td>
+   <td style="text-align:left;"> $0.003  * 10^6$ </td>
+   <td style="text-align:left;"> $0.002 * 10^6$ </td>
+   <td style="text-align:left;"> $0$ </td>
+   <td style="text-align:left;"> $0$ </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> talking </td>
+   <td style="text-align:left;"> $0.236  * 10^6$ </td>
+   <td style="text-align:left;"> $0.068  * 10^6$ </td>
+   <td style="text-align:left;"> $0.007  * 10^6$ </td>
+   <td style="text-align:left;"> $0.011  * 10^6$ </td>
+   <td style="text-align:left;"> $0$ </td>
+   <td style="text-align:left;"> $0$ </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> talking loud </td>
+   <td style="text-align:left;"> $0.751  * 10^6$ </td>
+   <td style="text-align:left;"> $0.139  * 10^6$ </td>
+   <td style="text-align:left;"> $0.139  * 10^6$ </td>
+   <td style="text-align:left;"> $0.059  * 10^6$ </td>
+   <td style="text-align:left;"> $0$ </td>
+   <td style="text-align:left;"> $0$ </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> coughing </td>
+   <td style="text-align:left;"> $0$ </td>
+   <td style="text-align:left;"> $0.025  * 10^6$ </td>
+   <td style="text-align:left;"> $0.145  * 10^6$ </td>
+   <td style="text-align:left;"> $0.48  * 10^6$ </td>
+   <td style="text-align:left;"> $2.51  * 10^6$ </td>
+   <td style="text-align:left;"> $6.65  * 10^6$ </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> sneezing </td>
+   <td style="text-align:left;"> $0$ </td>
+   <td style="text-align:left;"> $13  * 10^6$ </td>
+   <td style="text-align:left;"> $80  * 10^6$ </td>
+   <td style="text-align:left;"> $175  * 10^6$ </td>
+   <td style="text-align:left;"> $230  * 10^6$ </td>
+   <td style="text-align:left;"> $489  * 10^6$ </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The occurrence frequency of the above respiratory activities during a time step varied from one worker to another, depending on their working activities as well as their infection phases. For example, <u>Birring2006 and Hsu1994</u> suggested average coughing frequencies at 2 coughs per hour for healthy patients and 47 coughs per hour for symptomatic patients. Such variability between infection statuses was also suggested for the sneezing frequencies (<u>Hansen&amp;Mygind2002, Musch2021</u>). These SARS-CoV-2 symptoms frequencies <span class="math inline">f_{cough/sneeze}</span> (expressed in <span class="math inline">\#.min^{-1}</span>) included in the model are gathered in <a href="#tbl-air-freq">Table&nbsp;7</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-air-freq" class="anchored">
+
+<table style="width:65%; font-size: 11px; margin-left: auto; margin-right: auto;" class="table table-striped"><caption>Table&nbsp;7:  Frequency of different SARS-CoV-2 symptoms (expressed as the number of occurrences per minutes). </caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Symptoms </th>
+   <th style="text-align:left;"> Infectious presymptomatic </th>
+   <th style="text-align:left;"> Asymptomatic </th>
+   <th style="text-align:left;"> Symptomatic </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> coughing </td>
+   <td style="text-align:left;"> 0.003 </td>
+   <td style="text-align:left;"> 0.033 </td>
+   <td style="text-align:left;"> 0.783 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> sneezing </td>
+   <td style="text-align:left;"> 0.002 </td>
+   <td style="text-align:left;"> 0.08 </td>
+   <td style="text-align:left;"> 0.017 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Based on the frequencies below, during a given several-minute time step <span class="math inline">dt</span>, the probability to have a coughing/sneezing event for a worker was calculated by <span class="math inline">p_{cough/sneeze} = f_{cough/sneeze} * dt</span>. If no symptoms are observed during this time step, the worker was considered to have one of the three remaining respiratory activities, i.e.&nbsp;breathing, talking or talking loud, with supposedly equal probability.</p>
+</section>
+<section id="aerosolization-criteria" class="level5">
+<h5 class="anchored" data-anchor-id="aerosolization-criteria">Aerosolization criteria</h5>
+<p>The different droplets emitted by the workers can be aerosolized (suspended in the air) <span class="citation" data-cites="BazantBush2021">(<a href="#ref-BazantBush2021" role="doc-biblioref">Bazant &amp; Bush, 2021</a>)</span> or fall directly onto the nearby environments (including nearby workers, inert surfaces or food products) depending on the size of the droplets and the ventilation system in the room. In this study, a criterion was used to determine if in a given room <span class="math inline">r</span> a droplet of diameter <span class="math inline">D_d</span> (size class <span class="math inline">d</span>) will be aerosolized by comparing its sedimentation time, denoted <span class="math inline">t_{sed,r,d}</span>, with the circulation time of the airflow in the room, denoted <span class="math inline">t_{circ,r}</span>.</p>
+<p>On the one hand, assuming that all droplets were uniformly distributed in the air, their sedimentation time was calculated as follows:</p>
+<p><span class="math display">
+t_{sed,r,d}= \frac{H_r}{\upsilon_{sed,d}},
+</span></p>
+<p>with <span class="math inline">H_r</span> (in <span class="math inline">m</span>) corresponds to the height of the room and <span class="math inline">\upsilon_{sed,d}</span> (in <span class="math inline">m.s^{-1}</span>) is the settling velocity of the droplets. The velocity was calculated using the Stokes law:</p>
+<p><span class="math display">
+\upsilon_{sed,d} = \frac{g*(\rho_{water}-\rho_{air})*D_d^2}{18*\mu},
+</span></p>
+<p>where <span class="math inline">g</span> (in <span class="math inline">m.s^{-2}</span>) is the gravity acceleration; <span class="math inline">\rho_{water}</span> and <span class="math inline">\rho_{air}</span> (in <span class="math inline">kg.m^{-3}</span>) are the mass density of the droplets and the air, respectively and <span class="math inline">\mu</span> is the dynamic viscosity (<span class="math inline">kg.m^{-1}.s^{-1}</span>).</p>
+<p>On the other hand, the circulation time of the airflow in the room <span class="math inline">r</span> was calculated as the ratio between the volume of the room <span class="math inline">V_r</span> (<span class="math inline">m^3</span>) and the volumetric airflow rate <span class="math inline">\dot Q\upsilon_r</span> (<span class="math inline">m^3.h^{-1}</span>):</p>
+<p><span class="math display">
+t_{circ,r} = \frac{V_r}{\dot Q \upsilon_r},
+</span></p>
+<p>with the value of <span class="math inline">\dot Q \upsilon_r</span> depending on the user-defined ventilation characteristics of the room. This airflow rate was equivalent to (i) the air mixing rate for Air Handing Unit and Direct Expansion Coil systems or (ii) the renew airflow rate for Controlled Mechanical Ventilation (CMV) systems. Droplets of diameter <span class="math inline">D_d</span> in the room <span class="math inline">r</span> were then considered as aerosolized under the following if:</p>
+<p><span class="math display">
+t_{sed,r,d} &gt; 10 * t_{circ,r},
+</span></p>
+<p>otherwise, they were considered as sedimented onto nearby environments. The total number of droplets sedimented in the room was then calculated as follows:</p>
+<p><span class="math display">
+\dot N_{sed,d,r} =\upsilon_{sed,d} * S_r,
+</span></p>
+<p>with <span class="math inline">S_r</span> (in <span class="math inline">m^2</span>) corresponding to the area of the room.</p>
+</section>
+<section id="sec-falling-projection" class="level5">
+<h5 class="anchored" data-anchor-id="sec-falling-projection">Falling &amp; projection</h5>
+<p>As previously mentioned, the droplets of various sizes were considered in the model from emission by infectious workers through their respiratory activities (breathing, talking, etc.). Besides aerosolized or sedimented droplets after a given time step described above, one also considered a fraction of the emitted droplets (mostly the ones with high-diameters) that could possibly fall directly onto nearby environments and/or in the direction of nearby workers following coughing/sneezing events. These events, when they occurs (cf.&nbsp;frequencies in <a href="#tbl-air-freq">Table&nbsp;7</a>), gave then three different paths for the circulation of the droplets emitted by an infectious worker, including (i) a fraction going to the aerosol and sedimented afterwards as described in the previous sections, (ii) a variable fraction projected in the direction of nearby susceptible workers depending on the distance between them and the infectious one and (iii) a variable fraction fallen / dropped directly on nearby environments (<a href="#fig-abm-pzone">Figure&nbsp;5</a>).</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-abm-pzone" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="fig/schema/abm_pzone.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5: Distribution of the falling and projected droplets onto nearby environments and workers due to coughing or sneezing events.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In this study, for simplification purposes, the spatial environments in the plant were divided into one-square-meter tiles where different agents (workers, inert surfaces or food products) can be present at a same given time. The fractions of falling / projected droplets (paths ii and iii) were spatially distributed afterwards into sub-fractions for the nearby square tiles depending on the distances separating them and the infectious worker. These spatial distributions were estimated based on data obtained previously by <u>Duguid1946, Nicas2005, Li2021, Lie2020 and Jung2022</u> and shown in <a href="#fig-abm-pzone">Figure&nbsp;5</a> (for more details, see Appendices @ref(distribution-of-the-projected-droplets)).</p>
+</section>
+<section id="inhalation" class="level5">
+<h5 class="anchored" data-anchor-id="inhalation">Inhalation</h5>
+<p>The total number of droplets (containing viral RNA copies) inhaled by each worker (by breathing in small droplets from the air or by being exposed to direct droplets projections) was tracked for each time point. The total exposure to the virus of each worker was calculated as the cumulative number of RNA copies inhaled at the end of the day. This exposure, converted afterwards as a number of infectious virions using the conversion factor <span class="math inline">f_{RNA/virion}</span>, was included in the dose-modelling step to determine if a possible infection may occur (cf. <a href="#sec-distribution-of-the-projected-droplets">Section&nbsp;4.4</a>).</p>
+</section>
+</section>
+<section id="sec-surfaces" class="level4" data-number="2.3.1.4">
+<h4 data-number="2.3.1.4" class="anchored" data-anchor-id="sec-surfaces"><span class="header-section-number">2.3.1.4</span> Surfaces</h4>
+<p>As previously described, droplets can sediment or fall onto different areas that were divided into one-square-meter tiles. In the study, all inert surfaces (e.g.&nbsp;surfaces of the conveyor belts and the equipment) located on those tiles were considered as agents of the ABM model with their own spatial coordinates. During the working day, the quantity of contaminated droplets could be accumulated and probably transferred from or to aerosol or food portions present on these inert surfaces. These droplet accumulations were calculated at the end of the day to determine the contamination level of each inert surface tiles, expressed as the total number of viral RNA copies per <span class="math inline">m^2</span>. Considering a possible factor between this total of RNA copies and the estimated quantity of virions as well as an experimental limit of detection, a surface tile was considered as contaminated by infectious viruses (<em>positive</em> contamination) if its droplet accumulation exceeded a predefined threshold values. In this study, the contamination was computed for several threshold levels varying from 3 to 9 <span class="math inline">\log_{10}</span> viral RNA copies in order to deal with possible uncertainties in the RNA/virions factor and the limit of detection. At the end of the day, once the total number of contaminated surfaces as well as their corresponding spatial coordinates were determined, all droplet accumulations were reset at 0 since all inert surfaces were assumed to be daily cleaned by the <em>transverse2</em> workers.</p>
+</section>
+<section id="food" class="level4" data-number="2.3.1.5">
+<h4 data-number="2.3.1.5" class="anchored" data-anchor-id="food"><span class="header-section-number">2.3.1.5</span> Food</h4>
+<section id="food-processing" class="level5">
+<h5 class="anchored" data-anchor-id="food-processing">Food processing</h5>
+<p>The meat cutting process was described herein accordingly to the module Workers (cf. <a href="#sec-type-of-workers">Section&nbsp;2.3.1.2.1</a>) as a multi-step process from the arrival gate to the storage area. The agents <em>food portions</em> were computed with a flexible flow:</p>
+<ul>
+<li><p>Firstly, two principal input parameters were used to describe the quantity of processed meats depending on the type of meat processed in the plant (e.g.&nbsp;<em>porcine, bovine,</em> etc.), including (i) the average weight of the carcasses arriving at the begin of the cutting process and (ii) the net weight ratio describing the yield obtained at the end of the process by excluding other non-consumable parts of the carcasses;</p></li>
+<li><p>After all cutting steps, the final food portions could be various sizes and weights depending on the market/consumers demand. For simplification purposes, an agent <em>food portion</em> was defined as a portion with a given <em>consumer sales unit</em> (CSU), i.e.&nbsp;the average weight of the final portion (expressed in <span class="math inline">kg</span>) obtained at the end of the cutting process;</p></li>
+<li><p>Based on expert knowledge and interviews with industrial factories, the quantity of meat processed during a period was assumed to the depend to the working rhythm of each worker type (<em>logistic, cutter1, cutter2</em>, etc.). These rhythms were included as parameters, for each type of meat and type of workers, expressed at a ratio corresponding to the expected weight proportion of the carcass processed during a given period. For example, the working rhythm of the <em>cutter1</em> workers in a porcine processing plant equal to 0.2 <span class="math inline">min^{-1}</span> correspond to their capacity to cut 20% of a pork carcass during one minute into different portions ready to go to the subsequent processing steps;</p></li>
+<li><p>The working rhythm can be different from one worker category to another, therefore, different food portions can be accumulated over time on the same working surfaces (conveyor belts or equipment). This accumulation will condition then the duration of every meat portions spatially distributed in the plant during the different cutting steps: for example, several meat portions can stay 5 minutes in the first cutting step (deboning) but 10 minutes in the second one (slicing, chopping, etc.) requiring more time to be done;</p></li>
+<li><p>Knowing the above duration for each cutting step, the different food portionswere spatially distributed at different step-dependent locations in the plant (e.g.&nbsp;<em>cutting1-conveyor1-5minutes</em>). It is worth noting that locations such as the conveyor belts may represent several spatial <em>X-Y</em> coordinates depending on their dimensions. The spatial distribution of the meat portions on the conveyors was computed in the way that the different portions from the same carcass were at the same location during a given period but could possibly have different random coordinates (simplification purposes for modeling the movement of the conveyor belts);</p></li>
+<li><p>Finally, depending the total number of workers present in the plant at a given working day, the total number of agents <em>food portions</em> as well as their spatiotemporal distributions were accordingly computed.</p></li>
+</ul>
+<p>As for the inert surfaces (cf. <a href="#sec-surfaces">Section&nbsp;2.3.1.4</a>), the contamination of the meat products was considered if the viral RNA accumulation in each portion (through sedimentation, projection or transfers by contact) exceeds pre-defined threshold levels. This accumulation was calculated for each portion at the entry of storage area (end of cutting process). Based on the chosen threshold level, the contamination percentage was calculated at the end of each day as the ratio of the number of contaminated portions over the total number of processed ones during the considered day.</p>
+</section>
+<section id="transfers-by-contact" class="level5">
+<h5 class="anchored" data-anchor-id="transfers-by-contact">Transfers by contact</h5>
+<p>As described in <a href="#sec-falling-projection">Section&nbsp;2.3.1.3.3</a>, contaminated droplets can be accumulated after sedimentation/projection on different areas where inert surfaces and food portions are located at a given time, suggesting then possible droplet transfers by contact between them. These transfers are schematized in <a href="#fig-abm-transfers">Figure&nbsp;6</a>.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-abm-transfers" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="fig/schema/abm_transfers.png" class="img-fluid figure-img" style="width:85.0%"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;6: Tranfers of the droplets between the different inert surfaces and food portions.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Considering a quantity <span class="math inline">N_t</span> of RNA copies contaminated by sedimentation/project onto the a given one-square-meter tile at the time <span class="math inline">t</span>:</p>
+<ul>
+<li><p>the model computed firstly a fraction <span class="math inline">prop_{inert}</span> of <span class="math inline">N_t</span> accumulated directly on the corresponding inert surface. The remaining droplets <span class="math inline">(1-prop_{inert}) * N_t</span> were distributed equally on <span class="math inline">N_{FP_{expo}}</span> random food portions present on the surface while assuming that the remaining portions were not exposed to droplets at this time point <span class="math inline">t</span> in reason of the vertical stacking of the pieces.</p></li>
+<li><p>Afterwards, from the time <span class="math inline">t</span> to <span class="math inline">t+1</span>:</p>
+<ul>
+<li><p>the droplets present on the inert surface the time <span class="math inline">t</span> were partially transferred (transfer rate <span class="math inline">T_{surfaces-food}</span>) to <span class="math inline">N_{FP_{expo}}</span> random meat portions present on the surface at the time <span class="math inline">t+1</span> due to direct contact with equal droplets distribution on each portions;</p></li>
+<li><p>a fraction of <span class="math inline">T_{food-surfaces}</span> of the droplets were transferred from the exposed food portions at the time <span class="math inline">t</span> to their respective inert surface on which there were located at the time <span class="math inline">t+1</span>;</p></li>
+<li><p>as for the time $t$, possible additional contamination from sedimentation/projection was computed for the time <span class="math inline">t+1</span> on the inert surface and exposed food portions.</p></li>
+</ul></li>
+</ul>
+<p>The contamination balances were calculated for all inert surfaces and food portions at different time points. As previously described, the contamination of the surfaces and food portions were determined at the end of the day or at the begin of the food storage.</p>
+</section>
+</section>
+</section>
+<section id="input-data" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="input-data"><span class="header-section-number">2.3.2</span> Input data</h3>
+<section id="reference-scenario" class="level4" data-number="2.3.2.1">
+<h4 data-number="2.3.2.1" class="anchored" data-anchor-id="reference-scenario"><span class="header-section-number">2.3.2.1</span> Reference scenario</h4>
+<p>In view of the all parameters described above, based on literature data, expert knowledge and investigations, a set of the most likely parameter values was set to define a reference scenario. These parameter values, set by default as input of all model computations, constitutes then references for further comparative analyses such as simulation convergence check, parameter sensitivity analyses or scenario simulations. All default values are gathered in <a href="#tbl-parameters-reference">Table&nbsp;8</a>. This reference scenario was characterized by computing the virus transmission between workers, surfaces and meat portions in a processing plant from one initial infected worker during 42 days with five-minute time steps.</p>
+</section>
+<section id="model-parameter-values" class="level4" data-number="2.3.2.2">
+<h4 data-number="2.3.2.2" class="anchored" data-anchor-id="model-parameter-values"><span class="header-section-number">2.3.2.2</span> Model parameter values</h4>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-parameters-reference" class="anchored">
+
+<table style="width:100%; font-size: 11px; margin-left: auto; margin-right: auto;" class="table table-striped"><caption>Table&nbsp;8:  Parameters values implemented for the reference scenario. </caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> class </th>
+   <th style="text-align:left;"> definition </th>
+   <th style="text-align:left;"> sub-category </th>
+   <th style="text-align:left;"> symbol </th>
+   <th style="text-align:left;"> unit </th>
+   <th style="text-align:left;"> default </th>
+   <th style="text-align:left;"> range </th>
+   <th style="text-align:left;"> references </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Workers </td>
+   <td style="text-align:left;"> Total number of workers </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> $N_{workers}$ </td>
+   <td style="text-align:left;"> # persons </td>
+   <td style="text-align:left;"> 100 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Ratio between the total number of workers and the daily one </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> $r_{N_t/ N_{per day}}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 1.25 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> French legislation </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Proportion of each type of workers </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> cutter1 </td>
+   <td style="text-align:left;"> $p_{type-cutter1}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.36 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Mallet et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> cutter2 </td>
+   <td style="text-align:left;"> $p_{type-cutter2}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.47 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Mallet et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> logistic1 </td>
+   <td style="text-align:left;"> $p_{type-logistic1}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.04 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Gunther et al., 2020 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> logistic2 </td>
+   <td style="text-align:left;"> $p_{type-logistic2}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.04 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Mallet et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> transverse1 </td>
+   <td style="text-align:left;"> $p_{type-transverse1}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.045 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Mallet et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> transverse2 </td>
+   <td style="text-align:left;"> $p_{type-transverse2}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.045 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Mallet et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Proportion of workers in each team </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> team A </td>
+   <td style="text-align:left;"> $p_{teamA}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Assumption/Expert </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> team B </td>
+   <td style="text-align:left;"> $p_{teamB}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Assumption/Expert </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Proportion of workers which change the team weekly </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> $p_{ChangeTeam}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.05 </td>
+   <td style="text-align:left;"> 0 - 0.10 </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Proportion of workers having community activities </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> $p_{CommunityActivity}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.21 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Mallet et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Average number of workers per community </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> $N_{perCommunityActivity}$ </td>
+   <td style="text-align:left;"> persons </td>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Secondary attack rate </td>
+   <td style="text-align:left;"> situation by default </td>
+   <td style="text-align:left;"> $SAR_{sim}$ </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> unvaccinated-delta </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Unvaccinated - Original CoV </td>
+   <td style="text-align:left;"> $SAR_{unvaccinated-original}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.17 </td>
+   <td style="text-align:left;"> 0.14 - 0.21 </td>
+   <td style="text-align:left;"> Fung et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Unvaccinated - alpha </td>
+   <td style="text-align:left;"> $SAR_{unvaccinated-alpha}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.17 </td>
+   <td style="text-align:left;"> 0.14 - 0.21 </td>
+   <td style="text-align:left;"> Fung et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Unvaccinated - delta </td>
+   <td style="text-align:left;"> $SAR_{unvaccinated-delta$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.38 </td>
+   <td style="text-align:left;"> 0.24 - 0.53 </td>
+   <td style="text-align:left;"> Singanayagam et al. 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Unvaccinated - omicron </td>
+   <td style="text-align:left;"> $SAR_{unvaccinated-omicron}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.57 </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> Lyngse et al. 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Vaccinated - Original CoV </td>
+   <td style="text-align:left;"> $SAR_{vaccinated-original}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Vaccinated - alpha </td>
+   <td style="text-align:left;"> $SAR_{vaccinated-alpha}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Vaccinated - delta </td>
+   <td style="text-align:left;"> $SAR_{vaccinated-delta}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.25 </td>
+   <td style="text-align:left;"> 0.18 - 0.33 </td>
+   <td style="text-align:left;"> Singanayagam et al. 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Vaccinated - omicron </td>
+   <td style="text-align:left;"> $SAR_{vaccinated-omicron}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.375 </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> Lyngse et al. 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Daily secondary attack rate </td>
+   <td style="text-align:left;"> Unvaccinated - Original CoV </td>
+   <td style="text-align:left;"> $SAR_{unvaccinated-original-daily}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.017 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimated from SAR </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Unvaccinated - alpha </td>
+   <td style="text-align:left;"> $SAR_{unvaccinated-alpha-daily}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.017 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimated from SAR </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Unvaccinated - delta </td>
+   <td style="text-align:left;"> $SAR_{unvaccinated-delta$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.038 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimated from SAR </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Unvaccinated - omicron </td>
+   <td style="text-align:left;"> $SAR_{unvaccinated-omicron-daily}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.057 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimated from SAR </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Vaccinated - Original CoV </td>
+   <td style="text-align:left;"> $SAR_{vaccinated-original-daily}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimated from SAR </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Vaccinated - alpha </td>
+   <td style="text-align:left;"> $SAR_{vaccinated-alpha-daily}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimated from SAR </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Vaccinated - delta </td>
+   <td style="text-align:left;"> $SAR_{vaccinated-delta}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.025 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimated from SAR </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Vaccinated - omicron </td>
+   <td style="text-align:left;"> $SAR_{vaccinated-omicron-daily}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.0375 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimated from SAR </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Mask wearing </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> situation by default </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> surgical mask </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Mask acceptability </td>
+   <td style="text-align:left;"> surgical mask </td>
+   <td style="text-align:left;"> $p_{MaskAcceptability-surgical}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.8 </td>
+   <td style="text-align:left;"> 0 - 1 </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> FFP2 </td>
+   <td style="text-align:left;"> $p_{MaskAcceptability-FFP2}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.6 </td>
+   <td style="text-align:left;"> 0 - 1 </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Mask efficacy </td>
+   <td style="text-align:left;"> surgical mask </td>
+   <td style="text-align:left;"> $p_{MaskEfficacy-surgical}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.9 </td>
+   <td style="text-align:left;"> range (SD) </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> FFP2 </td>
+   <td style="text-align:left;"> $p_{MaskEfficacy-FFP2}$ </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0,95 </td>
+   <td style="text-align:left;"> [0,8 0,99] </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Number of initial infected workers </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> $n_{contaminated_init}$ </td>
+   <td style="text-align:left;"> # </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Regional prevalence </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> $prev$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 100/100000 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Duration of the infection phases </td>
+   <td style="text-align:left;"> Latent phase </td>
+   <td style="text-align:left;"> LatentPhaseDuration </td>
+   <td style="text-align:left;"> day </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> 0-8 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Presymptomatic </td>
+   <td style="text-align:left;"> PresympDuration </td>
+   <td style="text-align:left;"> day </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> 01-avr </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Symptomatic </td>
+   <td style="text-align:left;"> SympDuration </td>
+   <td style="text-align:left;"> day </td>
+   <td style="text-align:left;"> 8 </td>
+   <td style="text-align:left;"> 05-nov </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Asymptomatic </td>
+   <td style="text-align:left;"> AsymDuration </td>
+   <td style="text-align:left;"> day </td>
+   <td style="text-align:left;"> 8 </td>
+   <td style="text-align:left;"> 05-nov </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Non infectious - Symptomatic </td>
+   <td style="text-align:left;"> NonInfectiousDurationSymp </td>
+   <td style="text-align:left;"> day </td>
+   <td style="text-align:left;"> 4 </td>
+   <td style="text-align:left;"> 02-juin </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Non infectious - Asymptomatic </td>
+   <td style="text-align:left;"> NonInfectiousDurationASymp </td>
+   <td style="text-align:left;"> day </td>
+   <td style="text-align:left;"> 4 </td>
+   <td style="text-align:left;"> 02-juin </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Probability of symptoms develpment </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> $p_{ssymptom}$ </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.335 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Probability to be absent if symptomatic </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> pPresenceSymp </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 24/140 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Duration of the absence period </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> AbsenceDuration </td>
+   <td style="text-align:left;"> day </td>
+   <td style="text-align:left;"> 10 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Assumption/Fixed by authorities </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Time </td>
+   <td style="text-align:left;"> Duration of simulation period </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Ndays </td>
+   <td style="text-align:left;"> day </td>
+   <td style="text-align:left;"> 42 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Time step </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Step </td>
+   <td style="text-align:left;"> minutes </td>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Virus </td>
+   <td style="text-align:left;"> Variant of concern </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> VoC </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "delta" </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Variability of viral loads </td>
+   <td style="text-align:left;"> situation by default </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> delta </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> delta (min - mode - max) </td>
+   <td style="text-align:left;"> RNA_dist ("delta") min </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 1.6 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RNA_dist ("delta") mode </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 8.6 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RNA_dist ("delta") max </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 10.4 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> original VoC (min - mode - max) </td>
+   <td style="text-align:left;"> RNA_dist ("original") min </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 0.6 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RNA_dist ("original") mode </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 7.6 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RNA_dist ("original") max </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 9.4 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> alpha (min - mode - max) </td>
+   <td style="text-align:left;"> RNA_dist ("alpha") min </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 1.3 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RNA_dist ("alpha") mode </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 8.3 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RNA_dist ("alpha") max </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 10.1 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> omicron (min - mode - max) </td>
+   <td style="text-align:left;"> RNA_dist ("omicron") min </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 1.6 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RNA_dist ("omicron") mode </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 8.6 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RNA_dist ("omicron") max </td>
+   <td style="text-align:left;"> log10 RNA/ml </td>
+   <td style="text-align:left;"> 10.4 </td>
+   <td style="text-align:left;"> +/- 0.3 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Dose-response parameters </td>
+   <td style="text-align:left;"> r (Watanabe model) </td>
+   <td style="text-align:left;"> DRM1_r ("Watanabe model") </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.00246 </td>
+   <td style="text-align:left;"> 0.00128 - 0.00527 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Ratio between the number of RNA copies and virions </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RNA_virion_ratio </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 500 </td>
+   <td style="text-align:left;"> 100-1000 </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Food </td>
+   <td style="text-align:left;"> Type of meat </td>
+   <td style="text-align:left;"> situation by default </td>
+   <td style="text-align:left;"> meat </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> porcine </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Worker rhythm </td>
+   <td style="text-align:left;"> porcine - logistic1 </td>
+   <td style="text-align:left;"> worker_rhythm_porcine_logistic1 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> porcine - cutter1 </td>
+   <td style="text-align:left;"> worker_rhythm_porcine_cutter1 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.2 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> porcine - cutter2 </td>
+   <td style="text-align:left;"> worker_rhythm_porcine_cutter2 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.1 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> porcine - logistic2 </td>
+   <td style="text-align:left;"> worker_rhythm_porcine_logistic2 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> bovine - logistic1 </td>
+   <td style="text-align:left;"> worker_rhythm_bovine_logistic1 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> bovine - cutter1 </td>
+   <td style="text-align:left;"> worker_rhythm_bovine_cutter1 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.2 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> bovine - cutter2 </td>
+   <td style="text-align:left;"> worker_rhythm_bovine_cutter2 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.2 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> bovine - logistic2 </td>
+   <td style="text-align:left;"> worker_rhythm_bovine_logistic2 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> veal - logistic1 </td>
+   <td style="text-align:left;"> worker_rhythm_veal_logistic1 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> veal - cutter1 </td>
+   <td style="text-align:left;"> worker_rhythm_veal_cutter1 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.2 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> veal - cutter2 </td>
+   <td style="text-align:left;"> worker_rhythm_veal_cutter2 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.1 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> veal - logistic2 </td>
+   <td style="text-align:left;"> worker_rhythm_veal_logistic2 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> lamb - logistic1 </td>
+   <td style="text-align:left;"> worker_rhythm_lamb_logistic1 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> lamb - cutter1 </td>
+   <td style="text-align:left;"> worker_rhythm_lamb_cutter1 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.2 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> lamb - cutter2 </td>
+   <td style="text-align:left;"> worker_rhythm_lamb_cutter2 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.1 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> lamb - logistic2 </td>
+   <td style="text-align:left;"> worker_rhythm_lamb_logistic2 </td>
+   <td style="text-align:left;"> carcasses/min </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> +/- 10% </td>
+   <td style="text-align:left;"> Assumption/Expert/Data </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Raw carcass weight </td>
+   <td style="text-align:left;"> bovine </td>
+   <td style="text-align:left;"> carcass_weight_bovine </td>
+   <td style="text-align:left;"> kg </td>
+   <td style="text-align:left;"> 286 (NDL) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Expert/Data (OFIVAL 1985) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> porcine </td>
+   <td style="text-align:left;"> carcass_weight_porcine </td>
+   <td style="text-align:left;"> kg </td>
+   <td style="text-align:left;"> 75 (NDL) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Expert/Data (OFIVAL 1985) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> veal </td>
+   <td style="text-align:left;"> carcass_weight_veal </td>
+   <td style="text-align:left;"> kg </td>
+   <td style="text-align:left;"> 102 (NDL) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Expert/Data (OFIVAL 1985) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> lamb </td>
+   <td style="text-align:left;"> carcass_weight_lamb </td>
+   <td style="text-align:left;"> kg </td>
+   <td style="text-align:left;"> 17 (NDL) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Expert/Data (OFIVAL 1985) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Net weight ratio </td>
+   <td style="text-align:left;"> bovine </td>
+   <td style="text-align:left;"> net_weight_ratio_bovine </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.6 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Expert/Data (OFIVAL 1985) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> porcine </td>
+   <td style="text-align:left;"> net_weight_ratio_porcine </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.59 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Expert/Data (OFIVAL 1985) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> veal </td>
+   <td style="text-align:left;"> net_weight_ratio_veal </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.75 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Expert/Data (OFIVAL 1985) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> lab </td>
+   <td style="text-align:left;"> net_weight_ratio_lamb </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.585 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Expert/Data (OFIVAL 1985) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Consumer sales unit </td>
+   <td style="text-align:left;"> bovine </td>
+   <td style="text-align:left;"> CSU_bovine </td>
+   <td style="text-align:left;"> kg </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> porcine </td>
+   <td style="text-align:left;"> CSU_porcine </td>
+   <td style="text-align:left;"> kg </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> veal </td>
+   <td style="text-align:left;"> CSU_veal </td>
+   <td style="text-align:left;"> kg </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> lamb </td>
+   <td style="text-align:left;"> CSU_lamb </td>
+   <td style="text-align:left;"> kg </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Plant structure </td>
+   <td style="text-align:left;"> Dimensions of the plant </td>
+   <td style="text-align:left;"> width </td>
+   <td style="text-align:left;"> dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 26 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> length </td>
+   <td style="text-align:left;"> dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 21 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> height </td>
+   <td style="text-align:left;"> dim.Z </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> name </td>
+   <td style="text-align:left;"> label </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "Cutting room" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> air conditioner type </td>
+   <td style="text-align:left;"> Air_Cond_Type </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "AHU" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Air_renewal </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 2400 </td>
+   <td style="text-align:left;"> -[0- 4800] </td>
+   <td style="text-align:left;"> Regulation </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Airflowrate </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 90000 </td>
+   <td style="text-align:left;"> +/- 20% </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 4 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" dim.Z </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" pos.X </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" pos.Y </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" indoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "bottom" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" extdoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "left" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" Air_Cond_Type </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "CMV" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" Air_renewal </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 90 (SD) </td>
+   <td style="text-align:left;"> [60 - 120] </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Entry hall" Airflowrate </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 90 (SD) </td>
+   <td style="text-align:left;"> non inclus </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." dim.Z </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 2.5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." pos.X </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." pos.Y </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." indoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "left" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." extdoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." Air_Cond_Type </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "CMV" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." Air_renewal </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 30 (SD) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "W.C." Airflowrate </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 30 (SD) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" dim.Z </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" pos.X </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" pos.Y </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" indoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "left" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" extdoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" Air_Cond_Type </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "DEC" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" Air_renewal </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 120 (SD) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Cooling area" Airflowrate </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 500 (SD) </td>
+   <td style="text-align:left;"> non inclus </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" dim.Z </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" pos.X </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" pos.Y </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.4 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" indoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "right" </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" extdoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "left" </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" Air_Cond_Type </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "DEC" </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" Air_renewal </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 30 (SD) </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Arrival gate" Airflowrate </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 200 (SD) </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" dim.Z </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" pos.X </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.7 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" pos.Y </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" indoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "bottom" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" extdoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "top" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" Air_Cond_Type </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "DEC" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" Air_renewal </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 30 (SD) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Waste area" Airflowrate </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 200 (SD) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 4 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" dim.Z </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" pos.X </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" pos.Y </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.5 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" indoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "left" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" extdoor.side </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" Air_Cond_Type </td>
+   <td style="text-align:left;"> predefined values </td>
+   <td style="text-align:left;"> "CMV" </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" Air_renewal </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 120 (SD) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Office" Airflowrate </td>
+   <td style="text-align:left;"> m3/h </td>
+   <td style="text-align:left;"> 200 (SD) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Conveyor1" dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 14 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Conveyor1" dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Conveyor1" pos.X </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.2 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Conveyor1" pos.Y </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.45 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Conveyor2" dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 14 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Conveyor2" dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Conveyor2" pos.X </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.25 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Conveyor2" pos.Y </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.25 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Equipment1" dim.X </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Equipment1" dim.Y </td>
+   <td style="text-align:left;"> m </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Equipment1" pos.X </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.75 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> "Equipment1" pos.Y </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.35 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Input </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Surfaces </td>
+   <td style="text-align:left;"> Inert_prop </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> inert_prop </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 01-mars </td>
+   <td style="text-align:left;"> 0 - 0.5 </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> food_prop </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 02-mars </td>
+   <td style="text-align:left;"> 0.5 - 1 </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> nFP_expo </td>
+   <td style="text-align:left;"> # portions </td>
+   <td style="text-align:left;"> 10 </td>
+   <td style="text-align:left;"> janv-20 </td>
+   <td style="text-align:left;"> Assumption </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> transfer_S2F </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.99 </td>
+   <td style="text-align:left;"> 0.64 - 1 </td>
+   <td style="text-align:left;"> Duret et al., 2017 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> transfer_F2S </td>
+   <td style="text-align:left;"> rate </td>
+   <td style="text-align:left;"> 0.28 </td>
+   <td style="text-align:left;"> 0.01 - 0.95 </td>
+   <td style="text-align:left;"> Duret et al., 2017 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> pos_threshold </td>
+   <td style="text-align:left;"> RNA copies </td>
+   <td style="text-align:left;"> 5log (LG) </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Estimation (LG) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Air </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Droplet classes </td>
+   <td style="text-align:left;"> &lt;b5&gt;m </td>
+   <td style="text-align:left;"> 0.8/ 1.8/ 3.5/ 5.5/ 20/ 100 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Buonnanno et al., 2020 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Cd_exp (Breathing) </td>
+   <td style="text-align:left;"> m-3 </td>
+   <td style="text-align:left;"> 0.084/0.009/0.003/0.002/ 0/ 0 * 1E6 </td>
+   <td style="text-align:left;"> 20% </td>
+   <td style="text-align:left;"> Morawska et al., 2009, Kenedy et al. 2020 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Cd_exp (Voiced counting "talking") </td>
+   <td style="text-align:left;"> m-3 </td>
+   <td style="text-align:left;"> 0.236/ 0.068/ 0.007/ 0.011/ 0/ 0 * 1E6 </td>
+   <td style="text-align:left;"> 20% </td>
+   <td style="text-align:left;"> Morawska et al., 2009, Kenedy et al. 2020 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Cd_exp (Unmodulated vocalization "talking loud") </td>
+   <td style="text-align:left;"> m-3 </td>
+   <td style="text-align:left;"> 0.751/ 0.139/ 0.139/ 0.059/ 0/ 0 * 1E6 </td>
+   <td style="text-align:left;"> 20% </td>
+   <td style="text-align:left;"> Morawska et al., 2009, Kenedy et al. 2020 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Cd_cough (Coughing) </td>
+   <td style="text-align:left;"> m-3 </td>
+   <td style="text-align:left;"> 0/ 0.025/ 0.145/ 0.48/ 2.51/ 6.65 * 1E6 </td>
+   <td style="text-align:left;"> 20% </td>
+   <td style="text-align:left;"> Duguid 1946 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Cd_sneeze (Sneezing) </td>
+   <td style="text-align:left;"> m-3 </td>
+   <td style="text-align:left;"> 0/ 13/ 80/ 175/ 230/ 489 * 1E6 </td>
+   <td style="text-align:left;"> 20% </td>
+   <td style="text-align:left;"> Duguid 1946 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RespRate (Resting) </td>
+   <td style="text-align:left;"> m3/min </td>
+   <td style="text-align:left;"> 0.49 / 60 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Adams 1993 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RespRate (Standing) </td>
+   <td style="text-align:left;"> m3/min </td>
+   <td style="text-align:left;"> 0.54 / 60 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Adams 1994 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RespRate (Light exercise) </td>
+   <td style="text-align:left;"> m3/min </td>
+   <td style="text-align:left;"> 1.38 / 60 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Adams 1995 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RespRate (Moderate exercise) </td>
+   <td style="text-align:left;"> m3/min </td>
+   <td style="text-align:left;"> 2.35 / 60 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Adams 1996 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> RespRate (Heavy exercise) </td>
+   <td style="text-align:left;"> m3/min </td>
+   <td style="text-align:left;"> 3.3 / 60 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Adams 1997 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_cough (infectious) </td>
+   <td style="text-align:left;"> freq/minutes </td>
+   <td style="text-align:left;"> f&lt;e9&gt;vr-60 </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Birrong et al., 2006 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_cough (symptomatic) </td>
+   <td style="text-align:left;"> freq/minutes </td>
+   <td style="text-align:left;"> 47 / 60 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Birrong et al., 2006 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_cough (asymptomatic) </td>
+   <td style="text-align:left;"> freq/minutes </td>
+   <td style="text-align:left;"> f&lt;e9&gt;vr-60 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Birrong et al., 2006 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_sneeze (infectious) </td>
+   <td style="text-align:left;"> freq/minutes </td>
+   <td style="text-align:left;"> 0,002 </td>
+   <td style="text-align:left;"> [0 0,004] max 4 fois par jour </td>
+   <td style="text-align:left;"> Hansen and Mygind 2002 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_sneeze (symptomatic) </td>
+   <td style="text-align:left;"> freq/minutes </td>
+   <td style="text-align:left;"> janv-60 </td>
+   <td style="text-align:left;"> [ 0; 5/60] </td>
+   <td style="text-align:left;"> Musch et al 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_sneeze (asymptomatic) </td>
+   <td style="text-align:left;"> freq/minutes </td>
+   <td style="text-align:left;"> 0,08 </td>
+   <td style="text-align:left;"> [0 0,16] </td>
+   <td style="text-align:left;"> Hansen and Mygind 2002 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_zone (ctr) </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.2 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimation based on Li et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_zone (adj1) </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.05 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimation based on Li et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_zone (adj2) </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.03 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimation based on Li et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_zone (adj3) </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.015 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimation based on Li et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_zone_air (ctr) </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimation based on Li et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_zone_air (adj1) </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.11 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimation based on Li et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_zone_air (adj2) </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.045 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimation based on Li et al., 2021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> p_zone_air (adj3) </td>
+   <td style="text-align:left;"> ratio </td>
+   <td style="text-align:left;"> 0.015 </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> Estimation based on Li et al., 2021 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="output-indicators" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="output-indicators"><span class="header-section-number">2.3.3</span> Output indicators</h3>
+</section>
+</section>
+<section id="parallel-computing" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="parallel-computing"><span class="header-section-number">2.4</span> Parallel computing</h2>
+<p>Calculation / technical requirements / Migale</p>
+</section>
+<section id="convergence-check" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="convergence-check"><span class="header-section-number">2.5</span> Convergence check</h2>
+</section>
+</section>
+<section id="usage" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Usage</h1>
+<p>approach for convergence /</p>
+</section>
+<section id="appendices" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Appendices</h1>
+<section id="individual-variability-in-viral-load" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="individual-variability-in-viral-load"><span class="header-section-number">4.1</span> Individual variability in viral load</h2>
+<p>Among the infection phases described previously, the model considered the viral load emitted by the different workers only during their infectiousness period. Viral loads were considered to be similar between asymptomatic and symptomatic persons according to a study of <span class="citation" data-cites="Walsh2020">Walsh et al. (<a href="#ref-Walsh2020" role="doc-biblioref">2020</a>)</span> and assumed to be constant during the whole infectiousness period. Parameters characterizing inter-individual variability (min, mode and max values) were estimated by fitting triangular probability distributions on data collected by <span class="citation" data-cites="Jones2021">Jones et al. (<a href="#ref-Jones2021" role="doc-biblioref">2021</a>)</span> on presymptomatic, asymptomatic, and mildly symptomatic (PAMS) cases (<a href="#fig-viral-load-triangular">Figure&nbsp;7</a>). The latter corresponds to the <em>alpha</em> variant (that is B.1.1.7). The viral load of the alpha variant was found to be 1 <span class="math inline">\log_{10}</span> higher than the original SARS-CoV-2 strain <span class="citation" data-cites="Teyssou2021">(<a href="#ref-Teyssou2021" role="doc-biblioref">Teyssou et al., 2021</a>)</span>.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-viral-load-triangular" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="model_descriptor_files/figure-html/fig-viral-load-triangular-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;7: Fitting of a triangular distribution to virus load measurements (expressed in log10 copy/ml) on data obtained by Jones et al (2021).</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The parameters of the triangular distribution used to describe variability of viral load are respectively, min=1.6, mode=8.6 and max=10.4. The <em>delta</em> VoC is associated with higher viral load <span class="citation" data-cites="Luo2021 Wang2021 Teyssou2021">(<a href="#ref-Luo2021" role="doc-biblioref">Luo et al., 2021</a>; <a href="#ref-Teyssou2021" role="doc-biblioref">Teyssou et al., 2021</a>; <a href="#ref-Wang2021" role="doc-biblioref">Wang et al., 2021</a>)</span>. The concentration of delta VoC was found to be 2 times more important than for <em>alpha</em> <span class="citation" data-cites="Teyssou2021">(<a href="#ref-Teyssou2021" role="doc-biblioref">Teyssou et al., 2021</a>)</span>. Other differences observed in <em>Ct</em> values suggest that the difference could be higher <span class="citation" data-cites="Luo2021 Wang2021">(<a href="#ref-Luo2021" role="doc-biblioref">Luo et al., 2021</a>; <a href="#ref-Wang2021" role="doc-biblioref">Wang et al., 2021</a>)</span>. Therefore, the distribution of viral load was considered to be shifted by 0.5 <span class="math inline">\log_{10}</span> from <em>delta</em> with an uncertainty range between 0.3 and 1 <span class="math inline">\log_{10}</span>. Finally, the level of viral load for <em>omicron</em> VoC was found to be similar to <em>delta</em> <span class="citation" data-cites="Lyngse2021">(<a href="#ref-Lyngse2021" role="doc-biblioref">Lyngse et al., 2021</a>)</span>. All estimated parameters are gathered in <a href="#tbl-load-VoC">Table&nbsp;4</a>).</p>
+</section>
+<section id="dose-response-model-parameters" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="dose-response-model-parameters"><span class="header-section-number">4.2</span> Dose-response model parameters</h2>
+<p>Dose-response modelling is the process of using mathematical relationships to describe the probability of an adverse health effect (e.g., infection, illness) occurring in an individual or the frequency of an adverse health effect in a population when that individual or population is exposed to a specific dose of pathogenic microorganisms. Two types of modelling approaches can be distinguished <span class="citation" data-cites="Haas2002">(<a href="#ref-Haas2002" role="doc-biblioref">Haas, 2002</a>)</span>. In the first, it is considered that there is a cooperation between ingested/inhaled microorganisms, involving the notion of minimum infective dose: the infection is the result of the combined action of multiple micro-organism units, and it becomes possible only if the dose exceeds a threshold (the so-called “minimal infective dose”). In the second approach it is assumed on an independence of action of microorganism units. Each microorganism unit has a non-zero chance of causing infection on its own. For SARS-CoV-2, as for other infectious pathogens, the models currently used are based on the single hit model theory and the absence of a threshold <span class="citation" data-cites="Poydenot2021">(<a href="#ref-Poydenot2021" role="doc-biblioref">Poydenot et al., 2021</a>)</span>.</p>
+<ul>
+<li><strong>Exponential dose response model</strong></li>
+</ul>
+<p>The exponential model is a no-threshold model, where the probability of infection (<em>r</em>) for a virion particle is constant, and the number of virions inhaled is not perfectly known but assumed to follow a Poisson distribution of parameter <em>d</em> . The hypothesis of the constancy of <em>r</em> means that the result of the interaction between host, microorganism and environmental factors does not vary much between exposed individuals. The Poisson distribution is applicable in case the contamination is considered homogeneous. This assumption appears suitable for characterizing droplet distribution in the air. The probability of being infected following the inhalation of air in which the average contamination is equal to <em>d</em> is expressed as follows:</p>
+<p><span class="math display">P(\mathrm{infection}|d)=1-\exp(-r/d)</span></p>
+<p><a href="#fig-DRM-exponential">Figure&nbsp;8</a> shows some examples of the exponential dose-response curves depending on different values of <span class="math inline">r</span>.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-DRM-exponential" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="model_descriptor_files/figure-html/fig-DRM-exponential-1.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8: Examples of the exponential dose-response model for calculating the probability of infection according to the dose for different <em>r</em> values.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Wells-Riley model</strong></li>
+</ul>
+<p>The Wells-Riley model, as illustrated in can also be used to calculate the probability of infection based on given dose <span class="citation" data-cites="Wells1955 Sze2010">(<a href="#ref-Sze2010" role="doc-biblioref">Sze To &amp; Chao, 2010</a>; <a href="#ref-Wells1955" role="doc-biblioref">Wells et al., 1955</a>)</span>. It also relies on the hypothesis of a random distribution of the pathogen in the air. But it uses another parametrization compared to the exponential dose-response model. The quantum of infection <em>q</em> is used. <em>q</em> corresponds to a quantity of inhaled virions for which the probability of infection in the population is 63%.</p>
+<p><span class="math display">P(\mathrm{infection}|d)=1-\exp(-d/q)</span></p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-DRM-WR" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="model_descriptor_files/figure-html/fig-DRM-WR-1.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9: Illustration of the notion of quantum of infection. <em>q</em> = 100 in this example.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Comparison of models</strong></li>
+</ul>
+<p>No data have been used so far for fitting an exponential dose response curve for Sars-Cov2 <span class="citation" data-cites="Parhizkar2021">(<a href="#ref-Parhizkar2021" role="doc-biblioref">Parhizkar, Van Den Wymelenberg, Haas, &amp; Corsi, 2021</a>)</span>. However prior work has shown that dose-responses for other coronaviruses <span class="citation" data-cites="Watanabe2010 Haas2021">(<a href="#ref-Haas2021" role="doc-biblioref">Haas, 2021</a>; <a href="#ref-Watanabe2010" role="doc-biblioref">Watanabe et al., 2010</a>)</span>. This dose-response has been used in several risk assessment for Sars-Cov2 <span class="citation" data-cites="Pitol2021">(e.g. <a href="#ref-Pitol2021" role="doc-biblioref">Pitol &amp; Julian, 2021</a>)</span>.</p>
+<p><span class="citation" data-cites="Prentiss2020">Prentiss, Chu, &amp; Berggren (<a href="#ref-Prentiss2020" role="doc-biblioref">2020</a>)</span> provided some estimates of <em>q</em> values based on estimation of exposure and observed attack rates. Six values were obtained from 6 six different situations were the attack rates. The values ranged from 322 to 3012. <span class="citation" data-cites="Augenbraun2020">Augenbraun et al. (<a href="#ref-Augenbraun2020" role="doc-biblioref">2020</a>)</span> assumed a conservative value of <em>q</em> equal to 100.</p>
+<p><a href="#fig-DRM-compare">Figure&nbsp;10</a> compares the exponential dose response derived from <span class="citation" data-cites="Watanabe2010">Watanabe et al. (<a href="#ref-Watanabe2010" role="doc-biblioref">2010</a>)</span> and available in <a href="http://qmrawiki.org/experiments/sars">QMRAwiki</a> and the values derived from <span class="citation" data-cites="Prentiss2020">Prentiss et al. (<a href="#ref-Prentiss2020" role="doc-biblioref">2020</a>)</span>.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-DRM-compare" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="model_descriptor_files/figure-html/fig-DRM-compare-1.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10: Comparison of different dose-response models.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The Watanabe’s model provided a conservative estimate of the infection probability. The best fit value for <span class="math inline">r = 0.00246</span> was used in the SACADA_ABM model. The 95% CI are used in the sensitivity analysis of the model (<strong>0.00128</strong> and <strong>0.00527</strong>).</p>
+<ul>
+<li><strong>Expression of dose to assess probability of infection</strong></li>
+</ul>
+<p>Evidence suggests that the concentration of SARS-Cov2 expressed in gene copies or in infectious virus are strongly different. Different ratios have been proposed to account of this difference. Infective virus are though to be from 100 to 1000 lower than gene copies <span class="citation" data-cites="Miller2021 Pitol2021">(<a href="#ref-Miller2021" role="doc-biblioref">Miller et al., 2021</a>; <a href="#ref-Pitol2021" role="doc-biblioref">Pitol &amp; Julian, 2021</a>)</span>. The value of 500 is used in SACADA_ABM. The values of 100 to 1000 will be used in the sensitivity analysis.</p>
+</section>
+<section id="assumption-for-droplets-contamination" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="assumption-for-droplets-contamination"><span class="header-section-number">4.3</span> Assumption for droplets contamination</h2>
+<p>(SD)</p>
+</section>
+<section id="sec-distribution-of-the-projected-droplets" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="sec-distribution-of-the-projected-droplets"><span class="header-section-number">4.4</span> Distribution of the projected droplets</h2>
+<p>(SD)</p>
+</section>
+</section>
+<section id="bibliographic-references" class="level1 unnumbered" data-number="5">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">5 Bibliographic references</h2><div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="doc-bibliography">
+<div id="ref-Alene2021" class="csl-entry" role="doc-biblioentry">
+Alene, M., Yismaw, L., Assemie, M. A., Ketema, D. B., Mengist, B., Kassie, B., &amp; Birhan, T. Y. (2021). Magnitude of asymptomatic COVID-19 cases throughout the course of infection: A systematic review and meta-analysis. <em>PloS One</em>, <em>16</em>(3), e0249090.
+</div>
+<div id="ref-Augenbraun2020" class="csl-entry" role="doc-biblioentry">
+Augenbraun, B. L., Lasner, Z. D., Mitra, D., Prabhu, S., Raval, S., Sawaoka, H., &amp; Doyle, J. M. (2020). Assessment and mitigation of aerosol airborne SARS-CoV-2 transmission in laboratory and office environments. <em>Journal of Occupational and Environmental Hygiene</em>, <em>17</em>(10), 447–456.
+</div>
+<div id="ref-BazantBush2021" class="csl-entry" role="doc-biblioentry">
+Bazant, M. Z., &amp; Bush, J. W. M. (2021). A guideline to limit indoor airborne transmission of COVID-19. <em>Proceedings of the National Academy of Sciences</em>, <em>118</em>(17), e2018995118. doi:<a href="https://doi.org/10.1073/pnas.2018995118">10.1073/pnas.2018995118</a>
+</div>
+<div id="ref-Buonanno2020" class="csl-entry" role="doc-biblioentry">
+Buonanno, G., Morawska, L., &amp; Stabile, L. (2020). Quantitative assessment of the risk of airborne transmission of SARS-CoV-2 infection: Prospective and retrospective applications. <em>Environ Int</em>, <em>145</em>, 106112. Journal Article. doi:<a href="https://doi.org/10.1016/j.envint.2020.106112">10.1016/j.envint.2020.106112</a>
+</div>
+<div id="ref-Byrne2020" class="csl-entry" role="doc-biblioentry">
+Byrne, A. W., McEvoy, D., Collins, A. B., Hunt, K., Casey, M., Barber, A., et al.others. (2020). Inferred duration of infectious period of SARS-CoV-2: Rapid scoping review and analysis of available evidence for asymptomatic and symptomatic COVID-19 cases. <em>BMJ Open</em>, <em>10</em>(8), e039856.
+</div>
+<div id="ref-Fung2021" class="csl-entry" role="doc-biblioentry">
+Fung, H. F., Martinez, L., Alarid-Escudero, F., Salomon, J. A., Studdert, D. M., Andrews, J. R., … Modeling Group Chin Elizabeth T Claypool Anneke L Fernandez Mariana Gracia Valeria Luviano Andrea Rosales Regina Isabel Medina Reitsma Marissa Ryckman Theresa, S.-C. C. S. M. (SC-COSMO). (2021). The household secondary attack rate of severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2): A rapid review. <em>Clinical Infectious Diseases</em>, <em>73</em>(Supplement_2), S138–S145.
+</div>
+<div id="ref-Grant2021" class="csl-entry" role="doc-biblioentry">
+Grant, R., Charmet, T., Schaeffer, L., Galmiche, S., Madec, Y., Von Platen, C., … Fontanet, A. (2021). Impact of SARS-CoV-2 delta variant on incubation, transmission settings and vaccine effectiveness: Results from a nationwide case-control study in france. <em>The Lancet Regional Health - Europe</em>, 100278. doi:<a href="https://doi.org/10.1016/j.lanepe.2021.100278">10.1016/j.lanepe.2021.100278</a>
+</div>
+<div id="ref-Grimm2010" class="csl-entry" role="doc-biblioentry">
+Grimm, V., Berger, U., DeAngelis, D. L., Polhill, J. G., Giske, J., &amp; Railsback, S. F. (2010). <span class="nocase">The ODD protocol: A review and first update</span>. <em>Ecological Modelling</em>, <em>221</em>(23), 2760–2768. doi:<a href="https://doi.org/10.1016/j.ecolmodel.2010.08.019">10.1016/j.ecolmodel.2010.08.019</a>
+</div>
+<div id="ref-Haas2002" class="csl-entry" role="doc-biblioentry">
+Haas, C. N. (2002). Conditional dose-response relationships for microorganisms: Development and application. <em>Risk Analysis</em>, <em>22</em>(3), 455–463.
+</div>
+<div id="ref-Haas2021" class="csl-entry" role="doc-biblioentry">
+Haas, C. N. (2021). Action levels for SARS-CoV-2 in air: Preliminary approach. <em>Risk Analysis</em>, <em>41</em>(5), 705–709.
+</div>
+<div id="ref-He2021" class="csl-entry" role="doc-biblioentry">
+He, J., Guo, Y., Mao, R., &amp; Zhang, J. (2021). Proportion of asymptomatic coronavirus disease 2019: A systematic review and meta-analysis. <em>Journal of Medical Virology</em>, <em>93</em>(2), 820–830.
+</div>
+<div id="ref-He2020" class="csl-entry" role="doc-biblioentry">
+He, X., Lau, E. H., Wu, P., Deng, X., Wang, J., Hao, X., et al.others. (2020). Temporal dynamics in viral shedding and transmissibility of COVID-19. <em>Nature Medicine</em>, <em>26</em>(5), 672–675.
+</div>
+<div id="ref-Jones2021" class="csl-entry" role="doc-biblioentry">
+Jones, T. C., Biele, G., Mühlemann, B., Veith, T., Schneider, J., Beheim-Schwarzbach, J., et al.others. (2021). Estimating infectiousness throughout SARS-CoV-2 infection course. <em>Science</em>.
+</div>
+<div id="ref-vanKampen2021" class="csl-entry" role="doc-biblioentry">
+Kampen, J. J. van, Vijver, D. A. van de, Fraaij, P. L., Haagmans, B. L., Lamers, M. M., Okba, N., et al.others. (2021). Duration and key determinants of infectious virus shedding in hospitalized patients with coronavirus disease-2019 (COVID-19). <em>Nature Communications</em>, <em>12</em>(1), 1–6.
+</div>
+<div id="ref-Kang2021" class="csl-entry" role="doc-biblioentry">
+Kang, M., Xin, H., Yuan, J., Ali, S. T., Liang, Z., Zhang, J., et al.others. (2021). Transmission dynamics and epidemiological characteristics of delta variant infections in china. <em>Medrxiv</em>.
+</div>
+<div id="ref-Lau2020" class="csl-entry" role="doc-biblioentry">
+Lau, E. H., &amp; Leung, G. M. (2020). Reply to: Is presymptomatic spread a major contributor to COVID-19 transmission? <em>Nature Medicine</em>, <em>26</em>(10), 1534–1535.
+</div>
+<div id="ref-Luo2021" class="csl-entry" role="doc-biblioentry">
+Luo, C. H., Morris, C. P., Sachithanandham, J., Amadi, A., Gaston, D., Li, M., et al.others. (2021). Infection with the SARS-CoV-2 delta variant is associated with higher infectious virus loads compared to the alpha variant in both unvaccinated and vaccinated individuals. <em>medRxiv</em>.
+</div>
+<div id="ref-Lyngse2021" class="csl-entry" role="doc-biblioentry">
+Lyngse, F. P., Mortensen, L. H., Denwood, M. J., Christiansen, L. E., Møller, C. H., Skov, R. L., et al.others. (2021). SARS-CoV-2 omicron VOC transmission in danish households. <em>medRxiv</em>.
+</div>
+<div id="ref-Ma2021" class="csl-entry" role="doc-biblioentry">
+Ma, Q., Liu, J., Liu, Q., Kang, L., Liu, R., Jing, W., … Liu, M. (2021). Global percentage of asymptomatic SARS-CoV-2 infections among the tested population and individuals with confirmed COVID-19 diagnosis: A systematic review and meta-analysis. <em>JAMA Network Open</em>, <em>4</em>(12), e2137257–e2137257.
+</div>
+<div id="ref-Miller2021" class="csl-entry" role="doc-biblioentry">
+Miller, S. L., Nazaroff, W. W., Jimenez, J. L., Boerstra, A., Buonanno, G., Dancer, S. J., … Noakes, C. (2021). Transmission of SARS-CoV-2 by inhalation of respiratory aerosol in the skagit valley chorale superspreading event. <em>Indoor Air</em>, <em>31</em>(2), 314–323.
+</div>
+<div id="ref-Morawska2009" class="csl-entry" role="doc-biblioentry">
+Morawska, L., Johnson, G. R., Ristovski, Z. D., Hargreaves, M., Mengersen, K., Corbett, S., … Katoshevski, D. (2009). Size distribution and sites of origin of droplets expelled from the human respiratory tract during expiratory activities. <em>Journal of Aerosol Science</em>, <em>40</em>(3), 256–269. doi:<a href="https://doi.org/10.1016/j.jaerosci.2008.11.002">https://doi.org/10.1016/j.jaerosci.2008.11.002</a>
+</div>
+<div id="ref-Parhizkar2021" class="csl-entry" role="doc-biblioentry">
+Parhizkar, H., Van Den Wymelenberg, K., Haas, C., &amp; Corsi, R. (2021). A quantitative risk estimation platform for indoor aerosol transmission of COVID-19. <em>medRxiv</em>.
+</div>
+<div id="ref-Pitol2021" class="csl-entry" role="doc-biblioentry">
+Pitol, A. K., &amp; Julian, T. R. (2021). Community transmission of SARS-CoV-2 by surfaces: Risks and risk reduction strategies. <em>Environmental Science &amp; Technology Letters</em>, <em>8</em>(3), 263–269.
+</div>
+<div id="ref-Poydenot2021" class="csl-entry" role="doc-biblioentry">
+Poydenot, F., Abdourahamane, I., Caplain, E., Der, S., Haiech, J., Jallon, A., … Andreotti, B. (2021). Risk assessment for long and short range airborne transmission of SARS-CoV-2, indoors and outdoors, using carbon dioxide measurements. <em>arXiv Preprint arXiv:2106.09489</em>.
+</div>
+<div id="ref-Prentiss2020" class="csl-entry" role="doc-biblioentry">
+Prentiss, M. G., Chu, A., &amp; Berggren, K. K. (2020). Superspreading events without superspreaders: Using high attack rate events to estimate n o for airborne transmission of COVID-19. <em>MedRxiv</em>.
+</div>
+<div id="ref-Sah2021" class="csl-entry" role="doc-biblioentry">
+Sah, P., Fitzpatrick, M. C., Zimmer, C. F., Abdollahi, E., Juden-Kelly, L., Moghadas, S. M., … Galvani, A. P. (2021). Asymptomatic SARS-CoV-2 infection: A systematic review and meta-analysis. <em>Proceedings of the National Academy of Sciences</em>, <em>118</em>(34).
+</div>
+<div id="ref-Santos2021" class="csl-entry" role="doc-biblioentry">
+Santos, R. E. A., Silva, M. G. da, Monte Silva, M. C. B. do, Barbosa, D. A. M., Vale Gomes, A. L. do, Galindo, L. C. M., … Ferraz-Pereira, K. N. (2021). Onset and duration of symptoms of loss of smell/taste in patients with COVID-19: A systematic review. <em>American Journal of Otolaryngology</em>, 102889.
+</div>
+<div id="ref-Singanayagam2021" class="csl-entry" role="doc-biblioentry">
+Singanayagam, A., Hakki, S., Dunning, J., Madon, K. J., Crone, M. A., Koycheva, A., et al.others. (2021). Community transmission and viral load kinetics of the SARS-CoV-2 delta (b. 1.617. 2) variant in vaccinated and unvaccinated individuals in the UK: A prospective, longitudinal, cohort study. <em>The Lancet Infectious Diseases</em>.
+</div>
+<div id="ref-Sze2010" class="csl-entry" role="doc-biblioentry">
+Sze To, G. N., &amp; Chao, C. Y. H. (2010). Review and comparison between the wells–riley and dose-response approaches to risk assessment of infectious respiratory diseases. <em>Indoor Air</em>, <em>20</em>(1), 2–16.
+</div>
+<div id="ref-Teyssou2021" class="csl-entry" role="doc-biblioentry">
+Teyssou, E., Delagrèverie, H., Visseaux, B., Lambert-Niclot, S., Brichler, S., Ferre, V., et al.others. (2021). The delta SARS-CoV-2 variant has a higher viral load than the beta and the historical variants in nasopharyngeal samples from newly diagnosed COVID-19 patients. <em>Journal of Infection</em>, <em>83</em>(4), e1–e3.
+</div>
+<div id="ref-Walsh2020" class="csl-entry" role="doc-biblioentry">
+Walsh, K. A., Jordan, K., Clyne, B., Rohde, D., Drummond, L., Byrne, P., … Harrington, P. (2020). SARS-CoV-2 detection, viral load and infectivity over the course of an infection. <em>Journal of Infection</em>, <em>81</em>(3), 357–371. doi:<a href="https://doi.org/10.1016/j.jinf.2020.06.067">10.1016/j.jinf.2020.06.067</a>
+</div>
+<div id="ref-Wang2021" class="csl-entry" role="doc-biblioentry">
+Wang, Y., Chen, R., Hu, F., Lan, Y., Yang, Z., Zhan, C., et al.others. (2021). Transmission, viral kinetics and clinical characteristics of the emergent SARS-CoV-2 delta VOC in guangzhou, china. <em>EClinicalMedicine</em>, <em>40</em>, 101129.
+</div>
+<div id="ref-Watanabe2010" class="csl-entry" role="doc-biblioentry">
+Watanabe, T., Bartrand, T. A., Weir, M. H., Omura, T., &amp; Haas, C. N. (2010). Development of a dose-response model for SARS coronavirus. <em>Risk Analysis: An International Journal</em>, <em>30</em>(7), 1129–1138.
+</div>
+<div id="ref-Wells1955" class="csl-entry" role="doc-biblioentry">
+Wells, W. F. et al. (1955). Airborne contagion and air hygiene. An ecological study of droplet infections. <em>Airborne Contagion and Air Hygiene. An Ecological Study of Droplet Infections.</em>
+</div>
+<div id="ref-Zhao2021" class="csl-entry" role="doc-biblioentry">
+Zhao, S., Tang, B., Musa, S. S., Ma, S., Zhang, J., Zeng, M., et al.others. (2021). Estimating the generation interval and inferring the latent period of COVID-19 from the contact tracing data. <em>Epidemics</em>, <em>36</em>, 100482.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+<script src="model_descriptor_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
