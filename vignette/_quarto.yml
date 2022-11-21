@@ -1,0 +1,49 @@
+project:
+  type: website
+  render: 
+    - index.qmd
+    - usage.qmd
+    - model.qmd
+    - computing.qmd
+
+website:
+  title: "SACADA Project"
+  favicon: fig/logo/logo_sacada_horiz.png
+  navbar:
+    pinned: true
+    left:
+      - href: index.qmd
+        text: Introduction
+      - href: model.qmd
+        text: Model description
+      - href: computing.qmd
+        text: Computing
+      - href: usage.qmd
+        text: Applications
+      
+
+execute: 
+  echo: false
+  warning: false
+
+format:
+  html:
+    theme: flatly
+    page-layout: full
+    fig-align: center
+    smooth-scroll: true
+    margin-header: |
+      ![](fig/logo/logo_sacada_horiz.png)
+    toc: true
+    toc-depth: 5
+    toc-title: "On this page"
+    number-sections: true
+    number-depth: 3
+  docx:
+    toc: true
+    toc-depth: 5
+    number-sections: true
+    number-depth: 3
+
+css: www/abm-sacada.css
+bibliography: www/abm-sacada.bib

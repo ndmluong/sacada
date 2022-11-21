@@ -1,40 +1,5 @@
 ---
-title: "An agent-based model to simulate the transmission of SARS-CoV-2 in meat processing facilities"
-author:
-  - name: Ngoc-Du Martin Luong
-    orcid: 0000-0003-0714-136X
-    email: ngoc-du.luong@anses.fr
-  - name: Laurent Guillier
-    orcid: 0000-0002-7867-2937
-    email: laurent.guillier@anses.fr
-
-date: "10/28/2022"
-toc: true
-toc-depth: 5
-toc-title: "On this page"
-title-block-banner: true
-number-sections: true
-number-depth: 4
-execute: 
-  echo: false
-  warning: false
-format:
-  html:
-    code-fold: true
-    theme: lumen
-    html-math-method: katex
-    page-layout: full
-    fig-align: center
-    smooth-scroll: true
-    css: www/abm-sacada.css
-  pdf:
-    geometry: 
-      - top = 30 mm
-      - left = 30 mm
-  docx: default
-editor: visual
-bibliography: www/abm-sacada.bib
-csl: www/apa.csl
+title: "Model description"
 ---
 
 ```{r setup, include = FALSE}
@@ -51,13 +16,9 @@ library(survival)
 library(fitdistrplus)
 ```
 
-# Background and objectives
+The Agent-Based Model (ABM) is presented in this study according to the Overview-Design-Details (ODD) protocol as recommended by @Grimm2010.
 
-# Model description
-
-The ABM model is presented in this study according to the Overview-Design-Details (ODD) protocol as recommended by @Grimm2010.
-
-## Overview
+# Overview
 
 The outline of the agent-based modelling workflow developed in this study is schematized in @fig-abm-outline.
 
@@ -79,9 +40,9 @@ Several parameters were included in the model. On the one hand, some parameters.
 
 The model was divided in four separate modules describing different agents evolving in the processing plant including (i) the workers, (ii) the droplets in the air, (iii) the inert surfaces and (iv) the food products, respectively. As schematized in \@ref(fig:fig-abm-outline), different possible interactions between these agents were described, such as the transmission of the droplets probably containing viral particles between infectious workers and the air through their respiratory activities (exhalation and inhalation), the sedimentation of these droplets from the air onto inert surfaces and/or food portions as well as the transfers between surfaces and food, etc. Based on prior data or knowledge, spatiotemporal rules were defined to simulate the interactions between modules and the properties of every agents at successive time points distanced by a predefined short time step (minutes). These step-by-step simulations were performed afterwards for longer periods (days, weeks, etc.). At the end of these periods, balances were calculated for different properties of the agents, e.g. the total number of aerosolized or fallen droplets, the number of viral gene copies inhaled by each worker, etc. Based on these balances, several contamination indicators were estimated such as the total number of infected workers, the number of contaminated food portions and surfaces in the plant, etc. These estimated indicators could be compared with collected epidemiological data for further model validation purposes.
 
-## Design concept
+# Design concept
 
-### Basic principles
+## Basic principles
 
 The different agents integrated into the model for describing the functioning of the meat processing plant are illustrated in @fig-abm-processing-plant. The model was implemented in the way that end-users can include by themselves as input data the different characteristics of the plant such as its dimensions, structures, objects, etc. For instance, as shown in @fig-abm-processing-plant, the illustrated plant is made up of several rooms / spaces including an entry hall for workers, an office, a cooling area for food storage, a large area for meat cutting activities with two conveyor belts for food transfers and a packaging machine, etc. Different types of workers were considered in the model depending on their respective activities, including the cutters, the logistic workers as well as the ones with transverse activities. The number of workers of each type present in the plant and their respective working rhythm and timetable condition then the daily meat processing flow (meat quantity, processing duration) of the overall plant. This processing flow was described as successive transformation steps of the meat products: the carcasses/half-carcasses arriving in the plant through the gate are transported to the conveyors by logistic workers, become smaller meat portions after different cutting steps carried out by cutters around the conveyors and eventually packed and stored in the cooling area. Other workers with transverse activities such as manager, administrative or cleaning workers can also be present in the plant at different moments depending on their respective timetable. Based on the overall timetable of the plant, one can define rules for generating predefined or random movements of every agents (workers, carcasses, meat cuts...) between different locations in the plant at different time points. Determining these movements over time will allow then to track the possible transmission of the virus introduced by one or several infectious workers in the plant.
 
@@ -99,21 +60,19 @@ The transmission of the virus from one or several infectious workers to other su
 knitr::include_graphics("fig/schema/abm_transmission.png")
 ```
 
-### Prediction
+## Prediction
 
 The parameters
 
-### Stochasticity
+## Stochasticity
 
 The stochasticity
 
-## Details
+# Details
 
-### Modules - Sub-models
+## Food processing plant
 
-#### Food processing plant
-
-##### Structures
+### Structures
 
 The structure of the multi-room food processing plant can be included as inputs of the model. Based on industrial investigations / interviews, seven principal rooms (spaces) were included herein as an example to define the plant structure, including the *Cutting room* (the main space of the plant), *Entry hall* (for workers), *Arrival gate* (for food arrival into the cutting room), *Cooling area* (for food storage), *Waste area*, *W.C.*, and *Office* (illustration in @fig-abm-processing-plant).
 
@@ -126,7 +85,7 @@ The different characteristics of each room are included as inputs of the model:
 
 The above characteristics were defined in the model as model parameters based on industrial investigations or previous works. For example, each room needs to be positioned on the entire workshop grid using a numerical value between 0 and 1 indicating the relative position over the axes. The cutting room is the main build by subtracting all other rooms. The position of the internal and external doors can also be mentioned using the predefined values *top*, *bottom*, *left* or *right*.
 
-##### Objects
+### Objects
 
 The different objects or equipment can be included inside the plant such as conveyors, peeler, etc. In the same ways as for the different rooms, their dimensions and their relative position alongside the *X* and *Y* axes are included as model inputs. As illustrated in @fig-abm-processing-plant, two types of objects were included : two conveyor belts allowing to transport the different carcasses or food portions from one point to another and an equipment that can be shared by several operators (e.g.: a peeler, frequently used in meat cutting plant). Some parameters values characterizing these objects are illustrated in @tbl-plant-object-parameters.
 
@@ -138,9 +97,9 @@ read.csv("csv/parameters_object_plant.csv",sep=";",header = T) %>%
   kable_styling('striped', font_size = 11)
 ```
 
-#### Workers
+## Workers
 
-##### Type of workers {#sec-type-of-workers}
+### Type of workers {#sec-type-of-workers}
 
 Different principal types of workers were taken into account in the model depending on the their daily tasks inside the plant. According to industrial investigations and expert knowledge, six types of workers were included as following (@fig-abm-processing-plant)
 
@@ -167,7 +126,7 @@ read.csv("csv/parameters_worker.csv",sep=";",header = T) %>%
 
 The workers were split afterwards into two teams, denoted *"team A"* and *"team B"* according to their working shift (morning or afternoon) and to their weekly schedule. In the model, this team dividing was included by the parameters $p_{Team}$ (value between 0 and 1 representing the proportion of each team) and set by default at $p_{Team}=0.5$ (equal distribution between the two teams A and B). In each team, the types of workers (cutters, transverse and logistic workers) were proportionally distributed as described above. The two teams A and B alternatively change their shift (morning/afternoon) from one week to another. Finally, the workerschange the team (between the teams A and B) from one week to another using a probability defined as model parameter, denoted $p_{changeTeam}$, (value between 0 and 1), arbitrarily set at $p_{changeTeam} = 0.05$.
 
-##### Infection phases
+### Infection phases
 
 The duration of different infections phases were taken into account in the model and are schematized in @fig-infection-status. The uncertainty ranges of the different values have been identified for sensitivity analysis of the hypothesis of the model (@tbl-infection-duration).
 
@@ -212,7 +171,7 @@ read.csv("csv/parameters_duration.csv",sep=";",header = T) %>%
 
 ```
 
-##### Individual variability
+### Individual variability
 
 Among the infection phases described previously, the model considered the viral load emitted by the different workers only during their infectiousness period. Viral loads were considered to be similar between asymptomatic and symptomatic persons according to a study of @Walsh2020 and assumed to be constant during the whole infectiousness period. The inter-individual variability of virus load in sputum and the VoC was taken into account in the ABM model: parameters characterizing this variability were estimated by fitting triangular probability distributions on literature [@Jones2021; @Teyssou2021; @Luo2021; @Wang2021] (see Appendices... ). Estimated values of these parameters are gathered in @tbl-load-VoC.
 
@@ -228,7 +187,7 @@ read.csv("csv/parameters_vload.csv",sep=";",header = T) %>%
 
 ```
 
-##### Secondary attack rate
+### Secondary attack rate
 
 The secondary attack rate (SAR) parameter used to estimate the probability of contraction SARS-CoV-2 for the workers having community activities outside the plant such as co-living. The SAR of the original and *alpha* VoCs has been found by @Fung2021 to be equal to 17.1% (95%CI 13-21%). According to @Singanayagam2021, the SAR was found to be 38% for *delta* variant (with 95%CI 24-53%) in case of unvaccinated people, and 25% (with 95%CI 18-33%) for vaccinated people. The SAR for *omicron* is respectively 1.2 for vaccinated and 2.6 times more important than for delta [@Lyngse2021]. These different SAR parameter values included in the model are shown in Table \@ref(tab:TAB-SAR).
 
@@ -245,7 +204,7 @@ read.csv("csv/parameters_sar.csv",sep=";",header = T) %>%
   kable_styling('striped', font_size = 11)
 ```
 
-##### Infection probability
+### Infection probability
 
 The possible triggering of the first infection phase for each worker was modeled using a dose-response modelling approach, considering the viral quantity inhaled by each one. Among different dose-response models proposed in the literature (see more details in the section \@ref(dose-response-model-parameters) ), the Watanabe model [@Watanabe2010] was chosen herein to describe, for each worker, the probability to get infected as function of the number of inhaled virions (infectious virus), denoted \$dose\$, as follows:
 
@@ -255,11 +214,11 @@ $$
 
 where $r$ is the shape parameter defining the exponential form of the no-threshold model is a no-threshold model. The value of \$r\$, estimated at $r=0.00246$ [95%CI 0.00128-0.00527] based on literature data (cf. section \@ref(dose-response-model-parameters)) was used herein in the ABM model. It is also worth noting that the concentration of SARS-CoV-2 expressed in gene copies (e.g. RNA copies) or in infectious virus are strongly different. Important ratios between these concentrations have been suggested in the literature, varying from a factor of 100 to 1000 between the number of genes copies and the infectious viral particles [@Miller2021; @Pitol2021]. This factor, denoted $f_{RNA/virion}$, was included in the ABM model with a arbitrarily chosen value of 500 as well as the 95%CI between 100 and 1000.
 
-##### Working days
+### Working days
 
-#### Air
+## Air
 
-##### Exhalation
+### Exhalation
 
 The initial source of SARS-CoV-2 was considered through different respiratory activities of the infectious workers emitting droplets of various sizes. The number of droplets (expressed as $s^{-1}$ ) (containing or not viral particles) emitted over time was modeled as follows :
 
@@ -303,7 +262,7 @@ rm(data)
 
 Based on the frequencies below, during a given several-minute time step $dt$, the probability to have a coughing/sneezing event for a worker was calculated by $p_{cough/sneeze} = f_{cough/sneeze} * dt$. If no symptoms are observed during this time step, the worker was considered to have one of the three remaining respiratory activities, i.e. breathing, talking or talking loud, with supposedly equal probability.
 
-##### Aerosolization criteria
+### Aerosolization criteria
 
 The different droplets emitted by the workers can be aerosolized (suspended in the air) [@BazantBush2021] or fall directly onto the nearby environments (including nearby workers, inert surfaces or food products) depending on the size of the droplets and the ventilation system in the room. In this study, a criterion was used to determine if in a given room $r$ a droplet of diameter $D_d$ (size class $d$) will be aerosolized by comparing its sedimentation time, denoted $t_{sed,r,d}$, with the circulation time of the airflow in the room, denoted $t_{circ,r}$.
 
@@ -341,7 +300,7 @@ $$
 
 with $S_r$ (in $m^2$) corresponding to the area of the room.
 
-##### Falling & projection {#sec-falling-projection}
+### Falling & projection {#sec-falling-projection}
 
 As previously mentioned, the droplets of various sizes were considered in the model from emission by infectious workers through their respiratory activities (breathing, talking, etc.). Besides aerosolized or sedimented droplets after a given time step described above, one also considered a fraction of the emitted droplets (mostly the ones with high-diameters) that could possibly fall directly onto nearby environments and/or in the direction of nearby workers following coughing/sneezing events. These events, when they occurs (cf. frequencies in @tbl-air-freq), gave then three different paths for the circulation of the droplets emitted by an infectious worker, including (i) a fraction going to the aerosol and sedimented afterwards as described in the previous sections, (ii) a variable fraction projected in the direction of nearby susceptible workers depending on the distance between them and the infectious one and (iii) a variable fraction fallen / dropped directly on nearby environments (@fig-abm-pzone).
 
@@ -355,17 +314,17 @@ knitr::include_graphics("fig/schema/abm_pzone.png")
 
 In this study, for simplification purposes, the spatial environments in the plant were divided into one-square-meter tiles where different agents (workers, inert surfaces or food products) can be present at a same given time. The fractions of falling / projected droplets (paths ii and iii) were spatially distributed afterwards into sub-fractions for the nearby square tiles depending on the distances separating them and the infectious worker. These spatial distributions were estimated based on data obtained previously by [Duguid1946, Nicas2005, Li2021, Lie2020 and Jung2022]{.underline} and shown in @fig-abm-pzone (for more details, see Appendices \@ref(distribution-of-the-projected-droplets)).
 
-##### Inhalation
+### Inhalation
 
 The total number of droplets (containing viral RNA copies) inhaled by each worker (by breathing in small droplets from the air or by being exposed to direct droplets projections) was tracked for each time point. The total exposure to the virus of each worker was calculated as the cumulative number of RNA copies inhaled at the end of the day. This exposure, converted afterwards as a number of infectious virions using the conversion factor $f_{RNA/virion}$, was included in the dose-modelling step to determine if a possible infection may occur (cf. @sec-distribution-of-the-projected-droplets).
 
-#### Surfaces {#sec-surfaces}
+## Surfaces {#sec-surfaces}
 
 As previously described, droplets can sediment or fall onto different areas that were divided into one-square-meter tiles. In the study, all inert surfaces (e.g. surfaces of the conveyor belts and the equipment) located on those tiles were considered as agents of the ABM model with their own spatial coordinates. During the working day, the quantity of contaminated droplets could be accumulated and probably transferred from or to aerosol or food portions present on these inert surfaces. These droplet accumulations were calculated at the end of the day to determine the contamination level of each inert surface tiles, expressed as the total number of viral RNA copies per $m^2$. Considering a possible factor between this total of RNA copies and the estimated quantity of virions as well as an experimental limit of detection, a surface tile was considered as contaminated by infectious viruses (*positive* contamination) if its droplet accumulation exceeded a predefined threshold values. In this study, the contamination was computed for several threshold levels varying from 3 to 9 $\log_{10}$ viral RNA copies in order to deal with possible uncertainties in the RNA/virions factor and the limit of detection. At the end of the day, once the total number of contaminated surfaces as well as their corresponding spatial coordinates were determined, all droplet accumulations were reset at 0 since all inert surfaces were assumed to be daily cleaned by the *transverse2* workers.
 
-#### Food
+## Food
 
-##### Food processing
+### Cutting process
 
 The meat cutting process was described herein accordingly to the module Workers (cf. @sec-type-of-workers) as a multi-step process from the arrival gate to the storage area. The agents *food portions* were computed with a flexible flow:
 
@@ -383,7 +342,7 @@ The meat cutting process was described herein accordingly to the module Workers 
 
 As for the inert surfaces (cf. @sec-surfaces), the contamination of the meat products was considered if the viral RNA accumulation in each portion (through sedimentation, projection or transfers by contact) exceeds pre-defined threshold levels. This accumulation was calculated for each portion at the entry of storage area (end of cutting process). Based on the chosen threshold level, the contamination percentage was calculated at the end of each day as the ratio of the number of contaminated portions over the total number of processed ones during the considered day.
 
-##### Transfers by contact
+### Transfers by contact
 
 As described in @sec-falling-projection, contaminated droplets can be accumulated after sedimentation/projection on different areas where inert surfaces and food portions are located at a given time, suggesting then possible droplet transfers by contact between them. These transfers are schematized in @fig-abm-transfers.
 
@@ -408,41 +367,6 @@ Considering a quantity $N_t$ of RNA copies contaminated by sedimentation/project
     -   as for the time \$t\$, possible additional contamination from sedimentation/projection was computed for the time $t+1$ on the inert surface and exposed food portions.
 
 The contamination balances were calculated for all inert surfaces and food portions at different time points. As previously described, the contamination of the surfaces and food portions were determined at the end of the day or at the begin of the food storage.
-
-### Input data
-
-#### Reference scenario
-
-In view of the all parameters described above, based on literature data, expert knowledge and investigations, a set of the most likely parameter values was set to define a reference scenario. These parameter values, set by default as input of all model computations, constitutes then references for further comparative analyses such as simulation convergence check, parameter sensitivity analyses or scenario simulations. All default values are gathered in @tbl-parameters-reference. This reference scenario was characterized by computing the virus transmission between workers, surfaces and meat portions in a processing plant from one initial infected worker during 42 days with five-minute time steps.
-
-#### Model parameter values
-
-```{r}
-#| label: tbl-parameters-reference
-#| tbl-cap: 'Parameters values implemented for the reference scenario.'
-data <- read.csv("csv/parameters_reference.csv",sep=";",header = F)
-tabcolnames <- data[1, ]
-data <- as.data.frame(data[-1,])
-row.names(data) <- 1:nrow(data)
-knitr::kable(
- data,
- col.names = tabcolnames,
- table.attr = "style='width:100%;'"
-) %>%
- kable_styling('striped', font_size = 11)
-```
-
-### Output indicators
-
-## Parallel computing
-
-Calculation / technical requirements / Migale
-
-## Convergence check
-
-# Usage
-
-approach for convergence /
 
 # Appendices
 
@@ -605,4 +529,4 @@ Evidence suggests that the concentration of SARS-Cov2 expressed in gene copies o
 
 (SD)
 
-# Bibliographic references
+# References
