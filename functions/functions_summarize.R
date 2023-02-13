@@ -113,7 +113,11 @@ f_plotConvCumulContaWorkers <- function(
 # f_smrzAverageFoodContaRatio
 f_smrzAverageFoodContaRatio <- function(
     FPS,
+    IS,
     detection = 5, # (integer) expressed in log10: the detection detection/quantification for the number of RNA copies
+    cluster_filter = T,
+    clusterthreshold = 25,
+    all_seed = F,
     nbsim = NULL,
     sampleseed = NULL
 ){
@@ -124,14 +128,25 @@ f_smrzAverageFoodContaRatio <- function(
   
   if (!is.null(sampleseed)) set.seed(sampleseed)
   
-  all_seed <- unique(FPS$seed)
+  # the maximum number of infected worker
+  max_positive <- tapply(IS$Positive, IS$seed, max)
+  
+  if (all_seed == T) {
+    cluster_vec <- max_positive
+  } else {
+    if (cluster_filter == T) {
+      cluster_vec <- max_positive[max_positive >= clusterthreshold]
+    } else {
+      cluster_vec <- max_positive[max_positive < clusterthreshold]
+    }
+  }
   
   if (!is.null(nbsim)) {
     if (nbsim > length(all_seed)) stop(">>> required number of simulations not sufficient !")
     FPS %>%
       dplyr::filter(., seed %in% sample(all_seed, nbsim)) -> FPSsub
   } else {
-    FPSsub <- FPS
+    FPSsub <- subset(FPS, seed %in% names(cluster_vec))
   }
   
   detection_var <- paste("pos_FP_", detection, "log", sep = "")
@@ -237,8 +252,12 @@ f_plotConvFoodContaRatio <- function(
 # f_smrzAverageSurfaceContaRatio
 f_smrzAverageSurfacesContaRatio <- function(
     SS,
+    IS,
     plant,
     detection = 5, # (integer) expressed in log10: the detection detection/quantification for the number of RNA copies
+    cluster_filter = T,
+    clusterthreshold = 25,
+    all_seed = F,
     nbsim = NULL,
     sampleseed = NULL
 ){
@@ -247,9 +266,18 @@ f_smrzAverageSurfacesContaRatio <- function(
     stop(">>> detection threshold not available!\n  >>> possible values: 3 4 5 6 7 8 9")
   }
   
-  if (!is.null(sampleseed)) set.seed(sampleseed)
+  # the maximum number of infected worker
+  max_positive <- tapply(IS$Positive, IS$seed, max)
   
-  all_seed <- unique(SS$seed)
+  if (all_seed == T) {
+    cluster_vec <- max_positive
+  } else {
+    if (cluster_filter == T) {
+      cluster_vec <- max_positive[max_positive >= clusterthreshold]
+    } else {
+      cluster_vec <- max_positive[max_positive < clusterthreshold]
+    }
+  }
   
   plant$L %>%
     dplyr::filter(., location %in% c("Conveyor1", "Conveyor2", "Equipment 1")) %>%
@@ -260,7 +288,7 @@ f_smrzAverageSurfacesContaRatio <- function(
     SS %>%
       dplyr::filter(., seed %in% sample(all_seed, nbsim)) -> SSsub
   } else {
-    SSsub <- SS
+    SSsub <- subset(SS, seed %in% names(cluster_vec))
   }
   
   detection_var <- paste("pos_S_", detection, "log", sep = "")
@@ -404,25 +432,37 @@ f_estimateRt <- function(
     } else {
       if (DayLastInci < tstep) {
         t_start <- seq(2, DayLastInci)
+        
       } else {
-        t_start <- seq(2, nrow(MyInci) - tstep)
+        if (nrow(MyInci)-tstep > 2) {
+          t_start <- seq(2, nrow(MyInci) - tstep)
+        } else {
+          t_start <- c(2)
+        }
       }
+      
       # ending points for the windows
       t_end <- t_start + tstep
       
       # if the some ending points of the windows (t_end) exceed the last day of the simulation, remove them and correct t_start
       t_end <- t_end[t_end <= max(MyInci$dates)]
+      
       t_start <- t_end - tstep
       
       options(warn = -1)
-      Rt_res <- EpiEstim::estimate_R(incid = MyInci,
-                                     method = "parametric_si",
-                                     config = make_config(list(mean_si = prm_conta$SerialInterval[[prm_conta$VoC]][["mu"]],
-                                                               std_si = prm_conta$SerialInterval[[prm_conta$VoC]][["sigma"]],
-                                                               t_start = t_start,
-                                                               t_end = t_end)))
-      options(warn = 0)
-      R_output <- mean(Rt_res$R$`Mean(R)`)
+      if (length(t_start) > 0) {
+        Rt_res <- EpiEstim::estimate_R(incid = MyInci,
+                                       method = "parametric_si",
+                                       config = make_config(list(mean_si = prm_conta$SerialInterval[[prm_conta$VoC]][["mu"]],
+                                                                 std_si = prm_conta$SerialInterval[[prm_conta$VoC]][["sigma"]],
+                                                                 t_start = t_start,
+                                                                 t_end = t_end)))
+        options(warn = 0)
+        R_output <- mean(Rt_res$R$`Mean(R)`)
+      } else {
+        R_output <- NA
+      }
+
       
     }
     
@@ -727,6 +767,225 @@ f_summaryOutput <- function(
 }
 
 
+
+
+# f_ClusterProb
+f_ClusterProb <- function(
+    IS,
+    clusterthreshold = 25
+) {
+  
+  # the maximum number of infected worker
+  max_positive <- tapply(IS$Positive, IS$seed, max)
+  
+  cluster_vec <- max_positive[max_positive >= clusterthreshold]
+  
+  cluster_prob <- length(cluster_vec) / length(unique(IS$seed))
+  
+  return(cluster_prob)
+}
+
+
+# f_ClusterPeak
+f_ClusterPeak <- function(
+    IS,
+    clusterthreshold = 25,
+    cluster_filter = T,
+    metrics = "mean",
+    qtile = 0.5,
+    all_sim = F,
+    fulldist = F
+) {
+  
+  # the maximum number of infected worker
+  max_positive <- tapply(IS$Positive, IS$seed, max)
+  
+  if (all_sim == T) {
+    cluster_vec <- max_positive
+  } else {
+    if (cluster_filter == T) {
+      cluster_vec <- max_positive[max_positive >= clusterthreshold]
+    } else {
+      cluster_vec <- max_positive[max_positive < clusterthreshold]
+    }
+  }
+  
+  if (metrics == "mean") output <- mean(cluster_vec)
+  if (metrics == "median") output <- median(cluster_vec)
+  if (metrics == "quantile") {
+    output <- quantile(cluster_vec, probs = qtile)
+  }
+  
+  if (fulldist == T) {
+    return(cluster_vec)
+  } else {
+    return(output)
+  }
+
+}
+
+# f_DaysBeforeCluster
+f_DaysBeforeCluster <- function(
+    IS,
+    metrics = "mean",
+    cluster_threshold = 25,
+    qtile = 0.5,
+    fulldist = F
+ ) {
+  # the maximum number of infected worker
+  max_positive <- tapply(IS$Positive, IS$seed, max)
+  
+  # cluster > 25 cases
+  cluster_vec <- max_positive[max_positive >= cluster_threshold]
+  
+  # seed of the clusters
+  cluster_seed <- names(cluster_vec)
+  
+  # for each cluster seed, looking for the number  
+  sapply(cluster_seed, function(x) {
+    subset(IS, seed == x & Positive >= 25)$Day %>% min()
+  }) -> days_vec
+  
+  if (metrics == "mean") output <- mean(days_vec)
+  if (metrics == "quantile") output <- quantile(days_vec, probs = qtile)
+ 
+  if (fulldist == T) {
+    return(days_vec)
+  } else {
+    return(output)
+  }
+    
+}
+
+
+# f_meanDaysBeforePeak
+f_DaysBeforePeak <- function(
+    IS,
+    clusterthreshold = 25,
+    cluster_filter = T,
+    metrics = "mean",
+    qtile = 0.5
+) {
+  # the maximum number of infected worker
+  max_positive <- tapply(IS$Positive, IS$seed, max)
+  
+  # filter cluster >= 25 cases
+  if (cluster_filter == T) {
+    cluster_vec <- max_positive[max_positive >= clusterthreshold]
+  } else {
+    cluster_vec <- max_positive
+  }
+  
+  # seed of the clusters
+  cluster_seed <- names(cluster_vec)
+  
+  # for each cluster seed, looking for the number  
+  sapply(cluster_seed, function(x) {
+    ISsub <- subset(IS, seed == x)
+    subset(ISsub, Positive == max(ISsub$Positive))$Day %>% min()
+  }) -> days_vec
+  
+  if (metrics == "mean") output <- mean(days_vec)
+  if (metrics == "quantile") output <- quantile(days_vec, probs = qtile)
+  
+  return(output)
+  
+}
+
+
+# f_meanClusterSource
+f_ClusterSource <- function(
+    IL,
+    IS,
+    clusterthreshold = 25,
+    cluster_filter = T,
+    inside_source = TRUE
+) {
+  # the maximum number of infected worker
+  max_positive <- tapply(IS$Positive, IS$seed, max)
+  
+  # cluster > 25 cases
+  if (cluster_filter == T) {
+    cluster_vec <- max_positive[max_positive >= clusterthreshold]
+  } else {
+    cluster_vec <- max_positive
+  }
+  
+  # seed of the clusters
+  cluster_seed <- names(cluster_vec)
+  
+  sapply(cluster_seed, function(x) {
+    ILsub <- subset(IL, seed == x)
+    nb_infectedsource <- ifelse(inside_source == TRUE,
+                                nrow(subset(ILsub, InfectionSource == "aerosol")),
+                                nrow(subset(ILsub, InfectionSource %in% c("epidemy","community"))))
+    
+    total_infected <- nrow(subset(ILsub, !is.na(InfectionSource)))
+    
+    nb_infectedsource / total_infected
+  }) %>%
+    mean() -> output
+  
+  return(output)
+  
+}
+
+
+# f_surfacesOccurences
+f_surfacesOccurrences <- function(
+    res,
+    threshold = "5log",
+    clusterthreshold = 25
+) {
+  f_initSurfaces(P = res$MyPlant$P,
+                 prm_plant = res$Parms_Plant,
+                 prm_time = res$Parms_Time,
+                 day = 1)$S_ID %>%
+    unique() %>%
+    as.vector() -> all_S_ID
+  
+  # the maximum number of infected worker
+  max_positive <- tapply(res$IS$Positive, res$IS$seed, max)
+  
+  # cluster > 25 cases
+  cluster_vec <- max_positive[max_positive >= clusterthreshold]
+  
+  # seed of the clusters
+  cluster_seed <- names(cluster_vec)
+  
+  colS <- paste("S_ID_", threshold, sep="")
+  
+  occurrences <- matrix(data = NA, nrow = length(cluster_seed), ncol = length(all_S_ID))
+  
+  SSsub <- subset(res$SS, seed == 30001)
+  
+  # for each surface
+  for (xsur in 1:length(all_S_ID)) {
+    for (xclus in 1:length(cluster_seed)) {
+      SSsub <- subset(res$SS, seed == cluster_seed[xclus])
+      
+      combinedstring <- paste(SSsub[[colS]], collapse = ", ")
+
+      occurrences[xclus, xsur] <- str_count(string = combinedstring,
+                                            pattern = all_S_ID[xsur])
+    }
+  }
+  
+  occurrences <- as.data.frame(occurrences)
+  colnames(occurrences) <- all_S_ID
+  rownames(occurrences) <- cluster_seed
+  
+  occ <- c()
+  for (j in 1:length(all_S_ID)) {
+    occ <- c(occ, occurrences[,j])
+  }
+
+  output <- data.frame(S_ID = rep(all_S_ID, each = length(cluster_seed)),
+                       occurrences = occ)
+  
+  return(output)
+    
+}
 
 
 
