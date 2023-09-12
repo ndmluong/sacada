@@ -15,8 +15,7 @@ library(tidyverse)
 
 # LOADING SIMULATED DATA ####
 ## MCvy 12/22 - Cross effect of Mask-wearing and social distancing ####
-# load(file = "simulation_output/20220919_output_MCvy.RData") # archives
-load(file = "simulation_output/20221201_output_MCvy.RData")
+load(file = "simulation_output/data/output_MCvy.RData")
 
 MCvy <- list(M0Cvy11, M0Cvy14, M0Cvy17, M0Cvy20,
              M25Cvy11, M25Cvy14, M25Cvy17, M25Cvy20,
