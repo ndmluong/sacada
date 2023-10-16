@@ -1,11 +1,9 @@
-Parameters;Label in ABM script;Value;Unit;Uncertainty range;Justification of parameter value;References
-Total number of worker;Nworkers;100;N/A;[??-??];for exemple;[interviews]
-Number of regular worker;Nworkers_ext;15;N/A;[1-4];for exemple;[interviews]
-Number of temporary worker;;;;;;
-Number of subcontract worker;;;;;;
-Cutter ;cutter1;0.36;ratio (0 to 1);[5-11];;[@Mallet2021]
-Cutter ;cutter2;0.47;ratio (0 to 1);[5-11];;[@Mallet2021]
-Logistic;logistic1;0.04;ratio (0 to 1);;;[@Gunther2020]
-Logistic;logistic2;0.04;ratio (0 to 1);;;[@Gunther2020]
-Transverse;transverse1;0.045;ratio (0 to 1);[0.18-0.475];(total number of transverse workers = 0.09);[@Mallet2021]
-Transverse;transverse2;0.045;ratio (0 to 1);;(total number of transverse workers = 0.09);[@Mallet2021]
+Parameters;Unit;Value;Uncertainty range;References
+Total number of workers;number of workers;100;input;[interviews]
+Number of temporary workers;number of workers;15;[1-4];[interviews]
+Proportion of cutters 1;ratio (0 to 1);0.36;[5-11];@Mallet2021
+Proportion of cutters 2;ratio (0 to 1);0.47;[5-11];@Mallet2021
+Proportion of logistic workers 1;ratio (0 to 1);0.04;;@Gunther2020
+Proportion of logistic workers 2;ratio (0 to 1);0.04;;@Gunther2020
+Proportion of transverse workers 1;ratio (0 to 1);0.045;[0.18-0.475];@Mallet2021
+Proportion of transverse workers 2;ratio (0 to 1);0.045;;@Mallet2021

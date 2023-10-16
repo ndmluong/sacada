@@ -1,46 +1,13 @@
 ---
-title: "The reference scenario"
+title: "A reference scenario"
 ---
-
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-library(dplyr)
-library(ggplot2)
-library(DiagrammeR)
-library(kableExtra)
-library(dplyr)
-library(mvtnorm)
-library(mc2d)
-library(MASS)
-library(survival)
-library(fitdistrplus)
-```
-
-# Input data
-
-In view of the all parameters described above, based on literature data, expert knowledge and investigations, a set of the most likely parameter values was set to define a reference scenario. These parameter values, set by default as input of all model computations, constitutes then references for further comparative analyses such as simulation convergence check, parameter sensitivity analyses or scenario simulations. All default values are gathered in @tbl-parameters-reference. This reference scenario was characterized by computing the virus transmission between workers, surfaces and meat portions in a processing plant from one initial infected worker during 42 days with five-minute time steps.
-
-```{r}
-#| label: tbl-parameters-reference
-#| tbl-cap: 'Parameters values implemented for the reference scenario.'
-data <- read.csv("csv/parameters_reference.csv",sep=";",header = F)
-tabcolnames <- data[1, ]
-data <- as.data.frame(data[-1,])
-row.names(data) <- 1:nrow(data)
-knitr::kable(
- data,
- col.names = tabcolnames) %>%
- kable_styling('striped', font_size = 11)
-```
-
-# Output indicators
-
-list of input indicators
 
 # Computing
 
-## Parallel computing
+## Input data - Reference scenario
 
-## Convergence check
+In view of the all parameters described above, based on literature data, expert knowledge and investigations, a set of the most likely parameter values was set to define a reference scenario. These parameter values, set by default as input of all model computations, constitutes then references for further comparative analyses such as simulation convergence check, parameter sensitivity analyses or scenario simulations. All default values are provided in attached spreadsheet (*parameters_reference_xlsx*). This reference scenario was characterized by computing the virus transmission between workers, surfaces and meat portions in a processing plant from one initial infected worker during 42 days with five-minute time steps.
 
-# Some results
+## Output indicators
+
+In this project, output indicators are multiple depending on the aim the study. These indicators can be directly obtained or estimated from the simulations in order to describe the infection of the workers, the contamination of the surfaces and the food products processed in the plant. One can cite, for example to describe the infection of the workers, the probability to have a cluster of at least 25 infection cases (based on criteria by the French national public health agency) as well as its uncertainty range, the number of infected workers at the peak of the epidemiological curve, the number of days before reaching this peak, the initial or effective transmission rate $R_0$ or $R_t$, etc. Considering the food contamination, one can estimate for example the average daily ratio of contaminated food portions over a several-day period with a detection of viral RNA copies reaching a predefined threshold level (e.g. 4log, 5log, etc.). Finally, for the surfaces contamination, one can estimate the frequency of the different surfaces daily exceeding a threshold viral RNA copies level and possibly carry out comparisons between the different locations in the plant.

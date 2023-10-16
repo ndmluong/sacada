@@ -10,15 +10,19 @@ author:
   - name: Steven Duret
     orcid: 0000-0002-9293-8092
 
-date: "10/28/2022"
+date: "01/27/2023"
 
 number-sections: false
 ---
 
-# Background
+# Background and objectives
 
-quelques textes
+The main goal of this project is to gain insights on the circulation of SARS-CoV-2 in meat processing plants in order to provide preventive or risk mitigation measures for workers and consumers. A simulation mathematical model was built for predicting the propagation of the virus in such environments using data available in the literature and collected from laboratory experiments. A literature review was carried out to identify the different relevant approaches for modelling pathogen transmission in a population. This review suggested then three commonly used approaches including epidemic SEIR-based (Susceptible-Exposed-Infectious-Removed) modelling approaches, event-based models combing distribution fitting, regression or temporal series or other integrative agent-based modelling approaches.
 
-# Objectives
+In this project, the objective was to model transmission of the SARS-CoV viruses focusing on food facilities. The characteristics of such facilities was defined using literature information and data previously collected in WP2 by carrying out epidemiological and industrial investigations. These obtained data suggested relative small population in such facilities that can be defined as a multi-room space with the presence of around 100 operators. Given this relatively small population, epidemic model revealed to be not suitable for the studied case. Indeed, epidemic models identified in the literature review were developed to describe the pathogen transmission from a city scale to country scale. Hence, such models were not retained in this project.
 
-les objectifs ici
+Event-based models have been developed to predict pathogens transmission in food facility in the literature. However, such studies identified the main route of contamination involved generally only fomites or direct contact, neglecting then the important possibility of transmission through aerosol as for respiratory pathogens like SARS-CoV viruses. Moreover, these studies only took into account a small population of workers present in the facility (from around 2 to 10 operators). Lastly, the interactions between the different workers were also limited and did not take into account possible contamination of food products.
+
+The present project aimed to predict both the transmission of SARS-CoV-2 between workers and from workers to food products. For this reason, it was necessary to include various routes of contamination including contact through fomites, air via aerosolized droplets or direct transmission of large droplet during coughing or sneezing event as well as other possible contamination outside sources, e.g. infection due to community activities. Including various routes of contamination in the food facility requires then considering various spatio-temporal aspects such as individual location of the different surfaces (e.g. cutting board and conveyor), location of the food products and location the operators at different given time points as well as the level of contamination of the air in the room. Individual behaviors of the operators susceptible to influence the transmission of the virus such as presence of symptoms, viral load emitted by infectious operators, mask wearing, etc. should also be included in the model. Moreover, it was necessary to evaluate the evolution of the epidemic in the facility and its effects on further transmission. In other words, it was necessary to consider workers, food items, surface and air in each room as autonomous entities that are able to interact with each other in the facility.
+
+In view of the points discussed above, Agent-Based Models (ABM) could be the most appropriate approach to include all those aspects. Selecting such integrated computational-based models represent a powerful modelling to perform simulations while including specific characteristics of the different autonomous entities in space and over time as well as complex interactions between them. This document aimed to provide the detailed description of the developed ABM, the definition of its parameters as well as its potential simulation outcome indicators associated with the contamination of the workers, surfaces and food products.

@@ -1,1 +1,1 @@
-Sitemap: https://8aaae66c-8134-4e7e-8b60-7fd33671893a.netlify.app/sitemap.xml
+Sitemap: https://quartopub.com/sites/ndmluong/sacada-project/sitemap.xml

@@ -2,9 +2,9 @@ project:
   type: website
   render: 
     - index.qmd
-    - usage.qmd
     - model.qmd
     - computing.qmd
+    - usage.qmd
 
 website:
   title: "SACADA Project"
@@ -18,8 +18,6 @@ website:
         text: Model description
       - href: computing.qmd
         text: Computing
-      - href: usage.qmd
-        text: Applications
       
 
 execute: 
@@ -37,11 +35,6 @@ format:
     toc: true
     toc-depth: 5
     toc-title: "On this page"
-    number-sections: true
-    number-depth: 3
-  docx:
-    toc: true
-    toc-depth: 5
     number-sections: true
     number-depth: 3
 
